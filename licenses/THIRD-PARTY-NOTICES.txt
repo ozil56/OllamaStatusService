@@ -1,0 +1,11 @@
+THIRD-PARTY COMPONENTS
+
+Python 3.13.12 Windows x64 embeddable runtime: https://www.python.org/ftp/python/3.13.12/
+License: runtime/LICENSE.txt (Python Software Foundation and bundled components).
+
+WinSW 2.12.0: https://github.com/winsw/winsw/releases/tag/v2.12.0
+License: licenses/WinSW.txt (MIT).
+
+Python library versions are pinned in requirements.lock.txt.
+Each bundled distribution includes its own license/metadata under vendor/*.dist-info.
+No Ollama binaries or models are redistributed in this archive; installer references the existing Ollama installation on server A without copying it.

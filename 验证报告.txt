@@ -1,0 +1,72 @@
+Ollama 状态服务 1.2.3 · 验证报告
+日期：2026-10-16
+
+本次修改
+  新增 proxy_listen_host=127.0.0.1、proxy_listen_port=11436，旧配置缺少字段时自动使用默认值。
+  在同一个 Uvicorn 服务实例中绑定直连和代理入口，共用一次应用生命周期、执行槽、队列、容量、状态和 SQLite 任务库。
+  代理入口依据接受连接的 Socket 本地端口固定判为 remote，不依赖 HTTP Host 或任意客户端请求头。
+  11434 直连入口保留回环及同地址判定；本机等待优先，两类各自 FIFO，不打断当前运行请求。
+  代理入口默认仅 IPv4 回环，不自动增加 11436 防火墙开放规则；可配置指定 IPv4/IPv6 地址或双栈。
+  任一入口绑定失败即停止启动，并释放已经建立的监听；保留 IPv6 zone/scope。
+  /help 与 /healthz 增加 request_origin，可在不执行推理的情况下确认入口分类。
+  /help 描述实际代理监听配置和共享队列策略；安装器同时检查直连状态和代理入口 remote 健康响应。
+  升级前检查新增代理端口冲突，在卸载旧版前拒绝冲突；仍原样保留旧 config.json、模型路径和历史。
+  安装器、服务发现版本、包名和部署说明统一更新到 1.2.3。
+  部署说明 TXT/HTML、AI 接入说明和 FRPC TOML/INI 配置片段均已更新。
+
+已执行并通过
+  Python 自动测试共 60 项：
+    tests/proxy_ingress.py：10 项。
+      真实 TCP/HTTP 的两个入口；代理 IPv4/IPv6 均为 remote，本机直连为 local。
+      实际观测：运行远端 → 先排远端 → 后排本机 → 运行任务完整结束 → 本机执行 → 远端执行。
+      验证 11434/11436 查询同一组任务 ID、共享队列容量、零排队拒绝、两入口流式推理。
+      伪造 Host、Forwarded、X-Forwarded-For、X-Real-IP、Origin、X-Ollama-Priority 等头不提升优先级。
+      验证旧配置默认、非法字段值/端口碰撞拒绝、绑定失败时清理监听、默认回环范围、IPv6 scope 保留。
+    tests/local_priority.py：11 项。
+      本机优先、各自 FIFO、非抢占、本机超时/取消、零等待规则、IPv6/映射地址及代理端口来源。
+    tests/dual_stack.py：10 项。
+      IPv4/IPv6 同端口真实 HTTP、流式、共享队列、旧配置、显式单地址、IPv6 禁用回退及冲突失败。
+    tests/integration.py：24 项。
+      Ollama/OpenAI/Anthropic 兼容、限时排队、原子接收、断线、崩溃、持久化 unknown、维护与安全切换。
+    tests/upgrade_validation.py：5 项。
+      旧配置与历史只读预检、忙碌/排队/unknown 拒绝、布尔配置和未知字段校验。
+
+  Windows PowerShell 5.1 隔离升级测试：10 种场景通过。
+    成功、旧 LocalSubnet 规则、后端实际模型路径优先、忙碌拒绝、坏包拒绝、卸载失败、安装失败、
+    代理端口冲突在卸载前拒绝、代理健康检查失败不报告成功、自定义 IPv6 代理地址/端口。
+    实际运行 Upgrade/Uninstall/Setup 脚本，系统服务/防火墙/计划任务接口替换为临时测试。
+    确认配置字节不变、模型/历史保留、仍仅建立 11434 的原有防火墙规则，不开放 11436。
+
+  14 项 C# 模型目录发现测试通过。
+  4 种真实 EXE 界面检查通过：升级选择、卸载选择、完整包校验成功、损坏包失败反馈。
+    安装器显示“当前版本 1.2.2 → 1.2.3”，保留已有模型路径，并明确提示迁移代理回源。
+    每个检查只有一个图形窗口，无额外控制台；四张界面图已目视检查。
+  PowerShell 5.1 语法、CMD GB2312/CRLF、WinSW XML/中文路径、临时 ACL 恢复、
+  隐藏进程参数/退出码、包清单修改/缺失文件检测均通过。
+
+部署边界
+  本轮构建测试不修改本机已安装的生产服务、实际 FRP 或防火墙；生产服务仍需运行新安装器升级。
+  所有推理测试使用动态临时端口和模拟后端，不消耗真实模型/GPU，不打断其他任务。
+  尚未在其他服务器上实际升级或从其公网 FRP 入口完成端到端验收。
+  只升级程序而继续把 FRP 回源到 11434，仍会把本机回环转发误判为 local；必须同时迁移回源。
+  默认 11436 仅监听 127.0.0.1；异机代理需显式配置网卡监听和按来源限制的防火墙规则。
+  非抢占保证适用于正常调度；安装升级、停止服务及重启 FRP 应在任务全部完成后的维护时段进行。
+
+复验命令（完整解压后的目录，测试不会部署生产服务）
+  runtime\python.exe tests\proxy_ingress.py
+  runtime\python.exe tests\local_priority.py
+  runtime\python.exe tests\dual_stack.py
+  runtime\python.exe tests\integration.py
+  runtime\python.exe tests\upgrade_validation.py
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\upgrade_checks.ps1
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\setup_ui_checks.ps1
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\script_checks.ps1
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\config_checks.ps1
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\native_process_checks.ps1
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\package_integrity_checks.ps1
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\model_discovery_checks.ps1
+
+源码修改前备份、测试日志和安装器界面证据：
+  （维护者本地验证记录，不随公开包发布）
+旧 1.2.2 ZIP 保留；1.2.3 ZIP 附 SHA256 文件，并含逐文件完整性清单。
+

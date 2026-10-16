@@ -1,0 +1,35 @@
+# Runtime state and local settings
+config.json
+installation.json
+data/
+logs/
+backup/
+*.db
+*.db-wal
+*.db-shm
+*.log
+.env
+.env.*
+!.env.example
+
+# Generated dependencies and release outputs
+runtime/
+vendor/
+bin/
+*.exe
+*.dll
+*.pyd
+*.zip
+*.sha256.txt
+manifest.sha256.json
+__pycache__/
+*.py[cod]
+.venv/
+dist/
+build/
+.build-cache/
+
+# Private source documents are never part of this repository
+*.docx
+Ollama Status Service 开发过程说明.md
+Ollama Status Service 客户端使用文档.md

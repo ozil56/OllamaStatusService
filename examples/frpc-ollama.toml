@@ -1,0 +1,9 @@
+# Merge into the existing FRPC configuration; do not replace server/auth/TLS settings.
+# Keep your existing name, type and remotePort. 21134 below is ONLY an example.
+[[proxies]]
+name = "ollama-node-a"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 11436
+remotePort = 21134
+# No PROXY protocol: this gateway accepts ordinary HTTP.

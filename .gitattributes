@@ -1,0 +1,9 @@
+* text=auto
+*.md text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.cs text eol=lf
+*.ps1 text eol=crlf
+# GB2312 launchers must never be transcoded or newline-normalized by Git.
+*.cmd -text
+*.png binary

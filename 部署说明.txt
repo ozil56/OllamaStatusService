@@ -1,0 +1,297 @@
+Ollama 状态服务 1.2.3 · Windows x64 部署说明
+更新时间：2026-10-16
+1.2.3：增加 FRP、Nginx 和其他代理专用入口 127.0.0.1:11436，所有请求固定归为 remote。
+11434 与 11436 共用一个网关进程、调度队列和任务库；本机等待请求优先，正在执行的请求不被抢占。
+保留 1.2.2 的 IPv4/IPv6 双栈与 11434 防火墙策略。代理来源迁移步骤及验收见第十一节。
+保留 1.2.1 的模型目录自动识别和路径来源显示。
+新增：本机等待请求优先；本机、远端各自先来先服务；正在执行的请求不被抢占。
+升级方式：仍然只用“安装.exe”，检测到已有服务后提示“自动卸载旧版，再安装新版”。
+安装、升级、卸载均使用同一个图形窗口显示进度和结果，不创建 CMD/PowerShell 控制台；管理员权限通过 Windows UAC 确认。
+
+一、最终结构
+
+本地程序、直接访问的客户机 → A:11434（直连入口）→ 共享队列 → 127.0.0.1:11435（实际 Ollama）。
+外部客户端 → FRP / 同机反向代理 → A 的 127.0.0.1:11436（固定 remote）→ 同一个共享队列。
+本机程序继续使用 http://127.0.0.1:11434。代理必须将回源改到 11436；外部端口和客户端地址可以保持不变。
+11436 默认仅监听 IPv4 回环 127.0.0.1，不自动对局域网或公网开放；两个入口提供相同的 API、状态和帮助接口。
+默认同时监听 0.0.0.0:11434 和 [::]:11434，两种地址与代理入口共用一个队列、状态和任务库。
+支持 IPv6 DDNS 地址作为公网 Nginx 的上游，例如 http://ollama-node.example.com:11434；IPv6 字面地址需要方括号，例如 http://[2001:db8::133]:11434。
+11435 只监听本机回环，不对局域网开放。不要让本地程序绕过代理直接调用它，否则该请求无法被统计。
+
+直接使用 A 已安装的 ollama.exe、GPU 库和模型目录，不复制 Ollama、不复制 GPU 库、不复制模型，也不重装驱动。
+仅安装状态服务、自带 Python、依赖、服务包装器和托盘程序。额外空间通常不足 100 MB，另需日志及任务记录空间。
+已安装的 Ollama 程序目录必须保持存在；更新 Ollama 前先用本产品托盘停止服务，更新后确认原路径仍有效，再启动服务。
+
+二、双击安装与升级
+
+适用：Windows 10/11 x64，或有桌面环境的 Windows Server；已安装 Ollama 和所需显卡驱动。需要 Windows PowerShell 5.1、.NET Framework 4.8、任务计划和防火墙管理组件。
+无需另装 Python、Node、pip、NSSM。安装包中的 Python、WinSW 和依赖已准备好，安装时不联网下载。
+
+1. 将 ZIP 复制到 A，完整解压到一个新的空文件夹，避免旧包文件残留。不要在压缩软件预览窗口里直接运行安装程序。
+2. 结束正在执行的 Ollama 任务，然后双击“安装.exe”。
+3. 安装窗口自动查找现有 ollama.exe 和模型目录；核对后点击“开始安装”，在系统 UAC 提示中允许管理员权限。模型目录通常包含 blobs 和 manifests。
+4. 进度和结果显示在同一个窗口内。安装器停止现有 Ollama、备份原有启动项，注册两个开机后台服务；实际 Ollama 改在本机 11435，网关接管 11434 并新增代理专用入口 11436。
+5. 成功后启动托盘图标。Windows 可能把新图标收进右下角 ^，可以把图标拖到常显区。图标在用户登录后显示；无人登录时后台服务仍运行。
+6. 双击图标打开 http://127.0.0.1:11434/dashboard。B / D 访问 http://A的IP:11434/status 检查状态。
+
+安装只需双击“安装.exe”；卸载只需双击“卸载.exe”。
+
+模型目录识别：
+  已安装服务：优先读取后端服务 XML 的 OLLAMA_MODELS，其次读取 installation.json；不会被当前用户的默认路径覆盖。
+  首次安装：依次读取用户环境变量（注册表）、系统环境变量（注册表）、安装器继承的进程环境变量；无有效目录时再检查当前用户的 Ollama 启动日志、历史安装记录、用户默认目录。
+  自动去除路径首尾引号/空格、展开环境变量；检查 blobs 和 manifests 目录；忽略空值和无效候选。
+  界面会标注“现有服务配置”“系统环境变量（注册表）”等来源。日志中的路径会明确提示核对，因为历史日志不一定反映当前运行实例。
+  找不到时不会把不存在的默认目录当成成功；保留手动浏览入口。另一个 Windows 账户私有启动变量、未持久化的独立启动脚本或无权读取的配置不能保证自动识别。
+  已安装服务若明确指定一个失效目录，升级会提示核对并停止，不会静默切换到其他模型库。
+
+已经安装 1.1.x 或 1.2.0/1.2.1/1.2.2 如何升级：
+1. 暂停本机和远端客户端继续提交，等待 /status 显示 idle。
+2. 将新 ZIP 完整解压到新的文件夹，双击其中的“安装.exe”，无需手动运行卸载程序。
+3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.2.3”，确认一次管理员权限提示。
+4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.2.3，queue_policy.ordering 为 local_first_fifo_per_origin。
+5. 把该机 FRP 等代理的回源从 11434 改为 11436，按第十一节重新加载代理并验证来源。保持暂停提交，直到升级和代理迁移都完成。
+6. 验证通过后恢复客户端提交。每台服务器单独重复；可先升级一台验证，再处理其他机器。
+
+升级会短暂停止网关和 Ollama 后端。检测到正在运行/排队/unknown 的任务时拒绝升级，请先结束任务或通过托盘恢复。
+旧版卸载和新版安装自动衔接，不会弹出另一个卸载向导，也不会要求重新选择模型目录。
+成功升级原样保留 config.json、模型和 Ollama 路径、日志、任务记录。旧 JSON 缺少 proxy_listen_host/proxy_listen_port 时，程序自动使用 127.0.0.1:11436，不必补写字段。
+升级前检查代理端口冲突；发现其他程序占用时，在卸载旧版之前停止升级。启动时任一入口绑定失败都会报错退出，不会静默只启动 11434。安装成功必须通过直连状态和代理入口 remote 探测。原 Ollama 的 OLLAMA 调优/GPU 可见性参数也会沿用。
+旧配置的 listen_host=0.0.0.0 自动增加 IPv6 监听，无需补写配置。明确指定的 IPv4/IPv6 单地址仍按原地址绑定。
+本产品 TCP 11434 防火墙规则会统一更新为：所有来源、所有本地地址、所有网络配置文件、已启用；不再沿用旧版 LocalSubnet 或自定义地址限制。旧规则仍在升级备份中。
+不会复制 Ollama 程序、GPU 库或模型。服务注册、托盘启动项和 11434 防火墙规则由新版重新建立；11435 仍只监听本机。
+升级前将配置、安装记录、后端 XML 和访问范围备份到 %ProgramData%\OllamaStatusService\backup\upgrade-日期-编号。只备份设置，不复制整个旧程序。
+安装包校验失败时不会卸载；卸载失败时不会继续安装。若旧版卸载后新版安装失败，界面会明确报错，不自动回装旧版。查看窗口中的日志，修复原因后重新运行安装.exe；需要时从上述目录恢复 config.json 和访问范围。原模型和日志不受影响。
+不要将新包解压到 %ProgramFiles%\OllamaStatusService 内；卸载会清理这个程序目录。不要同时运行多个安装程序。
+默认只使用 LocalService 账户和本机磁盘模型目录。不要选择网络共享路径，也不要把模型放进本产品的 Program Files 目录。
+安装会改变原 Ollama 的启动方式及运行账户；不是零停机切换。原程序和模型不会被删除，但云端模型登录凭据不会迁移；本版主要针对本地模型。
+安装器读取并保留原用户/机器的 OLLAMA 调优和 GPU 可见性环境变量，覆盖 OLLAMA_HOST、OLLAMA_MODELS，不复制 OLLAMA_API_KEY。临时在某个终端内设置的变量不会自动继承。
+自定义服务、其他用户或第三方任务计划启动的 Ollama 不在自动启动项迁移范围内；若它们抢占端口，需要先关闭其自动启动。
+
+三、客户端自己选择排队策略
+
+所有推理 API 都支持可选请求头 X-Ollama-Queue-Timeout，单位为秒，支持小数：
+  值为 0：没有空位立即 HTTP 429，错误 busy_no_queue。适合有 A1/A2/A3 的多机调用者。
+  值为 30：最多排队 30 秒；轮到它就执行，超时返回 HTTP 429，错误 queue_wait_timeout。
+  不传：使用服务器默认值 15 秒，保留老客户端的直接调用方式。
+  非法值、负数、NaN、超过服务端上限：HTTP 400。默认上限 3600 秒，管理员可以调整。
+
+调度规则：
+  本机没有等待任务：正常服务远端请求。
+  本机请求到来、远端正在执行：让正在执行的请求正常完成，本机优先获得下一个位置。
+  本机和多个远端都在等待：先处理本机；本机内部、远端内部各自按完成接收并进入队列的先后顺序 FIFO。
+不会判断“连续批次”，没有申请保留、租约或保留窗口。本机队列一空，下一位置立即交给远端；本机请求尚未到达时，不为未来任务占位。
+本机识别使用真实 TCP 来源：回环地址（包括 IPv4 映射 IPv6），或来源地址等于该连接的服务器本地地址。推荐本机使用 http://127.0.0.1:11434；局域网其他机器是远端。忽略 Host、X-Forwarded-For 和自称本机/优先的请求头。这套 Socket 判断只用于 11434 直连入口。11436 按接受连接的实际本地端口强制归为 remote，即使来源是 127.0.0.1、::1 或与服务器相同的 IP，也不会获得本机优先级。HTTP Host、Origin、Forwarded、X-Forwarded-For、X-Real-IP 和优先级声明都不能覆盖分类。
+所有本机 FRP、SSH 隧道、反向代理等转入的外部流量都应使用 11436；如果仍回源 11434，回环连接仍会被当作 local。直接更改回源 IP 为本机局域网 IP 不能代替分离入口。
+默认只执行 1 个，最多等待 64 个，排队 JSON 序列化后合计上限 64 MiB，单个 JSON 请求体上限 32 MiB。超过容量返回 HTTP 429 queue_full，本机也不绕过容量限制。
+优先只对已经排队、尚未超时或断开的请求生效。本机若指定等待 0 秒，忙时仍立即返回；若只探测 busy 就跳过这台机器，服务端也不会收到本机排队请求。持续有本机工作时，远端可能等到自己的期限后返回 queue_wait_timeout，可按原策略换机。
+同模型第二批在第一批尚未完成时可以排队，不会仅因“当前忙”立即被拒绝；但仍受 D 选择的等待期限和队列容量约束。
+同模型不等于同一业务批次，不会为某个客户端无限续占服务器；本服务不合并提示词、不去重请求，也不推断业务批次。
+“忙碌”是状态；“接受排队”是能力，两者可以同时成立。D 不应看到 busy 就认定服务故障。
+
+排队期限只管尚未开始执行的等待。比如 D 设置 0.5 秒，0.2 秒后已经开始推理，就继续正常完成推理，不会在第 0.5 秒被中断。
+正常执行仍受服务端独立时限约束：默认单请求最长 3600 秒，上游连续无数据最长 600 秒；到限可能进入 unknown，而不是安全可重试的拒绝。
+客户端响应超时应覆盖排队时间、推理时间和网络余量。响应慢不代表尚未执行，不能因 POST 超时直接在另一台重放。
+
+PowerShell 示例（把地址和模型替换成实际值）：
+  $body = @{ model='qwen3:8b'; prompt='你好'; stream=$false } | ConvertTo-Json
+  Invoke-RestMethod -Uri 'http://192.168.1.10:11434/api/generate' -Method Post -ContentType 'application/json; charset=utf-8' -Headers @{'X-Ollama-Queue-Timeout'='30'} -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 3700
+将请求头的 30 改成 0，就是忙时立即拒绝，交由 D 选择下一台。
+
+四、多机选择与安全切换
+
+D 可以先查询各服务器 /status，优先选择 can_start_now=true 的服务器，然后原子提交请求。状态快照并不预留名额：查询后可能被其他客户端抢先，所以仍要处理提交时的拒绝。
+
+可以自动换服务器的确定条件：HTTP 429 或 503，响应头 X-Ollama-Forwarded: false，且 JSON 有 forwarded: false。意思是“这一请求尚未交给 Ollama”，在其他服务器执行不会和它重复。
+典型例子：busy_no_queue、queue_full、queue_wait_timeout、接收前后端不可用。
+不能据此自动切换：网络超时、连接中途断开、收到部分输出、响应头 X-Ollama-Forwarded: true、没有明确未转发确认的错误。
+服务器不会代替 D 联系 A2/A3。各服务器彼此独立；选服和是否重试由 D 决定。生产客户端若要自动处理不确定结果，应另外实现业务任务 ID 和结果对账，当前包不提供跨服务器幂等存储。
+
+examples\route_request.py 是 Python 3 标准库示例，无第三方依赖。它查询状态、选服，只有明确未转发的拒绝才换下一台；每台最多尝试一次，不无限重试。
+  python examples\route_request.py --servers http://192.168.1.10:11434 http://192.168.1.11:11434 http://192.168.1.12:11434 --model qwen3:8b --prompt "你好" --queue-seconds 0
+  --queue-seconds 30 表示每台最多排队 30 秒；总耗时可能包含多台各自的等待。--response-timeout 独立控制响应超时，不是自动切换信号。
+示例使用非流式 /api/generate 展示调度；实际程序仍可使用原有聊天、流式和向量接口，并添加相同请求头。
+
+五、给 AI agent 的帮助和服务发现
+
+GET http://A:11434/help
+返回机器可读 JSON：服务版本、接口地址、实时配置的排队默认值/上限、参数示例、状态含义、安全切换条件、执行时限和配置方式。
+GET http://A:11434/.well-known/ollama-status-service
+与 /help 相同，便于通用服务发现。
+GET http://A:11434/openapi.json
+OpenAPI 3.1 的状态/帮助/推理扩展说明。模型相关参数仍按 A 当前安装的 Ollama API；它不是 Ollama 所有功能的完整规范。
+所有响应带 X-Ollama-Status-Service: 1.2.3 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
+
+给其他 AI agent 的最简提示：
+“服务器地址为 http://A的IP:11434。先读取 GET /help 和 GET /status，根据返回的能力和限额设置 X-Ollama-Queue-Timeout；有多台服务器时按需要选择立即切换或限时等待。仅在收到明确 forwarded=false 的拒绝时自动换机，不要重放完成情况不确定的请求。”
+
+帮助数据来自正在运行的配置；修改服务端默认值并重启后 /help 会同步变化。
+客户端可以逐请求配置排队策略，无需管理员权限。服务端队列容量和默认值只能由 A 的管理员在本地修改，不提供远程配置写接口。
+
+六、状态接口、托盘及 API 兼容
+
+GET /status 主要字段：
+  state：idle / busy / offline / unknown / stopping。
+  can_start_now：此刻是否可立即开始；仅为快照。
+  accepting_requests：是否可以尝试接收/排队；还需考虑该请求大小和竞争。
+  inflight_requests：正在执行数。queued_requests：尚未执行的排队数。
+  queued_local_requests / queued_remote_requests：本机 / 远端等待数。
+  active_origin：当前执行来源 local / remote；空闲时为 null。
+  uncertain_requests：完成情况不确定的任务数。
+  requests：活动任务 ID、模型、接口、状态和登记时间；不存储提示词和输出。
+GET /api/tags：已安装模型；GET /api/ps：已加载模型。已加载不表示忙碌。
+GET /healthz：只证明代理活着；Ollama 在线请看 /status 的 ollama_online。
+
+托盘：绿色=空闲，橙色=处理中并显示排队数，红色=离线，紫色=需要恢复。
+菜单支持状态面板、日志、部署说明、启动/停止/恢复服务。退出图标不会停止后台服务。
+默认后台服务为自动延迟启动，失败后由 WinSW 重启；额外健康检查每分钟检查代理，连续失败时重启。后台服务与用户桌面的托盘进程分开，避免 Windows Session 0 无法显示图标。
+
+代理支持原生聊天、生成、向量接口，以及 OpenAI chat/completions/embeddings/responses 和 Anthropic messages；后端必须本身支持相应 API。
+GET/HEAD/OPTIONS、模型详情和 blob 上传透传；模型 pull/push/create/copy/delete 等 JSON 写请求经过同一调度器。保留认证/CORS 等端到端头、查询参数和后端响应格式。blob 上传不在推理队列内。
+这不是对每个第三方客户端的全面兼容认证。对管理接口，忙状态持续到该 HTTP 操作结束；若后端未来新增异步后台任务型 API，本服务无法在请求结束后推断其后台活动。
+
+七、断线、异常与恢复
+
+排队中客户端断开：从队列移除，不提交给 Ollama。
+已开始执行后客户端断开：继续读取 Ollama 的完成结果，直到完成才释放执行名额；不会立即宣称空闲。
+上游超时、截断流、代理崩溃：不能确认完成的运行中任务保存在 SQLite 为 unknown，阻止继续接收；队列中的请求不会自动重放。
+尚未执行的队列内容只在内存中；日志记录其状态，重启时将遗留排队记录标为 aborted。它不是可跨重启自动恢复的作业系统。
+恢复方式：托盘选择“恢复服务”，确认中止未完成任务；脚本停止代理和后端，检查后端端口和进程确已消失，再清除 unknown 并重新启动。
+不要在 Ollama 仍运行时手工删除 SQLite 数据库或强制清状态，这会造成假空闲。
+
+八、防火墙、配置、日志和卸载
+
+安装器自动添加 TCP 11434 入站允许规则：RemoteAddress=Any、LocalAddress=Any、Profile=Any、Enabled=True，限定本产品 Python 程序。首次安装和升级采用相同策略，IPv4/IPv6、局域网、ZeroTier 和公网 Nginx 来源均适用。
+11435 后端和新增的 11436 代理入口默认都只监听 127.0.0.1，不新增这两个端口的防火墙开放规则。不修改其他防火墙规则或路由器配置；已有阻止规则、路由器 IPv6 入站策略和公网服务器出口规则仍可能影响访问。
+本产品没有新增身份认证。Nginx 的 HTTPS、认证和 DDNS 上游解析由公网服务器的配置管理。
+
+IPv6/DDNS 排查：
+  Ping 成功仅说明 ICMP 可达，不代表 TCP 11434 可连接。
+  本机检查：Get-NetTCPConnection -LocalPort 11434 -State Listen，应看到 0.0.0.0 和 ::。
+  本机测试：curl.exe --noproxy "*" http://127.0.0.1:11434/healthz
+  本机测试：curl.exe --noproxy "*" "http://[::1]:11434/healthz"
+  公网 Nginx 所在服务器测试：curl -6 --connect-timeout 5 http://你的DDNS域名:11434/healthz
+  DDNS 域名应解析到 Ollama 主机的当前 IPv6；供客户端访问的代理域名应解析到 Nginx 服务器。
+  如果本机两种地址均正常而公网测试失败，再检查路由器 IPv6 入站规则及链路；不要用本机 Ping 代替公网连接验证。
+
+程序：%ProgramFiles%\OllamaStatusService
+配置：%ProgramData%\OllamaStatusService\config.json
+数据：%ProgramData%\OllamaStatusService\data\requests.sqlite3
+日志：%ProgramData%\OllamaStatusService\logs
+启动日志：%LocalAppData%\OllamaStatusService\setup-logs（从提权前就开始记录）
+安装日志：%ProgramData%\OllamaStatusService\install.log
+原启动项与权限备份：%ProgramData%\OllamaStatusService\installation.json
+默认日志按大小轮转。任务库保留至多 2000 条已终结记录，未完成/unknown 不会被清理。
+
+常用配置（修改后在维护时段通过托盘“停止服务”“启动服务”使其生效）：
+  queue_timeout_seconds = 15：未传请求头的默认等待秒数。
+  max_queue_timeout_seconds = 3600：客户端可选等待时间上限。
+  max_queue_size = 64；max_queue_bytes = 67108864。
+  max_concurrency = 1：本版本固定串行执行。
+  backend_url = http://127.0.0.1:11435；listen_port = 11434。
+  proxy_listen_host = 127.0.0.1；proxy_listen_port = 11436：固定 remote 的代理入口。
+  代理入口可以配置为其他未占用端口；必须与直连端口和实际 Ollama 后端端口不同，FRP 等代理的回源也必须同步修改。
+  proxy_listen_host 指定一个 IPv4/IPv6 地址时只绑定该地址；设为 0.0.0.0 时，与直连入口一样受 listen_ipv6 控制。默认 127.0.0.1 不随 listen_ipv6 扩大范围。
+  listen_host = 0.0.0.0；listen_ipv6 = true（JSON 布尔值）：同时监听 IPv4 和 IPv6，旧配置缺少此项时默认 true。
+  listen_ipv6 = false：0.0.0.0 仅监听 IPv4。listen_host 明确指定 127.0.0.1、某个网卡地址或 ::1 时，不自动扩展监听范围。
+  系统禁用/不支持 IPv6 时记录警告并保留 IPv4；IPv6 端口冲突或权限失败会报错停止，不会假装双栈成功。
+请保持直连 11434 和后端 11435 默认值，服务 XML、托盘和防火墙依赖它们。代理端口可单独调整；本说明使用默认 11436。
+
+卸载：双击“卸载.exe”，点击“开始卸载”，允许管理员权限。移除本产品服务、托盘快捷方式、健康任务和防火墙规则，恢复原启动项及为 LocalService 添加的目录权限。
+保留原 Ollama 程序、GPU 库、模型、日志、任务记录和安装备份。原启动项下次登录生效；也可立即从开始菜单启动原 Ollama，恢复原有 11434 使用方式。
+停止/卸载会中止正在执行的工作，请安排在维护时段。
+
+九、源码、验证与参考
+
+完整源码：app\gateway.py、app\run.py、app\maintenance.py、app\dashboard.html、src\OllamaTray.cs、src\SetupHost.cs、scripts\*.ps1。
+测试：tests\proxy_ingress.py（真实双入口 HTTP、固定 remote、防伪造、本机优先、非抢占、共享容量及冲突清理）、tests\dual_stack.py（真实双栈 HTTP/流式/共享队列）、tests\integration.py（模拟后端 HTTP 集成测试）、tests\local_priority.py（来源与队列调度）、tests\upgrade_checks.ps1（临时目录内执行实际升级脚本，模拟系统接口）、tests\script_checks.ps1、tests\config_checks.ps1。
+重编译托盘：powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\Build-Tray.ps1
+运行集成测试：runtime\python.exe tests\integration.py
+生成说明及启动器：runtime\python.exe scripts\Finalize-Package.py
+重新打包：powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\Package.ps1
+CMD 使用 GB2312/CRLF，PowerShell 使用 UTF-8 BOM/CRLF，以兼容中文 Windows PowerShell 5.1。
+
+1.2.3 的构建、双栈 HTTP、调度、隔离升级脚本及安装包验证结果见“验证报告.txt”。本轮构建测试不执行生产卸载/重装、真实 GPU 推理或 Windows 重启登录；安装器部署时会检查后端、直连状态和代理入口就绪。
+公开发行的安装与接入入口见 README.md、docs 中的多语言 README、部署说明及 AI 接入说明。
+部署后建议验证：本地原客户端一次真实请求、B/D 请求、排队策略、Windows 重启后的服务恢复和登录后的托盘显示。
+
+官方参考：
+https://docs.ollama.com/windows
+https://docs.ollama.com/api/introduction
+https://docs.ollama.com/api/ps
+https://docs.ollama.com/api/openai-compatibility
+https://github.com/winsw/winsw/releases/tag/v2.12.0
+
+
+十、构建与安装界面验证
+
+安装.exe 和卸载.exe 的完整源码为 src\SetupHost.cs；用 scripts\Build-Setup.ps1 编译，无需安装 .NET SDK。
+图形前端保留在原用户会话中；需要管理员权限的辅助进程调用 scripts\SetupWorker.ps1，然后执行 Setup.ps1 / Uninstall.ps1；升级通过 Upgrade.ps1 顺序复用卸载和安装脚本。
+安装/卸载期间的 PowerShell、WinSW 和维护命令显式使用 CreateNoWindow，并并行读取标准输出和错误输出，避免窗口闪烁及输出管道堵塞。
+成功后由原用户前端启动托盘，安装引擎不另弹成功或失败消息框。失败原因及“查看日志”链接保留在当前窗口。
+窗口工作期间不可关闭；UAC 取消后可以重新开始。关闭未开始的安装窗口不会影响现有服务。
+启动日志目录：%LOCALAPPDATA%\OllamaStatusService\setup-logs\本次操作目录。
+目录内包含 setup.log、engine-output.log、progress.json、result.json；安装过程中另外保留 ProgramData 下 install.log。
+只校验安装包：在终端执行 .\安装.exe --verify，不需要提权、不安装服务。
+tests\setup_ui_checks.ps1 实际启动图形 EXE，检查选择页、校验成功及校验失败界面、同一窗口及无控制台；测试不会安装或卸载真实服务。
+重新构建顺序：Build-Setup.ps1 → Build-Tray.ps1（修改托盘时）→ Finalize-Package.py → Package.ps1。生成清单后不能再修改包内文件。
+
+
+十一、FRP 和其他反向代理的入口迁移与验收
+
+每台服务器都必须先升级 StatusService 到 1.2.3，再修改本机代理的回源目标。
+升级和重启代理应在所有运行及排队请求结束后进行；“不中断运行任务”指正常调度不抢占，并不意味着安装升级或重启 FRP 可以保持在途连接。
+
+FRP 新版 TOML 配置：只修改对应 Ollama 的 [[proxies]] 条目，保留其他字段。
+  [[proxies]]
+  name = "ollama-node-a"
+  type = "tcp"
+  localIP = "127.0.0.1"
+  localPort = 11436
+  remotePort = 21134
+
+这里 remotePort=21134 仅为示例，务必保留该服务器原来的 remotePort。不要修改 serverAddr、serverPort、鉴权、TLS、域名、其他代理或其他同事的配置。
+同一台 frps 的不同服务器仍使用各自已有的 remotePort；每台 Ollama 主机上的 localPort 都可为 11436。
+如果原来使用 http/https/stcp 等其他代理类型，保留原类型和路由/认证字段，仅调整连接到网关的本地回源目标。插件接管回源的配置应改插件实际连接的地址。
+
+FRP 旧版 INI 格式（即使文件扩展名叫 .toml，也应按文件实际格式修改）：
+  [ollama-node-a]
+  type = tcp
+  local_ip = 127.0.0.1
+  local_port = 11436
+  remote_port = 21134
+
+上面的 name/节名和 remote_port 均为示例，应保留原值。示例文件见 examples\frpc-ollama.toml、examples\frpc-ollama.ini；这些是合并用片段，不是完整替换配置。
+配置保存后，用现有管理方式重载对应 frpc；不支持重载时，在空闲维护时段重启它。若 Windows 服务名确为 frpc，可在管理员 PowerShell 中使用 Restart-Service -Name frpc；其他服务名按实际值执行。
+不用修改 frps 的公网端口或外部客户端 URL，也不用开启 PROXY protocol。当前入口接收普通 HTTP，不解析 PROXY protocol 前导内容；不要仅打开 transport.proxyProtocolVersion。
+
+其他代理：
+  同机 Nginx/Caddy/SSH 隧道等，将上游/本地目标从 127.0.0.1:11434 改为 127.0.0.1:11436。
+  如果代理在另一台机器：在网关 config.json 中将 proxy_listen_host 改为网关可达的指定网卡 IP，再由管理员按实际代理来源设置 TCP 11436 防火墙范围。默认回环入口无法被另一台机器直接连接。
+  不建立第二个网关进程或另一套任务库。只使用同一网关的附加入口，才能共享本机优先队列。
+  本服务不替代原有 HTTPS/身份认证；代理应继续保留这些已有配置。客户端请求头不能提升为 local。
+
+无需模型推理的连接验收：
+  curl.exe --noproxy "*" http://127.0.0.1:11434/help
+  curl.exe --noproxy "*" http://127.0.0.1:11436/help
+  从外部客户端访问原来的 FRP URL 加 /help。
+三者 version 均应为 1.2.3；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
+/help、/healthz 的 request_origin 仅代表本次探测请求；实际推理和队列来源以 /status 的 active_origin、requests[].origin 和 queued_local_requests/queued_remote_requests 为准。
+两个入口查询 /status 应看到同一组活动任务；空闲时 active_origin 为 null，不能用空闲状态验证推理来源。
+
+维护时段的调度验收（使用本机已有模型，等待参数要覆盖测试时长）：
+1. 经外部 FRP 地址启动一个足够长的远端推理，确认 active_origin=remote。
+2. 在它运行时，先经 FRP 再提交一个请求，设置 X-Ollama-Queue-Timeout: 120，确认 queued_remote_requests=1。
+3. 随后在服务器本机向 127.0.0.1:11434 提交请求，设置同样的正数等待期限，确认 queued_local_requests=1。
+4. 当前远端请求应正常完成；随后先开始本机请求，再开始等待的远端请求。请求 ID 可通过响应头 X-Request-ID 和 /status 对照。
+5. 从代理入口提交含伪造 Host、X-Forwarded-For 或 X-Ollama-Priority: local 的请求，来源仍应为 remote。
+若第一项在第二、三项排队前已完成，应重做；不要把客户端零排队被拒绝当作本机优先失效。容量已满、等待超时或断开的请求不获得优先位置。
+
+隔离自动验证（不使用真实模型、不修改服务）：
+  runtime\python.exe tests\proxy_ingress.py
+该测试在动态临时端口复现两个入口，用可控制完成时机的模拟后端验证远端先排、本机后排、本机先执行和当前任务不中断，同时检查共享容量、流式、IPv6 和伪造头。
+
+FRP 官方配置参考：
+https://gofrp.org/zh-cn/docs/reference/proxy/
+https://gofrp.org/zh-cn/docs/features/common/realip/
+
+公开发行说明：原开发过程说明、客户端使用文档（Word 与 Markdown）均不包含在公开仓库或发行包中。示例使用保留域名和文档地址，部署前请替换。

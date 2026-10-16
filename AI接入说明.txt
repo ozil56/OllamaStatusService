@@ -1,0 +1,45 @@
+提供给 AI agent 的服务发现入口
+
+服务器地址：http://服务器A的IP:11434
+先读取：GET /help（结构化能力与实时配置），GET /status（当前状态）。
+标准发现：GET /.well-known/ollama-status-service；GET /openapi.json。
+
+客户端按请求选择策略：
+X-Ollama-Queue-Timeout: 0 → 忙时立即返回，客户端可以尝试下一台。
+X-Ollama-Queue-Timeout: N → 最多排队 N 秒，开始执行后不再按排队时限取消。
+不传 → 使用 /help 中 queue_policy.default，不要写死默认值。
+使用 /help 中的 maximum、容量、执行时限按需要配置客户端。
+
+选服依据 can_start_now / accepting_requests，状态快照不预留名额。
+只有 HTTP 429/503 + X-Ollama-Forwarded: false + JSON forwarded=false，才能安全自动转向其他服务器。
+POST 超时、断线、部分输出或 forwarded=true 不可视为未执行，不要自动重放。
+同一个模型不代表同一业务批次；服务采用本机优先、两类各自 FIFO，不提供跨服务器幂等去重。
+
+配置范围：客户端可以通过请求头改变单次排队策略。服务端配置需要 A 本地管理员修改并重启；没有远程配置写接口。
+多服务器参考代码：examples\route_request.py（Python 3，无第三方依赖）。
+
+1.2.3 网络接入：
+默认 IPv4/IPv6 同时监听 TCP 11434，共用队列；旧 listen_host=0.0.0.0 配置无需修改。
+安装和升级自动允许所有来源及所有网络配置文件访问 11434。实际 Ollama 仍在 127.0.0.1:11435。
+IPv6 DDNS 可以作为远端 Nginx 上游；直接写 IPv6 地址时使用 http://[IPv6地址]:11434。
+系统不支持 IPv6 时保留 IPv4；IPv6 端口冲突会报错。listen_ipv6=false 可明确只保留 IPv4。
+
+本机优先：
+正在执行的请求不中断；下一位置先取最早等待的本机请求，否则取最早等待的远端请求。
+按真实 TCP 来源判断，忽略自称本机的请求头；推荐本机地址 http://127.0.0.1:11434。
+没有保留申请、租约或批次占位。等待 0 秒或客户端看到 busy 就跳过，不产生本机排队优先权。
+本机优先也受排队期限和容量限制。需要等待下一位置时应实际提交请求，设置足够的正数等待期限；不要只轮询 idle。
+/status 返回 queued_local_requests、queued_remote_requests、active_origin、scheduling_policy。
+/help 的 queue_policy.priority 提供机器可读的识别、非抢占和无预留规则。
+
+
+FRP / 反向代理来源隔离（1.2.3）：
+本机程序保持 http://127.0.0.1:11434；同机 FRP、Nginx、SSH 隧道等的回源必须改为 http://127.0.0.1:11436。
+代理入口固定 remote，与 11434 共用一个进程、执行位置、队列、容量和状态；不需要也不信任客户端的来源或优先级声明。
+旧 config.json 缺少新字段时，proxy_listen_host 默认 127.0.0.1，proxy_listen_port 默认 11436；不自动开放代理端口防火墙。
+FRP 只需将对应代理的 localPort/local_port 从 11434 改为 11436，保留原 remotePort/remote_port、类型、认证和外部 URL。
+代理如果仍回源本机 11434，会继续被视为 local；只有升级而没有迁移回源，并未完成修复部署。
+/help 和 /healthz 返回 request_origin，表示本次探测的来源，便于不用推理检查 FRP 迁移；实际推理看 /status 的 active_origin 和 requests[].origin。
+/help 的 queue_policy.priority.proxy_listener 返回实际代理监听配置、固定 remote 和共享队列声明。
+同机代理默认使用 IPv4 的 127.0.0.1:11436；其他机器上的代理需管理员显式配置网卡监听及相应防火墙范围。
+不要为此开启 PROXY protocol；网关接收普通 HTTP。正常本机优先不会抢占，但部署升级和重启代理仍应等运行/排队任务结束。

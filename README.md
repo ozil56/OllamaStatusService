@@ -6,11 +6,13 @@
 
 A Windows gateway, background service and system tray application for an existing Ollama installation. It tracks requests as they execute, exposes machine-readable status and help, and schedules local and remote work through one shared queue.
 
-**Current release: 1.2.3 · Windows x64 · Offline installer**
+**Current release: 1.2.4 · Windows x64 · Offline installer**
 
-[Download 1.2.3](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.3) · [Release notes](CHANGELOG.md) · [Build from source](docs/BUILD.md)
+Version 1.2.4 fixes concurrent `ollama pull`/`push`: transfers bypass the inference queue and its deadlines, preserve streaming progress, and can run alongside inference. Active HTTP transfers appear separately in `/status` and the dashboard. They make `state=busy` for maintenance; `can_start_now` reports inference readiness. Downloads and cancellation remain managed by Ollama. Other model mutations (`create`, `copy`, `delete`) retain their existing scheduling.
 
-> Download `OllamaStatusService-Windows-x64-v1.2.3.zip` from the release assets. GitHub's automatic “Source code” archives are not installable packages. The installer and tray interface currently use Simplified Chinese; these README translations do not change the application language.
+[Download 1.2.4](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.4) · [Release notes](CHANGELOG.md) · [Build from source](docs/BUILD.md)
+
+> Download `OllamaStatusService-Windows-x64-v1.2.4.zip` from the release assets. GitHub's automatic “Source code” archives are not installable packages. The installer and tray interface currently use Simplified Chinese; these README translations do not change the application language.
 
 ## Why a gateway?
 
@@ -44,7 +46,10 @@ flowchart LR
     R[Remote clients] --> P[FRP / reverse proxy]
     P --> I[127.0.0.1:11436: always remote]
     D --> Q[One shared scheduler and request store]
+    D --> T[Parallel pull/push transfers]
     I --> Q
+    I --> T
+    T --> O
     Q --> O[Existing Ollama on 127.0.0.1:11435]
 ```
 
@@ -88,7 +93,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11434/help
 curl.exe --noproxy "*" http://127.0.0.1:11436/help
 ```
 
-Check `version=1.2.3` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.
+Check `version=1.2.4` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.
 
 Acceptance sequence: run remote A, queue remote B, then queue local C with a positive wait timeout. A must finish uninterrupted; C runs before B. Both queued requests must remain within their wait deadline and queue capacity.
 
@@ -102,7 +107,7 @@ Acceptance sequence: run remote A, queue remote B, then queue local C with a pos
 | `GET /dashboard` | Browser status panel |
 | `GET /api/tags`, `GET /api/ps` | Proxied Ollama model inventory / loaded models |
 
-Use `X-Ollama-Queue-Timeout` per inference request: `0` declines immediately when busy, a positive number waits up to that many seconds, and omission uses the server default (15 seconds). The default maximum is 3600 seconds; read `/help` for the running instance's limits. Waiting deadlines do not cut off inference once it has started. Default execution concurrency is 1, with up to 64 queued requests and 64 MiB of queued JSON data.
+Use `X-Ollama-Queue-Timeout` per inference request: `0` declines immediately when busy, a positive number waits up to that many seconds, and omission uses the server default (15 seconds). The default maximum is 3600 seconds; read `/help` for the running instance's limits. Waiting deadlines do not cut off inference once it has started. Scheduled execution concurrency is 1 (excluding pull/push), with up to 64 queued requests and 64 MiB of queued JSON data.
 
 ```powershell
 $body = @{ model='qwen3:8b'; prompt='Hello'; stream=$false } | ConvertTo-Json
@@ -126,7 +131,7 @@ If a request's completion cannot be verified, `unknown` blocks further admission
 
 ## Development and validation
 
-See [build instructions](docs/BUILD.md) for the source layout, offline dependency reuse and test commands. The 1.2.3 validation record covers 60 Python tests, 10 isolated upgrade scenarios, 14 C# discovery checks and four installer UI scenarios. Inference tests use temporary listeners and a mock backend; they do not prove deployment or GPU/FRP behavior on every production server. See [validation report](验证报告.txt).
+See [build instructions](docs/BUILD.md) for the source layout, offline dependency reuse and test commands. Version 1.2.4 passed 68 Python tests using the bundled runtime, 10 isolated upgrade scenarios, package/configuration checks, and two concurrent real Ollama CLI processes against a mock backend. The 1.2.3 report also records 14 C# discovery checks and four installer UI scenarios. Inference tests use temporary listeners and a mock backend; they do not prove deployment or GPU/FRP behavior on every production server. See [validation report](验证报告.txt).
 
 Public examples use placeholders. Production configurations, logs and the original client/development Word and Markdown documents are intentionally excluded.
 

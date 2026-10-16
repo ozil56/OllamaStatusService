@@ -1,5 +1,8 @@
-Ollama 状态服务 1.2.3 · Windows x64 部署说明
+Ollama 状态服务 1.2.4 · Windows x64 部署说明
 更新时间：2026-10-16
+1.2.4：修复并发 pull/push 被推理队列阻塞的问题，保留流式进度，不应用推理排队/读取/执行时限。
+模型传输连接单独显示；下载期间仍可推理。升级时须先停止提交并等待全部任务与传输完成。
+
 1.2.3：增加 FRP、Nginx 和其他代理专用入口 127.0.0.1:11436，所有请求固定归为 remote。
 11434 与 11436 共用一个网关进程、调度队列和任务库；本机等待请求优先，正在执行的请求不被抢占。
 保留 1.2.2 的 IPv4/IPv6 双栈与 11434 防火墙策略。代理来源迁移步骤及验收见第十一节。
@@ -47,8 +50,8 @@ Ollama 状态服务 1.2.3 · Windows x64 部署说明
 已经安装 1.1.x 或 1.2.0/1.2.1/1.2.2 如何升级：
 1. 暂停本机和远端客户端继续提交，等待 /status 显示 idle。
 2. 将新 ZIP 完整解压到新的文件夹，双击其中的“安装.exe”，无需手动运行卸载程序。
-3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.2.3”，确认一次管理员权限提示。
-4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.2.3，queue_policy.ordering 为 local_first_fifo_per_origin。
+3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.2.4”，确认一次管理员权限提示。
+4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.2.4，queue_policy.ordering 为 local_first_fifo_per_origin。
 5. 把该机 FRP 等代理的回源从 11434 改为 11436，按第十一节重新加载代理并验证来源。保持暂停提交，直到升级和代理迁移都完成。
 6. 验证通过后恢复客户端提交。每台服务器单独重复；可先升级一台验证，再处理其他机器。
 
@@ -119,7 +122,7 @@ GET http://A:11434/.well-known/ollama-status-service
 与 /help 相同，便于通用服务发现。
 GET http://A:11434/openapi.json
 OpenAPI 3.1 的状态/帮助/推理扩展说明。模型相关参数仍按 A 当前安装的 Ollama API；它不是 Ollama 所有功能的完整规范。
-所有响应带 X-Ollama-Status-Service: 1.2.3 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
+所有响应带 X-Ollama-Status-Service: 1.2.4 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
 
 给其他 AI agent 的最简提示：
 “服务器地址为 http://A的IP:11434。先读取 GET /help 和 GET /status，根据返回的能力和限额设置 X-Ollama-Queue-Timeout；有多台服务器时按需要选择立即切换或限时等待。仅在收到明确 forwarded=false 的拒绝时自动换机，不要重放完成情况不确定的请求。”
@@ -146,8 +149,8 @@ GET /healthz：只证明代理活着；Ollama 在线请看 /status 的 ollama_on
 默认后台服务为自动延迟启动，失败后由 WinSW 重启；额外健康检查每分钟检查代理，连续失败时重启。后台服务与用户桌面的托盘进程分开，避免 Windows Session 0 无法显示图标。
 
 代理支持原生聊天、生成、向量接口，以及 OpenAI chat/completions/embeddings/responses 和 Anthropic messages；后端必须本身支持相应 API。
-GET/HEAD/OPTIONS、模型详情和 blob 上传透传；模型 pull/push/create/copy/delete 等 JSON 写请求经过同一调度器。保留认证/CORS 等端到端头、查询参数和后端响应格式。blob 上传不在推理队列内。
-这不是对每个第三方客户端的全面兼容认证。对管理接口，忙状态持续到该 HTTP 操作结束；若后端未来新增异步后台任务型 API，本服务无法在请求结束后推断其后台活动。
+GET/HEAD/OPTIONS、模型详情和 blob 上传透传；POST /api/pull 与 /api/push 并发透传，不进入推理队列；create/copy/delete 等其他 JSON 写请求仍经过同一调度器。保留认证/CORS 等端到端头、查询参数和后端响应格式。blob 上传不在推理队列内。
+这不是对每个第三方客户端的全面兼容认证。pull/push 活动连接计入 inflight_model_transfers/model_transfers，令 state=busy，但不占推理执行位置，推理就绪看 can_start_now；传输结束或断开不生成推理 unknown。跟踪仅限当前 HTTP 连接，取消与续传由 Ollama 决定。对其他管理接口，忙状态持续到该 HTTP 操作结束；若后端未来新增异步后台任务型 API，本服务无法在请求结束后推断其后台活动。
 
 七、断线、异常与恢复
 
@@ -186,7 +189,7 @@ IPv6/DDNS 排查：
   queue_timeout_seconds = 15：未传请求头的默认等待秒数。
   max_queue_timeout_seconds = 3600：客户端可选等待时间上限。
   max_queue_size = 64；max_queue_bytes = 67108864。
-  max_concurrency = 1：本版本固定串行执行。
+  max_concurrency = 1：调度器内的任务固定串行执行，不限制 pull/push 传输并发。
   backend_url = http://127.0.0.1:11435；listen_port = 11434。
   proxy_listen_host = 127.0.0.1；proxy_listen_port = 11436：固定 remote 的代理入口。
   代理入口可以配置为其他未占用端口；必须与直连端口和实际 Ollama 后端端口不同，FRP 等代理的回源也必须同步修改。
@@ -274,7 +277,7 @@ FRP 旧版 INI 格式（即使文件扩展名叫 .toml，也应按文件实际�
   curl.exe --noproxy "*" http://127.0.0.1:11434/help
   curl.exe --noproxy "*" http://127.0.0.1:11436/help
   从外部客户端访问原来的 FRP URL 加 /help。
-三者 version 均应为 1.2.3；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
+三者 version 均应为 1.2.4；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
 /help、/healthz 的 request_origin 仅代表本次探测请求；实际推理和队列来源以 /status 的 active_origin、requests[].origin 和 queued_local_requests/queued_remote_requests 为准。
 两个入口查询 /status 应看到同一组活动任务；空闲时 active_origin 为 null，不能用空闲状态验证推理来源。
 

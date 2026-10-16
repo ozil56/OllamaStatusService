@@ -6,14 +6,14 @@ The repository contains application source, C# GUI source, PowerShell lifecycle 
 
 Use Windows x64 with Windows PowerShell 5.1 and the .NET Framework 4.8 compiler. No service installation or administrator session is required to compile and package.
 
-1. Download the **1.2.3 Windows release ZIP and checksum** from the project's Releases page. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW.
-2. Obtain the source checkout at tag `v1.2.3`.
+1. Download the **1.2.4 Windows release ZIP and checksum** from the project's Releases page. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW.
+2. Obtain the source checkout at tag `v1.2.4`. The 1.2.3 dependency bundle is also compatible because dependencies are unchanged.
 3. Run this from the source root, replacing the example dependency path:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\Build-Package.ps1 `
   -DependencyBundle 'C:\Build\Dependencies\OllamaStatusService' `
-  -OutputDirectory 'C:\Build\Output-1.2.3'
+  -OutputDirectory 'C:\Build\Output-1.2.4'
 ```
 
 `Build-Package.ps1` verifies the dependency bundle's manifest, dependency lock, Python version and WinSW hash. It copies only an explicit public source list, recompiles the installer/uninstaller and tray from C#, regenerates the HTML guide and encoding-sensitive launchers, then creates the ZIP, internal file manifest and external SHA256. It refuses to overwrite an existing output package.
@@ -36,6 +36,7 @@ If recreating dependencies independently, use a Python 3.13 x64 environment to i
 Run these commands **from the newly built package directory**, which contains `runtime` and `vendor`:
 
 ```powershell
+.\runtime\python.exe tests\model_transfers.py
 .\runtime\python.exe tests\proxy_ingress.py
 .\runtime\python.exe tests\local_priority.py
 .\runtime\python.exe tests\dual_stack.py
@@ -49,7 +50,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\native_process_che
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\package_integrity_checks.ps1
 ```
 
-The five Python suites contain 60 tests. They use temporary ports and a mock inference backend, not production models. The upgrade scenarios replace system service/firewall/task interfaces with isolated fixtures. `setup_ui_checks.ps1` additionally opens real installer windows for interactive GUI checks; it does not install or uninstall production services.
+The six Python suites contain 68 tests, including eight model-transfer regressions. They use temporary ports and a mock inference backend, not production models. The upgrade scenarios replace system service/firewall/task interfaces with isolated fixtures. `setup_ui_checks.ps1` additionally opens real installer windows for interactive GUI checks; it does not install or uninstall production services.
 
 These checks do not prove successful installation on every Windows host or real GPU/public FRP performance. Deployment acceptance must still verify origins and the ordering of a running remote request, a queued remote request, and a queued local request.
 

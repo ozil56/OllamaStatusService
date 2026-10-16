@@ -4,9 +4,11 @@
 
 **Ollama의 실제 작업 상태를 확인하고, 실행 중인 작업을 끊지 않으면서 로컬 대기 요청에 다음 순서를 제공합니다.**
 
-**1.2.3 · Windows x64** · [다운로드](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.3) · [변경 기록](../CHANGELOG.md) · [소스 빌드](BUILD.md)
+**1.2.4 · Windows x64** · [다운로드](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.4) · [변경 기록](../CHANGELOG.md) · [소스 빌드](BUILD.md)
 
 기존 Ollama 앞에 HTTP 게이트웨이, Windows 서비스, 트레이 아이콘을 추가합니다. 메모리에 로드된 모델이 반드시 추론 중인 것은 아닙니다. 이 서비스는 게이트웨이를 통과하는 요청의 수명을 추적합니다. Ollama, 모델, GPU 드라이버는 포함하지 않습니다. 앱 UI는 현재 중국어 간체이며, README 번역이 UI 번역을 의미하지는 않습니다.
+
+1.2.4는 동시 `ollama pull`/`push` 시간 초과를 수정합니다. 모델 전송은 추론 대기열과 시간 제한을 적용받지 않으며 진행 상황을 스트리밍합니다. 전송은 `/status`에서 별도로 집계되고 유지보수를 위해 상태가 `busy`가 되지만 추론 슬롯은 차지하지 않습니다. 추론 시작 가능 여부는 `can_start_now`로 확인하세요.
 
 ## 주요 기능
 
@@ -20,7 +22,7 @@
 
 Windows 10/11 x64 또는 데스크톱이 있는 Windows Server, 기존 Ollama와 로컬 모델, PowerShell 5.1, .NET Framework 4.8, 작업 스케줄러와 방화벽 관리 기능이 필요합니다. 설치에는 관리자 권한을 사용합니다.
 
-1. Release에서 `OllamaStatusService-Windows-x64-v1.2.3.zip`과 `.sha256.txt`를 내려받고 `Get-FileHash -Algorithm SHA256`으로 비교합니다. GitHub의 Source code ZIP은 설치 패키지가 아닙니다.
+1. Release에서 `OllamaStatusService-Windows-x64-v1.2.4.zip`과 `.sha256.txt`를 내려받고 `Get-FileHash -Algorithm SHA256`으로 비교합니다. GitHub의 Source code ZIP은 설치 패키지가 아닙니다.
 2. 새 요청을 중단하고 실행·대기 작업이 끝난 뒤, 새 폴더에 전체 압축을 풉니다.
 3. **`安装.exe`**를 실행하여 Ollama와 모델 경로를 확인하고 UAC를 허용합니다. 기존 버전도 같은 실행 파일로 업그레이드합니다.
 4. `http://127.0.0.1:11434/dashboard`를 확인합니다. 런타임과 의존성이 포함되어 설치 중 다운로드하지 않습니다.

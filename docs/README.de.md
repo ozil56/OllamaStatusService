@@ -4,9 +4,11 @@
 
 **Den tatsächlichen Ollama-Status sehen und lokalen Anfragen den nächsten freien Platz geben — ohne laufende Arbeit zu unterbrechen.**
 
-**Version 1.2.3 · Windows x64** · [Download](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.3) · [Änderungen](../CHANGELOG.md) · [Build-Anleitung](BUILD.md)
+**Version 1.2.4 · Windows x64** · [Download](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.4) · [Änderungen](../CHANGELOG.md) · [Build-Anleitung](BUILD.md)
 
 Ein HTTP-Gateway mit Windows-Diensten, grafischem Installer und Tray-Anwendung für eine vorhandene Ollama-Installation. Geladene Modelle sind nicht automatisch beschäftigt: Das Gateway verfolgt die Anfragen, die es weiterleitet. Ollama, Modelle und GPU-Treiber werden nicht mitgeliefert. Die Oberfläche ist derzeit auf vereinfachtem Chinesisch; diese README-Übersetzungen übersetzen nicht die Anwendung.
+
+1.2.4 behebt Zeitüberschreitungen bei parallelem `ollama pull`/`push`. Modellübertragungen umgehen die Inferenzwarteschlange und deren Zeitlimits; Fortschritt wird weiterhin gestreamt. `/status` zählt Übertragungen separat. Sie setzen den Zustand für Wartungszwecke auf `busy`, belegen aber keinen Inferenzplatz. Für die Inferenzbereitschaft gilt `can_start_now`.
 
 ## Funktionen
 
@@ -20,7 +22,7 @@ Ein HTTP-Gateway mit Windows-Diensten, grafischem Installer und Tray-Anwendung f
 
 Voraussetzungen: Windows 10/11 x64 oder Windows Server mit Desktop, vorhandenes Ollama mit lokalen Modellen, PowerShell 5.1, .NET Framework 4.8, Aufgabenplanung, Firewall-Verwaltung und Administratorrechte für die Installation.
 
-1. `OllamaStatusService-Windows-x64-v1.2.3.zip` und `.sha256.txt` aus den Release-Dateien laden. Mit `Get-FileHash -Algorithm SHA256` vergleichen. Die automatisch erzeugten Source-code-Archive sind keine Installationspakete.
+1. `OllamaStatusService-Windows-x64-v1.2.4.zip` und `.sha256.txt` aus den Release-Dateien laden. Mit `Get-FileHash -Algorithm SHA256` vergleichen. Die automatisch erzeugten Source-code-Archive sind keine Installationspakete.
 2. Neue Aufträge pausieren, laufende und wartende Arbeit abschließen lassen und das vollständige ZIP in einen neuen Ordner entpacken.
 3. **`安装.exe`** starten, Ollama- und Modellpfade prüfen und UAC bestätigen. Dasselbe Programm aktualisiert bestehende Installationen.
 4. `http://127.0.0.1:11434/dashboard` öffnen. Laufzeit und Abhängigkeiten sind enthalten; die Installation lädt nichts nach.

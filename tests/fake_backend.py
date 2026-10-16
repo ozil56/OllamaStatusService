@@ -10,6 +10,34 @@ app = FastAPI()
 received = 0
 received_models = []
 gates = {}
+active_transfers = {}
+
+@app.get('/__transfers')
+async def transfers():
+    return {'active': list(active_transfers)}
+
+@app.post('/api/pull')
+@app.post('/api/push')
+async def transfer(request: Request):
+    data = await request.json()
+    model = data.get('model') or data.get('name', '')
+    if model == 'reject-transfer':
+        return JSONResponse({'error': 'model not found'}, status_code=404)
+    async def chunks():
+        active_transfers[model] = True
+        try:
+            yield b'{"status":"pulling manifest"}\n'
+            if model.startswith('held-'):
+                await gates.setdefault(model, asyncio.Event()).wait()
+            yield b'{"status":"success"}\n'
+        finally:
+            active_transfers.pop(model, None)
+    if data.get('stream') is False:
+        async for _ in chunks():
+            pass
+        return {'status': 'success'}
+    return StreamingResponse(chunks(), media_type='application/x-ndjson',
+                             headers={'X-Test-Transfer': 'preserved'})
 
 @app.post('/__release/{model}')
 async def release(model: str):
@@ -30,7 +58,6 @@ async def model_detail(request: Request,model: str):
 async def upload(request: Request,digest: str):
     return JSONResponse({'bytes':len(await request.body())},status_code=201)
 
-@app.post('/api/pull')
 @app.post('/api/create')
 @app.post('/api/copy')
 @app.delete('/api/delete')

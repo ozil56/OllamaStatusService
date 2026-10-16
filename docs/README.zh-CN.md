@@ -4,9 +4,11 @@
 
 **让共享 Ollama 的忙闲可见，让本机请求优先获得下一次执行机会。**
 
-当前版本 **1.2.3**，适用于 Windows x64。这是已有 Ollama 前面的 HTTP 网关，配有后台服务、图形安装器和托盘。默认 README 为英文；本页为简体中文说明。软件界面目前为简体中文，多语言 README 不代表软件界面已本地化。
+当前版本 **1.2.4**。1.2.4 让 `pull/push` 并发透传、不占推理队列、不受推理时限影响，并保留进度输出。活动传输单独显示在 `/status` 和看板中，令 `state=busy` 以提示维护等待；是否能开始推理请看 `can_start_now`。取消、续传由 Ollama 处理，`create/copy/delete` 等其他写接口仍使用原调度规则。
 
-[下载 1.2.3](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.3) · [更新记录](../CHANGELOG.md) · [源码构建](BUILD.md)
+软件适用于 Windows x64。这是已有 Ollama 前面的 HTTP 网关，配有后台服务、图形安装器和托盘。默认 README 为英文；本页为简体中文说明。软件界面目前为简体中文，多语言 README 不代表软件界面已本地化。
+
+[下载 1.2.4](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.4) · [更新记录](../CHANGELOG.md) · [源码构建](BUILD.md)
 
 ## 它解决什么问题
 
@@ -33,7 +35,7 @@
 
 需要 Windows 10/11 x64 或带桌面的 Windows Server、已有 Ollama 和本地模型、Windows PowerShell 5.1、.NET Framework 4.8、任务计划与防火墙管理组件，安装时需管理员权限。
 
-1. 在 Release 下载 `OllamaStatusService-Windows-x64-v1.2.3.zip` 和 `.sha256.txt`，用 `Get-FileHash -Algorithm SHA256` 核对。GitHub 自动生成的 Source code 压缩包不能直接安装。
+1. 在 Release 下载 `OllamaStatusService-Windows-x64-v1.2.4.zip` 和 `.sha256.txt`，用 `Get-FileHash -Algorithm SHA256` 核对。GitHub 自动生成的 Source code 压缩包不能直接安装。
 2. 暂停新请求，等执行与排队任务结束，把完整 ZIP 解压到新的文件夹，不要覆盖安装目录。
 3. 双击 **`安装.exe`**，核对 Ollama 和模型路径，允许 UAC。已有版本也使用同一个安装器升级。
 4. 打开托盘或 `http://127.0.0.1:11434/dashboard`。安装包自带运行时、依赖和服务包装器，安装不联网下载。
@@ -54,13 +56,13 @@ localPort = 11436
 
 INI 对应 `local_ip`、`local_port`。保持原名称、类型、公网端口、域名、认证和 TLS；外部客户端地址通常不变。同机 Nginx、Caddy、SSH 隧道也应转到 `11436`。异机代理需要明确配置可达监听与限制来源的防火墙。这里接收普通 HTTP，不解析 PROXY protocol。
 
-分别访问 `http://127.0.0.1:11434/help`、`http://127.0.0.1:11436/help` 及原代理 URL 的 `/help`：版本应为 `1.2.3`，来源分别是 `local`、`remote`、`remote`。真实推理来源看 `/status.active_origin`。只升级而不迁移代理回源，旧的误分类问题仍会存在。
+分别访问 `http://127.0.0.1:11434/help`、`http://127.0.0.1:11436/help` 及原代理 URL 的 `/help`：版本应为 `1.2.4`，来源分别是 `local`、`remote`、`remote`。真实推理来源看 `/status.active_origin`。只升级而不迁移代理回源，旧的误分类问题仍会存在。
 
 验收：运行远端 A → 先排远端 B → 再排本机 C；A 完整结束后应先执行 C，再执行 B。B/C 要使用正数排队期限且不超时。
 
 ## 排队、安全换机与恢复
 
-请求头 `X-Ollama-Queue-Timeout: 0` 表示遇忙立即拒绝；正数表示最多等待的秒数；省略默认 15 秒。默认上限 3600 秒，实际以 `/help` 为准。它只限制开始前的排队，不会因排队期限在执行中到期而截断推理。默认并发 1、最多排队 64 个、等待 JSON 总量 64 MiB。
+请求头 `X-Ollama-Queue-Timeout: 0` 表示遇忙立即拒绝；正数表示最多等待的秒数；省略默认 15 秒。默认上限 3600 秒，实际以 `/help` 为准。它只限制开始前的排队，不会因排队期限在执行中到期而截断推理。调度器并发 1（不包括 pull/push）、最多排队 64 个、等待 JSON 总量 64 MiB。
 
 本机优先要求请求实际入队；零等待在忙时也会被拒绝。连续本机任务可能让远端等待到超时。`can_start_now` 是快照，不是预留凭证。
 
@@ -74,7 +76,7 @@ INI 对应 `local_ip`、`local_port`。保持原名称、类型、公网端口�
 
 配置和历史位于 `%ProgramData%\OllamaStatusService`，程序位于 `%ProgramFiles%\OllamaStatusService`。没有远程写配置接口。
 
-1.2.3 验证记录包括 60 项 Python 测试、10 种隔离升级场景、14 项 C# 路径发现检查和 4 种安装器界面场景。模拟后端测试不代表各生产机器已完成 GPU、公网链路或部署验收。公开包不包含原客户端/开发过程的 Word 与 Markdown 文档、生产配置或日志。
+1.2.4 已通过随包运行时的 68 项 Python 测试、10 种隔离升级场景、安装包与配置检查，以及两个真实 Ollama CLI 进程连接模拟后端的并发验证。历史 1.2.3 还记录了 14 项 C# 路径发现检查和 4 种安装器界面场景。模拟后端测试不代表各生产机器已完成 GPU、公网链路或部署验收。公开包不包含原客户端/开发过程的 Word 与 Markdown 文档、生产配置或日志。
 
 ## 许可证
 

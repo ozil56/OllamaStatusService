@@ -156,7 +156,7 @@ class NativeHttpTests(unittest.TestCase):
         with concurrent.futures.ThreadPoolExecutor() as pool:
             first = pool.submit(httpx.post, self.v6+'/api/generate',
                                 json={'model':'slow','stream':False}, trust_env=False, timeout=8)
-            busy = self.wait_status(self.v4, lambda s: s['state'] == 'busy')
+            busy = self.wait_status(self.v4, lambda s: s['inflight_requests'] == 1)
             self.assertEqual(busy['active_origin'], 'local')
             second = pool.submit(httpx.post, self.v4+'/api/generate',
                                  json={'model':'fast','stream':False}, trust_env=False, timeout=8)

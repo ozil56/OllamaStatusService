@@ -68,7 +68,7 @@ function Register-ScheduledTask { }
 function Invoke-RestMethod([string]$Uri) {
     $script:ProbeUrls.Add($Uri)
     if ($script:Scenario -eq 'proxy-health-failure' -and $Uri -like '*:11436/*') { throw 'fixture proxy endpoint unavailable' }
-    [pscustomobject]@{ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.2.3';scheduling_policy='local_first_fifo_per_origin'} }
+    [pscustomobject]@{ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.2.4';scheduling_policy='local_first_fifo_per_origin'} }
 function Start-Transcript { }
 function Stop-Transcript { }
 function Test-Path([string]$LiteralPath,[string]$PathType) {
@@ -175,7 +175,7 @@ try {
             [xml]$backend=Get-Content -LiteralPath (Join-Path $script:InstallRoot ($script:BackendName+'.xml')) -Raw
             Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_CONTEXT_LENGTH').value -eq '32768') 'Context tuning lost'
             Assert (($backend.service.env | Where-Object name -eq 'CUDA_VISIBLE_DEVICES').value -eq '0') 'GPU tuning lost'
-            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.2.3') 'Wrong installed version'
+            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.2.4') 'Wrong installed version'
             if ($case -eq 'service-model-overrides-record') {
                 Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).models -eq $activeModels) 'Reinstall used stale model path'
                 Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_MODELS').value -eq $activeModels) 'Backend model path was not preserved'

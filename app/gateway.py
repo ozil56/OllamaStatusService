@@ -15,16 +15,18 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+import anyio
 import httpx
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
 
 LOG = logging.getLogger("ollama_status")
-VERSION = "1.2.3"
+VERSION = "1.2.4"
 INFERENCE = {"/api/chat", "/api/generate", "/api/embed", "/api/embeddings",
              "/v1/chat/completions", "/v1/completions", "/v1/embeddings",
              "/v1/responses", "/v1/messages"}
 EMBEDDING = {"/api/embed", "/api/embeddings", "/v1/embeddings"}
+MODEL_TRANSFERS = {"/api/pull", "/api/push"}
 
 
 def utc():
@@ -288,6 +290,7 @@ def create_app(settings: Settings):
     settings.validate()
     settings.backend_url = settings.backend_url.rstrip("/")
     pending = deque()
+    transfers = {}
     wake = asyncio.Event()
     health = {"online": False, "checked_at": None, "last_success": 0.0}
     runtime = {"closing": False, "journal_ok": True, "queued_bytes": 0, "active": None}
@@ -368,7 +371,7 @@ def create_app(settings: Settings):
                      "health": "/healthz", "help": "/help", "openapi": "/openapi.json",
                      "installed_models": "/api/tags", "loaded_models": "/api/ps"},
             "status_fields": {
-                "state": {"idle": "无执行或排队任务", "busy": "正在执行或排队；不等于拒绝新请求",
+                "state": {"idle": "无执行、排队或模型传输", "busy": "正在执行、排队或传输模型；不等于拒绝新请求",
                           "offline": "Ollama 后端不可用", "unknown": "之前任务完成情况不确定，暂停接收",
                           "stopping": "正在停止"},
                 "can_start_now": "true 表示此刻可立即开始；仅为快照，实际提交仍可能被其他请求抢先",
@@ -378,6 +381,8 @@ def create_app(settings: Settings):
                 "queued_remote_requests": "等待中的远端请求数",
                 "active_origin": "当前执行来源 local / remote；无运行请求时为 null",
                 "uncertain_requests": "不能确认已完成的请求数",
+                "inflight_model_transfers": "当前 pull/push HTTP 请求数；单独统计，不占推理队列",
+                "model_transfers": "当前模型传输的 ID、接口、来源和开始时间；不代表后端全部下载活动",
                 "loaded_models_note": "/api/ps 表示模型驻留内存，不代表正在推理"},
             "queue_policy": {
                 "header": "X-Ollama-Queue-Timeout", "unit": "seconds", "type": "number",
@@ -403,6 +408,13 @@ def create_app(settings: Settings):
                 "max_waiting_body_bytes": settings.max_queue_bytes,
                 "restart": "排队内容不自动重放；已开始但未确认完成的任务进入 unknown",
                 "client_disconnect": "排队中断开则移除；执行中断开则继续跟踪直到完成或 unknown"},
+            "model_transfer_policy": {
+                "endpoints": sorted(MODEL_TRANSFERS), "method": "POST",
+                "scheduling": "concurrent_passthrough", "uses_inference_queue": False,
+                "queue_header_applies": False, "inference_deadlines_apply": False,
+                "status_note": "Active transfer connections make state busy but do not consume inference slots; use can_start_now for inference readiness.",
+                "client_disconnect": "Close the upstream HTTP connection; Ollama owns download cancellation and resume behavior.",
+                "tracking": "Live HTTP connections only; no replay or persistent inference recovery record."},
             "client_profiles": {
                 "switch_when_busy": {"headers": {"X-Ollama-Queue-Timeout": "0"}},
                 "wait_then_switch": {"headers": {"X-Ollama-Queue-Timeout": str(min(30, settings.max_queue_timeout_seconds))}},
@@ -472,13 +484,14 @@ def create_app(settings: Settings):
         rows = [dict(row, origin=origins.get(row["id"], "unknown")) for row in rows]
         backend_online = online()
         state = ("unknown" if uncertain or not runtime["journal_ok"] else
-                 "offline" if not backend_online else "busy" if inflight or queued else
+                 "offline" if not backend_online else "busy" if inflight or queued or transfers else
                  "stopping" if runtime["closing"] else "idle")
         return JSONResponse({"service": "OllamaStatusService", "version": VERSION,
                              "state": state, "ollama_online": backend_online,
                              "accepting_requests": state in {"idle", "busy"} and queued < settings.max_queue_size
                              and runtime["queued_bytes"] < settings.max_queue_bytes and not runtime["closing"], "inflight_requests": inflight,
-                             "can_start_now": state == "idle" and not runtime["closing"],
+                             "can_start_now": state in {"idle", "busy"} and not inflight and not queued and not runtime["closing"],
+                             "inflight_model_transfers": len(transfers), "model_transfers": list(transfers.values()),
                              "uncertain_requests": uncertain, "queued_requests": queued,
                              "queued_local_requests": sum(job["origin"] == "local" for job in pending),
                              "queued_remote_requests": sum(job["origin"] == "remote" for job in pending),
@@ -520,21 +533,79 @@ def create_app(settings: Settings):
         raw = request.scope.get("raw_path", request.url.path.encode()).decode("ascii")
         return "./" + raw.lstrip("/") + ("?" + request.url.query if request.url.query else "")
 
-    async def passthrough(request):
+    async def passthrough(request, model_transfer=False):
+        content = request.stream()
+        if model_transfer:
+            # Retain the existing JSON request-size bound, without rewriting the
+            # body. Once consumed, disconnect checks cannot steal request bytes.
+            content = bytearray()
+            async for chunk in request.stream():
+                content.extend(chunk)
+                if len(content) > settings.max_body_bytes:
+                    return JSONResponse({"error": "Request body too large"}, status_code=413)
+            content = bytes(content)
+        ident = str(uuid.uuid4()) if model_transfer else None
+        if ident:
+            if runtime["closing"]:
+                return JSONResponse({"error": "Gateway stopping"}, status_code=503)
+            transfers[ident] = {"id": ident, "endpoint": request.url.path.rstrip("/"),
+                                "origin": client_origin(request, settings.proxy_listen_port), "started_at": utc()}
         try:
+            # Transfers may be large or quiet during verification. Preserve Ollama's
+            # stream without inference queue/read/total deadlines; connect/write/pool
+            # failures still have finite transport timeouts.
+            options = {"timeout": httpx.Timeout(connect=5, read=None, write=30, pool=5)} if model_transfer else {}
             req = app.state.client.build_request(request.method, target(request),
-                content=request.stream(), headers=headers_for(request.headers))
-            upstream = await app.state.client.send(req, stream=True)
+                content=content, headers=headers_for(request.headers), **options)
+            if model_transfer:
+                sending = asyncio.create_task(app.state.client.send(req, stream=True))
+                received = False
+                try:
+                    while not sending.done():
+                        if await request.is_disconnected():
+                            transfers.pop(ident, None)
+                            return Response(status_code=499)
+                        await asyncio.wait({sending}, timeout=.1)
+                    upstream = sending.result()
+                    received = True
+                finally:
+                    if not received:
+                        sending.cancel()
+                        with anyio.CancelScope(shield=True):
+                            result = (await asyncio.gather(sending, return_exceptions=True))[0]
+                            if isinstance(result, httpx.Response):
+                                await result.aclose()
+            else:
+                upstream = await app.state.client.send(req, stream=True)
         except httpx.HTTPError:
+            transfers.pop(ident, None)
             return JSONResponse({"error": "Ollama backend unavailable"}, status_code=503)
+        except BaseException:
+            transfers.pop(ident, None)
+            raise
+
+        class ProxyResponse(StreamingResponse):
+            async def __call__(self, scope, receive, send):
+                # Cleanup even when the client leaves before body iteration starts.
+                # Shield it from Starlette's disconnect cancellation scope.
+                try:
+                    await super().__call__(scope, receive, send)
+                finally:
+                    try:
+                        with anyio.CancelScope(shield=True):
+                            await upstream.aclose()
+                    finally:
+                        transfers.pop(ident, None)
+
         async def body():
             try:
                 async for chunk in upstream.aiter_bytes():
                     yield chunk
-            finally:
-                await upstream.aclose()
-        return StreamingResponse(body(), status_code=upstream.status_code,
-                                 headers=headers_for(upstream.headers))
+            except httpx.HTTPError:
+                LOG.warning("Passthrough stream interrupted endpoint=%s", request.url.path)
+                raise
+        return ProxyResponse(body(), status_code=upstream.status_code,
+                             headers=headers_for(upstream.headers))
 
     def finish(ident, state, reason):
         try:
@@ -773,6 +844,8 @@ def create_app(settings: Settings):
     @app.api_route("/{rest:path}", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
     async def proxy(request: Request, rest: str):
         path = request.url.path.rstrip("/")
+        if request.method == "POST" and path in MODEL_TRANSFERS:
+            return await passthrough(request, model_transfer=True)
         if request.method in {"GET", "HEAD", "OPTIONS"} or path in {"/api/show", "/v1/messages/count_tokens"} or path.startswith("/api/blobs/"):
             return await passthrough(request)
         return await scheduled(request)

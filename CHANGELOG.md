@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.4 — 2026-10-16
+
+- Fix simultaneous `ollama pull` requests timing out in the single-slot inference queue. POST `/api/pull` and `/api/push` now stream concurrently to Ollama, without inference queue, read or total deadlines.
+- Preserve upstream progress, errors and non-streaming responses; close the upstream connection on client disconnect.
+- Track active transfer HTTP connections separately in status/help/dashboard. Transfers mark the service busy for maintenance but leave inference slots available (`can_start_now`). Transfer disconnects do not create persistent inference `unknown` records.
+- Preserve local-priority inference scheduling and existing create/copy/delete scheduling.
+- Add eight isolated real-HTTP transfer regressions, including cancellation before response headers, with no real model downloads.
+
+
 ## 1.2.3 — 2026-10-16
 
 - Add a dedicated proxy ingress on `127.0.0.1:11436`; all requests entering it are classified as `remote` using the accepted socket's local port.

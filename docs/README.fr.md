@@ -4,9 +4,11 @@
 
 **Voir l'état réel d'Ollama et donner le prochain créneau aux requêtes locales, sans interrompre le travail en cours.**
 
-**Version 1.2.3 · Windows x64** · [Télécharger](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.3) · [Changements](../CHANGELOG.md) · [Compilation](BUILD.md)
+**Version 1.2.4 · Windows x64** · [Télécharger](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.4) · [Changements](../CHANGELOG.md) · [Compilation](BUILD.md)
 
 Une passerelle HTTP, des services Windows, un installateur graphique et une icône de notification pour une installation Ollama existante. Un modèle chargé n'est pas forcément occupé : la passerelle suit les requêtes qu'elle transmet. Ollama, les modèles et les pilotes GPU ne sont pas distribués avec ce projet. L'interface est actuellement en chinois simplifié ; les traductions du README ne traduisent pas l'application.
+
+La version 1.2.4 corrige les délais dépassés lors de plusieurs `ollama pull`/`push` simultanés. Les transferts contournent la file et les limites de temps de l’inférence, tout en conservant le flux de progression. `/status` les compte séparément : ils indiquent `busy` pour la maintenance sans occuper de créneau d’inférence. Utiliser `can_start_now` pour savoir si une inférence peut démarrer.
 
 ## Fonctionnalités
 
@@ -20,7 +22,7 @@ Une passerelle HTTP, des services Windows, un installateur graphique et une icô
 
 Prérequis : Windows 10/11 x64 ou Windows Server avec bureau, Ollama et modèles locaux déjà installés, PowerShell 5.1, .NET Framework 4.8, Planificateur de tâches, gestion du pare-feu et droits administrateur pour l'installation.
 
-1. Télécharger `OllamaStatusService-Windows-x64-v1.2.3.zip` et `.sha256.txt` dans les fichiers de la release. Comparer avec `Get-FileHash -Algorithm SHA256`. Les archives Source code automatiques ne sont pas des installateurs.
+1. Télécharger `OllamaStatusService-Windows-x64-v1.2.4.zip` et `.sha256.txt` dans les fichiers de la release. Comparer avec `Get-FileHash -Algorithm SHA256`. Les archives Source code automatiques ne sont pas des installateurs.
 2. Suspendre les nouvelles requêtes, laisser finir les tâches actives et en attente, puis extraire toute l'archive dans un nouveau dossier.
 3. Lancer **`安装.exe`**, vérifier les chemins Ollama/modèles et accepter l'UAC. Le même programme assure la mise à niveau.
 4. Ouvrir `http://127.0.0.1:11434/dashboard`. L'environnement d'exécution et les dépendances sont inclus ; l'installation ne les télécharge pas.

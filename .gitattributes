@@ -1,9 +1,4 @@
-* text=auto
-*.md text eol=lf
-*.py text eol=lf
-*.json text eol=lf
-*.cs text eol=lf
-*.ps1 text eol=crlf
-# GB2312 launchers must never be transcoded or newline-normalized by Git.
-*.cmd -text
+# Preserve release-source bytes, explicit BOMs and Windows line endings.
+# In particular, GB2312 CMD files must never be transcoded by Git.
+* -text
 *.png binary

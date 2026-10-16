@@ -66,7 +66,7 @@ Invoke-GuiCheck $Root '安装.exe' '--test-selection' 'install-selection' 0
 $selection=Get-Content -LiteralPath (Join-Path $evidence 'install-selection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $hasInstall=(Test-Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\OllamaStatusGateway') -or (Test-Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\OllamaStatusBackend')
 if ($selection.upgrade_mode -ne $hasInstall) { throw 'Existing installation detection failed' }
-if ($hasInstall -and ($selection.primary_text -ne '升级到 1.2.4' -or -not $selection.primary_enabled)) { throw 'Upgrade action unavailable for existing installation' }
+if ($hasInstall -and ($selection.primary_text -ne '升级到 1.2.5' -or -not $selection.primary_enabled)) { throw 'Upgrade action unavailable for existing installation' }
 if ($hasInstall) {
     [xml]$installedXml=Get-Content -LiteralPath (Join-Path $env:ProgramFiles 'OllamaStatusService\OllamaStatusBackend.xml') -Encoding UTF8 -Raw
     $expectedModels=($installedXml.service.env | Where-Object name -eq 'OLLAMA_MODELS').value

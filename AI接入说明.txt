@@ -44,4 +44,4 @@ FRP 只需将对应代理的 localPort/local_port 从 11434 改为 11436，保�
 同机代理默认使用 IPv4 的 127.0.0.1:11436；其他机器上的代理需管理员显式配置网卡监听及相应防火墙范围。
 不要为此开启 PROXY protocol；网关接收普通 HTTP。正常本机优先不会抢占，但部署升级和重启代理仍应等运行/排队任务结束。
 
-1.2.4 模型传输：POST /api/pull 和 /api/push 并发透传，不进入推理队列、不应用推理排队或执行/读取时限。活动 HTTP 传输在 inflight_model_transfers/model_transfers 单独统计，state 为 busy，但不占推理位置；推理调度应看 can_start_now。其他管理写请求仍使用原调度规则。
+1.2.5 模型传输：POST /api/pull 和 /api/push 并发透传，不进入推理队列、不应用推理排队或执行/读取时限。活动 HTTP 传输在 inflight_model_transfers/model_transfers 单独统计，state 为 busy，但不占推理位置；推理调度应看 can_start_now。其他管理写请求仍使用原调度规则。

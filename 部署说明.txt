@@ -1,6 +1,11 @@
-Ollama 状态服务 1.2.4 · Windows x64 部署说明
+Ollama 状态服务 1.2.5 · Windows x64 部署说明
 更新时间：2026-10-16
-1.2.4：修复并发 pull/push 被推理队列阻塞的问题，保留流式进度，不应用推理排队/读取/执行时限。
+1.2.5：修复 LocalService 无权访问原模型目录导致模型列表为空的问题，默认 C 盘用户目录同样适用。
+首次安装和升级都会核实整个模型目录（含禁用继承的子目录和文件），按需补齐 LocalService 的修改权限。
+随后用 LocalService 身份验证模型访问和创建/写入/重命名/删除，再核对后端与网关模型列表；失败时显示路径，不能误报安装成功。
+权限修改前保存记录，卸载或安装失败时恢复该账户原有规则；保留其他账户、所有者和继承设置。显式拒绝或加密仍可能阻止访问，安装器会报错。
+模型目录含链接/重解析点时会停止，请选择实际目录。权限探测只创建临时小文件，不改写现有模型内容；探测任务结束后清理。
+保留 1.2.4：修复并发 pull/push 被推理队列阻塞的问题，保留流式进度，不应用推理排队/读取/执行时限。
 模型传输连接单独显示；下载期间仍可推理。升级时须先停止提交并等待全部任务与传输完成。
 
 1.2.3：增加 FRP、Nginx 和其他代理专用入口 127.0.0.1:11436，所有请求固定归为 remote。
@@ -47,11 +52,11 @@ Ollama 状态服务 1.2.4 · Windows x64 部署说明
   找不到时不会把不存在的默认目录当成成功；保留手动浏览入口。另一个 Windows 账户私有启动变量、未持久化的独立启动脚本或无权读取的配置不能保证自动识别。
   已安装服务若明确指定一个失效目录，升级会提示核对并停止，不会静默切换到其他模型库。
 
-已经安装 1.1.x 或 1.2.0/1.2.1/1.2.2 如何升级：
+已经安装 1.1.x 或 1.2.0 至 1.2.4 如何升级：
 1. 暂停本机和远端客户端继续提交，等待 /status 显示 idle。
 2. 将新 ZIP 完整解压到新的文件夹，双击其中的“安装.exe”，无需手动运行卸载程序。
-3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.2.4”，确认一次管理员权限提示。
-4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.2.4，queue_policy.ordering 为 local_first_fifo_per_origin。
+3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.2.5”，确认一次管理员权限提示。
+4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.2.5，queue_policy.ordering 为 local_first_fifo_per_origin。
 5. 把该机 FRP 等代理的回源从 11434 改为 11436，按第十一节重新加载代理并验证来源。保持暂停提交，直到升级和代理迁移都完成。
 6. 验证通过后恢复客户端提交。每台服务器单独重复；可先升级一台验证，再处理其他机器。
 
@@ -122,7 +127,7 @@ GET http://A:11434/.well-known/ollama-status-service
 与 /help 相同，便于通用服务发现。
 GET http://A:11434/openapi.json
 OpenAPI 3.1 的状态/帮助/推理扩展说明。模型相关参数仍按 A 当前安装的 Ollama API；它不是 Ollama 所有功能的完整规范。
-所有响应带 X-Ollama-Status-Service: 1.2.4 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
+所有响应带 X-Ollama-Status-Service: 1.2.5 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
 
 给其他 AI agent 的最简提示：
 “服务器地址为 http://A的IP:11434。先读取 GET /help 和 GET /status，根据返回的能力和限额设置 X-Ollama-Queue-Timeout；有多台服务器时按需要选择立即切换或限时等待。仅在收到明确 forwarded=false 的拒绝时自动换机，不要重放完成情况不确定的请求。”
@@ -277,7 +282,7 @@ FRP 旧版 INI 格式（即使文件扩展名叫 .toml，也应按文件实际�
   curl.exe --noproxy "*" http://127.0.0.1:11434/help
   curl.exe --noproxy "*" http://127.0.0.1:11436/help
   从外部客户端访问原来的 FRP URL 加 /help。
-三者 version 均应为 1.2.4；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
+三者 version 均应为 1.2.5；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
 /help、/healthz 的 request_origin 仅代表本次探测请求；实际推理和队列来源以 /status 的 active_origin、requests[].origin 和 queued_local_requests/queued_remote_requests 为准。
 两个入口查询 /status 应看到同一组活动任务；空闲时 active_origin 为 null，不能用空闲状态验证推理来源。
 

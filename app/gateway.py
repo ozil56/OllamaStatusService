@@ -21,7 +21,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
 
 LOG = logging.getLogger("ollama_status")
-VERSION = "1.2.4"
+VERSION = "1.2.5"
 INFERENCE = {"/api/chat", "/api/generate", "/api/embed", "/api/embeddings",
              "/v1/chat/completions", "/v1/completions", "/v1/embeddings",
              "/v1/responses", "/v1/messages"}

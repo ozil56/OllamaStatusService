@@ -68,7 +68,10 @@ function Register-ScheduledTask { }
 function Invoke-RestMethod([string]$Uri) {
     $script:ProbeUrls.Add($Uri)
     if ($script:Scenario -eq 'proxy-health-failure' -and $Uri -like '*:11436/*') { throw 'fixture proxy endpoint unavailable' }
-    [pscustomobject]@{ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.2.4';scheduling_policy='local_first_fifo_per_origin'} }
+    $models=@([pscustomobject]@{name='fixture:latest'})
+    if ($script:Scenario -eq 'inventory-empty') { $models=@() }
+    if ($script:Scenario -eq 'inventory-mismatch' -and $Uri -like '*:11434/api/tags') { $models=@([pscustomobject]@{name='wrong:latest'}) }
+    [pscustomobject]@{ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.2.5';models=$models;scheduling_policy='local_first_fifo_per_origin'} }
 function Start-Transcript { }
 function Stop-Transcript { }
 function Test-Path([string]$LiteralPath,[string]$PathType) {
@@ -92,7 +95,7 @@ function New-Object([string]$TypeName,[string]$ComObject) {
 }
 try {
     $successfulCases=@('success','legacy-local-subnet','service-model-overrides-record','custom-proxy')
-    foreach ($case in @('success','legacy-local-subnet','service-model-overrides-record','busy','bad-package','uninstall-failure','install-failure','proxy-port-conflict','proxy-health-failure','custom-proxy')) {
+    foreach ($case in @('success','legacy-local-subnet','service-model-overrides-record','busy','bad-package','uninstall-failure','install-failure','proxy-port-conflict','proxy-health-failure','custom-proxy','permission-failure','inventory-empty','inventory-mismatch')) {
         $script:Scenario=$case
         $script:ProbeUrls=[Collections.Generic.List[string]]::new()
         $caseRoot=Join-Path $fixture $case
@@ -101,6 +104,12 @@ try {
         # Load the real common routines, then replace only OS-specific operations.
         . (Join-Path $Root 'scripts\Common.ps1')
         function Grant-Directory { }
+        function Grant-ModelPermissions { $script:Events.Add('model-permissions') }
+        function Test-ModelServiceAccess {
+            $script:Events.Add('model-access-probe')
+            if ($script:Scenario -eq 'permission-failure') { throw 'fixture LocalService access denied' }
+            [pscustomobject]@{manifests=1}
+        }
         function Restore-OriginalSettings { }
         function Test-PackageIntegrity { if ($script:Scenario -eq 'bad-package') { throw 'fixture bad package' }; return 1 }
         function Invoke-Native([string]$File,[string[]]$Arguments) {
@@ -163,6 +172,9 @@ try {
         if ($case -in $successfulCases) {
             $expectedProxyUrl=if ($case -eq 'custom-proxy') {'http://[::1]:19136/healthz'} else {'http://127.0.0.1:11436/healthz'}
             Assert ($script:ProbeUrls.Contains($expectedProxyUrl)) 'Proxy listener readiness was not checked'
+            Assert ($script:ProbeUrls.Contains('http://127.0.0.1:11435/api/tags') -and $script:ProbeUrls.Contains('http://127.0.0.1:11434/api/tags')) 'Model inventory was not checked'
+            Assert ($script:Events.IndexOf('model-permissions') -lt $script:Events.IndexOf('model-access-probe')) 'Access tested before permission repair'
+            Assert ($script:Events.IndexOf('model-access-probe') -lt $script:Events.IndexOf('install:OllamaStatusBackend')) 'Service installed before checking access'
             Assert ($script:Results.Count -eq 1 -and $script:Results[0]) 'Intermediate uninstall completion escaped to GUI'
             Assert ($script:Events.IndexOf('uninstall:OllamaStatusBackend') -lt $script:Events.IndexOf('install:OllamaStatusBackend')) 'Install preceded uninstall'
             Assert ($script:Firewall.RemoteAddress.Count -eq 1 -and $script:Firewall.RemoteAddress[0] -eq 'Any') 'Upgrade did not allow all source addresses'
@@ -175,17 +187,18 @@ try {
             [xml]$backend=Get-Content -LiteralPath (Join-Path $script:InstallRoot ($script:BackendName+'.xml')) -Raw
             Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_CONTEXT_LENGTH').value -eq '32768') 'Context tuning lost'
             Assert (($backend.service.env | Where-Object name -eq 'CUDA_VISIBLE_DEVICES').value -eq '0') 'GPU tuning lost'
-            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.2.4') 'Wrong installed version'
+            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.2.5') 'Wrong installed version'
             if ($case -eq 'service-model-overrides-record') {
                 Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).models -eq $activeModels) 'Reinstall used stale model path'
                 Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_MODELS').value -eq $activeModels) 'Backend model path was not preserved'
             }
         } elseif ($case -in @('busy','bad-package','uninstall-failure','proxy-port-conflict')) {
             Assert (@($script:Events | Where-Object { $_ -like 'install:*' }).Count -eq 0) 'Installation ran after preflight/uninstall failure'
-        } elseif ($case -in @('install-failure','proxy-health-failure')) {
+        } elseif ($case -in @('install-failure','proxy-health-failure','permission-failure','inventory-empty','inventory-mismatch')) {
             Assert ($script:Results.Count -eq 0) 'Failed upgrade was reported successful'
             Assert ($errorMessage -like '*不会自动回装*') 'Missing honest failure guidance'
         }
+        if ($case -eq 'permission-failure') { Assert (@($script:Events | Where-Object { $_ -like 'install:*' }).Count -eq 0) 'Installed despite inaccessible models' }
         if ($case -eq 'proxy-port-conflict') { Assert (@($script:Events | Where-Object { $_ -like 'uninstall:*' }).Count -eq 0) 'Uninstalled before checking proxy port conflict' }
         Write-Output ('PASS reinstall upgrade: ' + $case)
     }

@@ -4,9 +4,11 @@
 
 **Ollama の稼働状態を可視化し、実行中の処理を中断せずにローカルの待機リクエストを優先します。**
 
-バージョン **1.2.4 · Windows x64**。[ダウンロード](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.4) · [変更履歴（英語）](../CHANGELOG.md) · [ビルド手順（英語）](BUILD.md)
+バージョン **1.2.5 · Windows x64**。[ダウンロード](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.5) · [変更履歴（英語）](../CHANGELOG.md) · [ビルド手順（英語）](BUILD.md)
 
 既存の Ollama に HTTP ゲートウェイ、Windows サービス、トレイ表示を追加します。モデルがメモリに読み込まれていることと、推論を実行中であることは別です。本サービスはゲートウェイを通るリクエストを追跡します。Ollama 本体、モデル、GPU ドライバーは同梱しません。アプリの UI は現在簡体字中国語です。README の翻訳は UI の翻訳ではありません。
+
+1.2.5 では、LocalService の権限不足による空のモデル一覧を修正しました。インストールと更新時にモデルフォルダー全体の権限を補い、実際のサービスアカウントでアクセスとモデル一覧を確認します。既定の C ドライブ内ユーザーフォルダーにも対応します。
 
 1.2.4 では、同時実行する `ollama pull`/`push` のタイムアウトを修正しました。モデル転送は推論キューとその時間制限を使用せず、進捗をストリーミングします。転送は `/status` に別集計され、保守のため状態は `busy` になりますが、推論枠は消費しません。推論の開始可否には `can_start_now` を使用してください。
 
@@ -22,7 +24,7 @@
 
 Windows 10/11 x64、またはデスクトップ環境のある Windows Server が対象です。既存の Ollama とローカルモデル、PowerShell 5.1、.NET Framework 4.8、タスクスケジューラ、ファイアウォール管理機能が必要です。インストールには管理者権限を使います。
 
-1. Release の `OllamaStatusService-Windows-x64-v1.2.4.zip` と `.sha256.txt` を取得し、`Get-FileHash -Algorithm SHA256` で比較します。GitHub の Source code ZIP はインストーラではありません。
+1. Release の `OllamaStatusService-Windows-x64-v1.2.5.zip` と `.sha256.txt` を取得し、`Get-FileHash -Algorithm SHA256` で比較します。GitHub の Source code ZIP はインストーラではありません。
 2. 新規投入を止め、実行・待機中の処理が終わってから、新しいフォルダーへ全体を展開します。
 3. **`安装.exe`** を起動し、Ollama とモデルのパスを確認して UAC を許可します。更新にも同じプログラムを使います。
 4. `http://127.0.0.1:11434/dashboard` を確認します。実行環境と依存関係は同梱され、インストール時のダウンロードは不要です。

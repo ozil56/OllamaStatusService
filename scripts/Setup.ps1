@@ -56,7 +56,7 @@ try {
         Grant-Directory (Join-Path $script:StateRoot $directory) 'S-1-5-19' 'Modify'
     }
     Grant-Directory $script:StateRoot 'S-1-5-32-545' 'ReadAndExecute'
-    $registration = [ordered]@{ version='1.2.4'; caller_sid=$CallerSid; caller_profile=$CallerProfile; source_exe=$sourceExe; source_dir=$sourceDir; source_acl=(Get-Acl -LiteralPath $sourceDir).Sddl; models=$models; model_acl=(Get-Acl -LiteralPath $models).Sddl; startup_values=@(); startup_links=@(); installed_at=(Get-Date).ToString('o') }
+    $registration = [ordered]@{ version='1.2.5'; caller_sid=$CallerSid; caller_profile=$CallerProfile; source_exe=$sourceExe; source_dir=$sourceDir; source_acl=(Get-Acl -LiteralPath $sourceDir).Sddl; models=$models; model_acl=(Get-Acl -LiteralPath $models).Sddl; startup_values=@(); startup_links=@(); installed_at=(Get-Date).ToString('o') }
     # Registry values are saved durably before removal, including when installation fails.
     foreach ($key in @("Registry::HKEY_USERS\$CallerSid\Software\Microsoft\Windows\CurrentVersion\Run", 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run')) {
         if (-not (Test-Path -LiteralPath $key)) { continue }
@@ -80,12 +80,13 @@ try {
             }
         }
     }
+    $registration.model_acl_journal=Join-Path $script:StateRoot ('backup\model-acl-'+[guid]::NewGuid().ToString('N')+'.jsonl')
+    [IO.File]::WriteAllText($registration.model_acl_journal,'',[Text.UTF8Encoding]::new($false))
     Save-Json $registration $script:RegistrationPath
     $mutated = $true
     Set-Progress '正在备份启动项、切换 Ollama 为系统服务…'
     foreach ($entry in $registration.startup_values) { Remove-ItemProperty -LiteralPath $entry.path -Name $entry.name }
     foreach ($entry in $registration.startup_links) { Remove-Item -LiteralPath $entry.original }
-    Grant-Directory $models 'S-1-5-19' 'Modify'
     Grant-Directory $sourceDir 'S-1-5-19' 'ReadAndExecute'
     # Stop only Ollama processes from the selected distribution, plus their descendants.
     $all = @(Get-CimInstance Win32_Process)
@@ -99,6 +100,10 @@ try {
     while ((Get-NetTCPConnection -LocalPort 11434 -State Listen -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 300 }
     if (Get-NetTCPConnection -LocalPort 11434 -State Listen -ErrorAction SilentlyContinue) { throw '11434 未释放，不能接管原端口。' }
     Assert-BackendStopped
+    Set-Progress '正在核实并修复 LocalService 对模型目录及文件的权限…'
+    Grant-ModelPermissions $models $registration.model_acl_journal
+    Set-Progress '正在以 LocalService 身份验证模型读取、写入和目录访问…'
+    $modelAccess=Test-ModelServiceAccess $models
     $config = [ordered]@{ backend_url='http://127.0.0.1:11435'; listen_host='0.0.0.0'; listen_ipv6=$true; listen_port=11434; proxy_listen_host='127.0.0.1'; proxy_listen_port=11436; max_queue_size=64; max_queue_bytes=67108864; queue_timeout_seconds=15; max_queue_timeout_seconds=3600; data_dir=(Join-Path $script:StateRoot 'data'); max_concurrency=1; request_deadline_seconds=3600; upstream_read_timeout_seconds=600; health_interval_seconds=2; health_timeout_seconds=3; max_body_bytes=33554432; max_response_bytes=67108864; client_write_timeout_seconds=15; shutdown_grace_seconds=50 }
     if ($AsUpgrade) { Copy-Item -LiteralPath $script:UpgradeState.ConfigBackup -Destination (Join-Path $script:StateRoot 'config.json') -Force }
     else { Save-Json $config (Join-Path $script:StateRoot 'config.json') }
@@ -161,7 +166,7 @@ $commonXml
     foreach ($name in @($script:BackendName, $script:GatewayName)) { Invoke-Native (Join-Path $script:InstallRoot ($name + '.exe')) @('install') }
     Set-Progress '正在配置 11434 防火墙例外、开机托盘和健康检查…'
     Get-NetFirewallRule -Name $script:FirewallName -ErrorAction SilentlyContinue | Remove-NetFirewallRule
-    # 1.2.4 intentionally applies the same all-source rule on install AND upgrade.
+    # 1.2.5 intentionally applies the same all-source rule on install AND upgrade.
     # The previous rule is retained in the upgrade backup for inspection/restoration.
     $ruleSettings=@{RemoteAddress='Any';LocalAddress='Any';Profile='Any';Enabled='True'}
     New-NetFirewallRule -Name $script:FirewallName -DisplayName 'Ollama 状态服务 TCP 11434（IPv4/IPv6）' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 11434 -Program (Join-Path $script:InstallRoot 'runtime\python.exe') @ruleSettings | Out-Null
@@ -181,13 +186,13 @@ $commonXml
     for ($i=0; $i -lt 45; $i++) {
         try {
             $status=Invoke-RestMethod 'http://127.0.0.1:11434/status' -TimeoutSec 2
-            if ($status.ollama_online -and $status.version -eq '1.2.4' -and $status.scheduling_policy -eq 'local_first_fifo_per_origin') {
+            if ($status.ollama_online -and $status.version -eq '1.2.5' -and $status.scheduling_policy -eq 'local_first_fifo_per_origin') {
                 $probeHost=$proxyHost
                 if ($probeHost -eq '0.0.0.0') { $probeHost='127.0.0.1' }
                 if ($probeHost -eq '::') { $probeHost='::1' }
                 if ($probeHost.Contains(':')) { $probeHost='['+$probeHost+']' }
                 $proxyHealth=Invoke-RestMethod ('http://'+$probeHost+':'+$proxyPort+'/healthz') -TimeoutSec 2
-                if ($proxyHealth.ok -and $proxyHealth.service -eq 'OllamaStatusService' -and $proxyHealth.version -eq '1.2.4' -and $proxyHealth.request_origin -eq 'remote') {
+                if ($proxyHealth.ok -and $proxyHealth.service -eq 'OllamaStatusService' -and $proxyHealth.version -eq '1.2.5' -and $proxyHealth.request_origin -eq 'remote') {
                     $ok=$true; break
                 }
             }
@@ -195,6 +200,8 @@ $commonXml
         Start-Sleep -Seconds 1
     }
     if (-not $ok) { throw '服务未能在规定时间内就绪，请查看 ProgramData\OllamaStatusService\logs。安装将回滚系统注册。' }
+    Set-Progress '正在核对 Ollama 后端和网关的模型列表…'
+    Assert-ModelInventory $modelAccess.manifests
     Set-Progress '安装完成。' $false
     Stop-Transcript | Out-Null; $transcript=$false
     if ($AsUpgrade) { return }

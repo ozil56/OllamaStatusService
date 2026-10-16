@@ -6,13 +6,13 @@
 
 A Windows gateway, background service and system tray application for an existing Ollama installation. It tracks requests as they execute, exposes machine-readable status and help, and schedules local and remote work through one shared queue.
 
-**Current release: 1.2.4 · Windows x64 · Offline installer**
+**Current release: 1.2.5 · Windows x64 · Offline installer**
 
-Version 1.2.4 fixes concurrent `ollama pull`/`push`: transfers bypass the inference queue and its deadlines, preserve streaming progress, and can run alongside inference. Active HTTP transfers appear separately in `/status` and the dashboard. They make `state=busy` for maintenance; `can_start_now` reports inference readiness. Downloads and cancellation remain managed by Ollama. Other model mutations (`create`, `copy`, `delete`) retain their existing scheduling.
+Version 1.2.5 fixes empty model lists caused by missing LocalService permissions. Installation and upgrade repair model-tree permissions, verify access using the actual service account, and check backend/gateway model inventories before reporting success. The default C-drive user-profile model directory is supported. The concurrent `pull`/`push` fix from 1.2.4 is retained.
 
-[Download 1.2.4](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.4) · [Release notes](CHANGELOG.md) · [Build from source](docs/BUILD.md)
+[Download 1.2.5](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.5) · [Release notes](CHANGELOG.md) · [Build from source](docs/BUILD.md)
 
-> Download `OllamaStatusService-Windows-x64-v1.2.4.zip` from the release assets. GitHub's automatic “Source code” archives are not installable packages. The installer and tray interface currently use Simplified Chinese; these README translations do not change the application language.
+> Download `OllamaStatusService-Windows-x64-v1.2.5.zip` from the release assets. GitHub's automatic “Source code” archives are not installable packages. The installer and tray interface currently use Simplified Chinese; these README translations do not change the application language.
 
 ## Why a gateway?
 
@@ -75,6 +75,8 @@ The installer reuses your existing Ollama and models, changes the backend to `11
 
 Run **`卸载.exe`** (Uninstall) to remove this service and restore backed-up integration settings. The original Ollama installation and models are retained. Detailed Chinese instructions: [deployment guide](部署说明.txt), [AI integration guide](AI接入说明.txt).
 
+Model permissions are granted only to **LocalService (`S-1-5-19`)** with **Modify**, including protected child directories/files. Original rules are recorded before changes and restored on uninstall or failed installation; unrelated accounts, ownership and inheritance protection are retained. A temporary task tests real service-account access and is removed after the check. Explicit denies/encryption can still block access and produce a path-specific error. Model-tree junctions/reparse points are rejected; select the actual directory instead.
+
 ## FRP migration in 1.2.3
 
 For the existing Ollama proxy entry on **each server**, change only the local destination:
@@ -93,7 +95,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11434/help
 curl.exe --noproxy "*" http://127.0.0.1:11436/help
 ```
 
-Check `version=1.2.4` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.
+Check `version=1.2.5` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.
 
 Acceptance sequence: run remote A, queue remote B, then queue local C with a positive wait timeout. A must finish uninterrupted; C runs before B. Both queued requests must remain within their wait deadline and queue capacity.
 
@@ -131,7 +133,7 @@ If a request's completion cannot be verified, `unknown` blocks further admission
 
 ## Development and validation
 
-See [build instructions](docs/BUILD.md) for the source layout, offline dependency reuse and test commands. Version 1.2.4 passed 68 Python tests using the bundled runtime, 10 isolated upgrade scenarios, package/configuration checks, and two concurrent real Ollama CLI processes against a mock backend. The 1.2.3 report also records 14 C# discovery checks and four installer UI scenarios. Inference tests use temporary listeners and a mock backend; they do not prove deployment or GPU/FRP behavior on every production server. See [validation report](验证报告.txt).
+See [build instructions](docs/BUILD.md) for test commands. Version 1.2.5 validation covers 68 Python tests, 13 isolated upgrade scenarios, real NTFS ACL repair and LocalService access checks in a C-drive user-profile fixture, plus package/configuration checks. The earlier reports retain the two concurrent Ollama CLI checks from 1.2.4 and the 1.2.3 installer UI checks. Tests do not prove deployment or GPU/FRP behavior on every production server. See [validation report](验证报告.txt).
 
 Public examples use placeholders. Production configurations, logs and the original client/development Word and Markdown documents are intentionally excluded.
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.5 — 2026-10-16
+
+- Fix empty model lists caused by LocalService lacking access to an existing model library, including default Windows user-profile directories and descendants with protected ACLs.
+- On install and upgrade, check the complete model tree and grant LocalService Modify where needed. Preserve owners, inheritance settings and other accounts' rules; journal changes before applying them for uninstall/failure restoration.
+- Run a temporary LocalService task to verify enumeration, existing-file access and create/write/rename/delete operations before starting the backend. Report the failing path if access remains blocked.
+- Check both backend and gateway `/api/tags` before reporting success. Existing manifests with an empty backend list, mismatched inventories and failed access checks now fail installation.
+- Do not follow model-directory junctions/reparse points into other data; select the actual directory when one is detected. Explicit deny rules or encryption may still require administrator intervention and are reported as errors.
+- Retain the 1.2.4 concurrent pull/push fix and existing scheduling behavior.
+
 ## 1.2.4 — 2026-10-16
 
 - Fix simultaneous `ollama pull` requests timing out in the single-slot inference queue. POST `/api/pull` and `/api/push` now stream concurrently to Ollama, without inference queue, read or total deadlines.

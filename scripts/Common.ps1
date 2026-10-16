@@ -9,6 +9,7 @@ $script:GatewayName = 'OllamaStatusGateway'
 $script:FirewallName = 'OllamaStatusService-11434'
 $script:TaskName = 'OllamaStatusServiceWatchdog'
 $script:RegistrationPath = Join-Path $script:StateRoot 'installation.json'
+. (Join-Path $PSScriptRoot 'ModelPermissions.ps1')
 
 function Test-Administrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -150,6 +151,7 @@ function Remove-Registrations {
 }
 
 function Restore-OriginalSettings($Registration) {
+    Restore-ModelPermissions $Registration
     foreach ($entry in @($Registration.startup_values)) {
         if (-not $entry) { continue }
         if (-not (Test-Path -LiteralPath $entry.path)) { New-Item -Path $entry.path -Force | Out-Null }

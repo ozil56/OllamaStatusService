@@ -34,5 +34,5 @@ foreach ($name in @('runtime','vendor','bin')) {
 & (Join-Path $packageRoot 'scripts\Build-Tray.ps1') -Root $packageRoot
 & (Join-Path $packageRoot 'runtime\python.exe') (Join-Path $packageRoot 'scripts\Finalize-Package.py')
 if ($LASTEXITCODE -ne 0) { throw 'Package finalization failed.' }
-& (Join-Path $packageRoot 'scripts\Package.ps1') -Root $packageRoot -ZipPath (Join-Path $outputRoot 'OllamaStatusService-Windows-x64-v1.2.4.zip')
+& (Join-Path $packageRoot 'scripts\Package.ps1') -Root $packageRoot -ZipPath (Join-Path $outputRoot 'OllamaStatusService-Windows-x64-v1.2.5.zip')
 Write-Output ('Built source at '+$sourceRoot+' with verified dependencies. No services were installed.')

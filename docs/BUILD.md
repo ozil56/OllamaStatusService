@@ -6,14 +6,14 @@ The repository contains application source, C# GUI source, PowerShell lifecycle 
 
 Use Windows x64 with Windows PowerShell 5.1 and the .NET Framework 4.8 compiler. No service installation or administrator session is required to compile and package.
 
-1. Download the **1.2.4 Windows release ZIP and checksum** from the project's Releases page. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW.
-2. Obtain the source checkout at tag `v1.2.4`. The 1.2.3 dependency bundle is also compatible because dependencies are unchanged.
+1. Download the **1.2.5 Windows release ZIP and checksum** from the project's Releases page. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW.
+2. Obtain the source checkout at tag `v1.2.5`. The 1.2.3/1.2.4 dependency bundles are also compatible because dependencies are unchanged.
 3. Run this from the source root, replacing the example dependency path:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\Build-Package.ps1 `
   -DependencyBundle 'C:\Build\Dependencies\OllamaStatusService' `
-  -OutputDirectory 'C:\Build\Output-1.2.4'
+  -OutputDirectory 'C:\Build\Output-1.2.5'
 ```
 
 `Build-Package.ps1` verifies the dependency bundle's manifest, dependency lock, Python version and WinSW hash. It copies only an explicit public source list, recompiles the installer/uninstaller and tray from C#, regenerates the HTML guide and encoding-sensitive launchers, then creates the ZIP, internal file manifest and external SHA256. It refuses to overwrite an existing output package.
@@ -51,6 +51,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\package_integrity_
 ```
 
 The six Python suites contain 68 tests, including eight model-transfer regressions. They use temporary ports and a mock inference backend, not production models. The upgrade scenarios replace system service/firewall/task interfaces with isolated fixtures. `setup_ui_checks.ps1` additionally opens real installer windows for interactive GUI checks; it does not install or uninstall production services.
+
+For the real NTFS permissions regression, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\model_permissions_checks.ps1` from an **elevated** terminal. It creates isolated C-drive user-profile fixtures and short-lived LocalService tasks, reproduces the old root-only permission failure, then verifies repair, file preservation and ACL restoration. It does not change production Ollama services/models. The upgrade suite includes 13 scenarios, including access-probe failure, empty inventory and gateway/backend inventory mismatch.
 
 These checks do not prove successful installation on every Windows host or real GPU/public FRP performance. Deployment acceptance must still verify origins and the ordering of a running remote request, a queued remote request, and a queued local request.
 

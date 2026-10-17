@@ -11,10 +11,11 @@ received = 0
 received_models = []
 gates = {}
 active_transfers = {}
+transfer_calls = {}
 
 @app.get('/__transfers')
 async def transfers():
-    return {'active': list(active_transfers)}
+    return {'active': list(active_transfers), 'calls': transfer_calls}
 
 @app.post('/api/pull')
 @app.post('/api/push')
@@ -24,9 +25,12 @@ async def transfer(request: Request):
     if model == 'reject-transfer':
         return JSONResponse({'error': 'model not found'}, status_code=404)
     async def chunks():
+        transfer_calls[model] = transfer_calls.get(model, 0) + 1
         active_transfers[model] = True
         try:
             yield b'{"status":"pulling manifest"}\n'
+            if model.startswith('held-progress-'):
+                yield b'{"status":"pulling fixture","digest":"fixture","completed":983,"total":1000}\n'
             if model.startswith('held-'):
                 await gates.setdefault(model, asyncio.Event()).wait()
             yield b'{"status":"success"}\n'

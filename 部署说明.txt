@@ -1,4 +1,4 @@
-Ollama 状态服务 1.2.5 · Windows x64 部署说明
+Ollama 状态服务 1.4.0 · Windows x64 部署说明
 更新时间：2026-10-16
 1.2.5：修复 LocalService 无权访问原模型目录导致模型列表为空的问题，默认 C 盘用户目录同样适用。
 首次安装和升级都会核实整个模型目录（含禁用继承的子目录和文件），按需补齐 LocalService 的修改权限。
@@ -7,6 +7,13 @@ Ollama 状态服务 1.2.5 · Windows x64 部署说明
 模型目录含链接/重解析点时会停止，请选择实际目录。权限探测只创建临时小文件，不改写现有模型内容；探测任务结束后清理。
 保留 1.2.4：修复并发 pull/push 被推理队列阻塞的问题，保留流式进度，不应用推理排队/读取/执行时限。
 模型传输连接单独显示；下载期间仍可推理。升级时须先停止提交并等待全部任务与传输完成。
+
+1.4.0 内置网页管理：安装完成后打开现有 OSS 地址的 /manage。支持多服务器列表、模型下载删除、下载暂停继续；沿用现有 Nginx Basic Auth，不新增账号、密码、端口或独立管理进程。
+网页自动包含“本服务器”。其他节点可手动添加，或在“导入服务器”中选择旧管理器导出的私有 JSON 文件。已有 Nginx 凭据仅用于访问其他节点；私有导入文件不要放入公开安装包。
+任务在目标 OSS 执行，关闭网页或管理电脑关机不会中断远端任务；目标服务器本身关机则暂停执行，服务恢复后可恢复未完成下载。升级前等待当前任务完成或先暂停。
+完整说明见 docs/MANAGE.md。新增节点列表保存在配置 data_dir/manage/manager.sqlite3，模型任务保存在 data_dir/model-jobs.sqlite3，升级保留。
+
+1.3.1 新增远端后台模型任务：使用 POST /oss/model-jobs 提交，GET /oss/model-jobs 查看进度。提交端关机不会中断服务器下载。升级前等待当前旧版 pull 完成；已有长连接任务不会自动变成远端任务。API 与客户端说明见 docs/MODEL-JOBS.md。
 
 1.2.3：增加 FRP、Nginx 和其他代理专用入口 127.0.0.1:11436，所有请求固定归为 remote。
 11434 与 11436 共用一个网关进程、调度队列和任务库；本机等待请求优先，正在执行的请求不被抢占。
@@ -55,8 +62,8 @@ Ollama 状态服务 1.2.5 · Windows x64 部署说明
 已经安装 1.1.x 或 1.2.0 至 1.2.4 如何升级：
 1. 暂停本机和远端客户端继续提交，等待 /status 显示 idle。
 2. 将新 ZIP 完整解压到新的文件夹，双击其中的“安装.exe”，无需手动运行卸载程序。
-3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.2.5”，确认一次管理员权限提示。
-4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.2.5，queue_policy.ordering 为 local_first_fifo_per_origin。
+3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.4.0”，确认一次管理员权限提示。
+4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.4.0，queue_policy.ordering 为 local_first_fifo_per_origin。
 5. 把该机 FRP 等代理的回源从 11434 改为 11436，按第十一节重新加载代理并验证来源。保持暂停提交，直到升级和代理迁移都完成。
 6. 验证通过后恢复客户端提交。每台服务器单独重复；可先升级一台验证，再处理其他机器。
 
@@ -127,7 +134,7 @@ GET http://A:11434/.well-known/ollama-status-service
 与 /help 相同，便于通用服务发现。
 GET http://A:11434/openapi.json
 OpenAPI 3.1 的状态/帮助/推理扩展说明。模型相关参数仍按 A 当前安装的 Ollama API；它不是 Ollama 所有功能的完整规范。
-所有响应带 X-Ollama-Status-Service: 1.2.5 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
+所有响应带 X-Ollama-Status-Service: 1.4.0 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
 
 给其他 AI agent 的最简提示：
 “服务器地址为 http://A的IP:11434。先读取 GET /help 和 GET /status，根据返回的能力和限额设置 X-Ollama-Queue-Timeout；有多台服务器时按需要选择立即切换或限时等待。仅在收到明确 forwarded=false 的拒绝时自动换机，不要重放完成情况不确定的请求。”
@@ -282,7 +289,7 @@ FRP 旧版 INI 格式（即使文件扩展名叫 .toml，也应按文件实际�
   curl.exe --noproxy "*" http://127.0.0.1:11434/help
   curl.exe --noproxy "*" http://127.0.0.1:11436/help
   从外部客户端访问原来的 FRP URL 加 /help。
-三者 version 均应为 1.2.5；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
+三者 version 均应为 1.4.0；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
 /help、/healthz 的 request_origin 仅代表本次探测请求；实际推理和队列来源以 /status 的 active_origin、requests[].origin 和 queued_local_requests/queued_remote_requests 为准。
 两个入口查询 /status 应看到同一组活动任务；空闲时 active_origin 为 null，不能用空闲状态验证推理来源。
 

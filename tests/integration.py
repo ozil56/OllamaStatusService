@@ -390,7 +390,7 @@ class GatewayTests(unittest.TestCase):
 
     def test_24_agent_discovery_reflects_live_config(self):
         response=self.client.get('/')
-        self.assertEqual(response.headers['x-ollama-status-service'],'1.2.5')
+        self.assertEqual(response.headers['x-ollama-status-service'],'1.4.0')
         self.assertIn('</help>',response.headers['link'])
         help_data=self.client.get('/help').json()
         self.assertEqual(help_data['queue_policy']['default'],2)

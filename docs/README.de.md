@@ -4,9 +4,11 @@
 
 **Den tatsächlichen Ollama-Status sehen und lokalen Anfragen den nächsten freien Platz geben — ohne laufende Arbeit zu unterbrechen.**
 
-**Version 1.2.5 · Windows x64** · [Download](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.5) · [Änderungen](../CHANGELOG.md) · [Build-Anleitung](BUILD.md)
+**Version 1.4.0 · Windows x64** · [Download](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.4.0) · [Änderungen](../CHANGELOG.md) · [Build-Anleitung](BUILD.md)
 
 Ein HTTP-Gateway mit Windows-Diensten, grafischem Installer und Tray-Anwendung für eine vorhandene Ollama-Installation. Geladene Modelle sind nicht automatisch beschäftigt: Das Gateway verfolgt die Anfragen, die es weiterleitet. Ollama, Modelle und GPU-Treiber werden nicht mitgeliefert. Die Oberfläche ist derzeit auf vereinfachtem Chinesisch; diese README-Übersetzungen übersetzen nicht die Anwendung.
+
+Version 1.4.0 integriert die Verwaltung mehrerer Server unter `/manage`: Modelle herunterladen und löschen sowie Downloads pausieren und fortsetzen. Die vorhandene Nginx-Authentifizierung bleibt bestehen; ein zusätzliches Konto ist nicht nötig. Downloads laufen auf dem Zielserver weiter, wenn der Browser geschlossen wird.
 
 Version 1.2.5 behebt leere Modelllisten durch fehlende LocalService-Berechtigungen. Installation und Upgrade ergänzen die erforderlichen Rechte im Modellverzeichnis und prüfen den Zugriff mit dem tatsächlichen Dienstkonto sowie die Modelllisten. Auch das Standardverzeichnis im Benutzerprofil auf C: wird unterstützt.
 
@@ -24,7 +26,7 @@ Version 1.2.5 behebt leere Modelllisten durch fehlende LocalService-Berechtigung
 
 Voraussetzungen: Windows 10/11 x64 oder Windows Server mit Desktop, vorhandenes Ollama mit lokalen Modellen, PowerShell 5.1, .NET Framework 4.8, Aufgabenplanung, Firewall-Verwaltung und Administratorrechte für die Installation.
 
-1. `OllamaStatusService-Windows-x64-v1.2.5.zip` und `.sha256.txt` aus den Release-Dateien laden. Mit `Get-FileHash -Algorithm SHA256` vergleichen. Die automatisch erzeugten Source-code-Archive sind keine Installationspakete.
+1. `OllamaStatusService-Windows-x64-v1.4.0.zip` und `.sha256.txt` aus den Release-Dateien laden. Mit `Get-FileHash -Algorithm SHA256` vergleichen. Die automatisch erzeugten Source-code-Archive sind keine Installationspakete.
 2. Neue Aufträge pausieren, laufende und wartende Arbeit abschließen lassen und das vollständige ZIP in einen neuen Ordner entpacken.
 3. **`安装.exe`** starten, Ollama- und Modellpfade prüfen und UAC bestätigen. Dasselbe Programm aktualisiert bestehende Installationen.
 4. `http://127.0.0.1:11434/dashboard` öffnen. Laufzeit und Abhängigkeiten sind enthalten; die Installation lädt nichts nach.

@@ -71,7 +71,7 @@ function Invoke-RestMethod([string]$Uri) {
     $models=@([pscustomobject]@{name='fixture:latest'})
     if ($script:Scenario -eq 'inventory-empty') { $models=@() }
     if ($script:Scenario -eq 'inventory-mismatch' -and $Uri -like '*:11434/api/tags') { $models=@([pscustomobject]@{name='wrong:latest'}) }
-    [pscustomobject]@{ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.2.5';models=$models;scheduling_policy='local_first_fifo_per_origin'} }
+    [pscustomobject]@{ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.4.0';models=$models;scheduling_policy='local_first_fifo_per_origin'} }
 function Start-Transcript { }
 function Stop-Transcript { }
 function Test-Path([string]$LiteralPath,[string]$PathType) {
@@ -156,6 +156,9 @@ try {
             [IO.File]::WriteAllText($xmlPath,$xmlText,[Text.UTF8Encoding]::new($true))
         }
         [IO.File]::WriteAllText((Join-Path $script:StateRoot 'data\history.txt'),'original-history')
+        New-Item -ItemType Directory -Path (Join-Path $script:StateRoot 'data\manage') -Force | Out-Null
+        [IO.File]::WriteAllText((Join-Path $script:StateRoot 'data\manage\manager.sqlite3'),'original-nodes-and-encrypted-credentials')
+        [IO.File]::WriteAllText((Join-Path $script:StateRoot 'data\model-jobs.sqlite3'),'original-owned-jobs')
         $configPath=Join-Path $script:StateRoot 'config.json'
         Save-Json @{data_dir=(Join-Path $script:StateRoot 'data');queue_timeout_seconds=71;listen_host='0.0.0.0'} $configPath
         if ($case -eq 'custom-proxy') { Save-Json @{data_dir=(Join-Path $script:StateRoot 'data');proxy_listen_host='::1';proxy_listen_port=19136} $configPath }
@@ -169,6 +172,8 @@ try {
         Assert ((Get-FileHash -LiteralPath $configPath).Hash -eq $configHash) "Config changed: $case"
         Assert ([IO.File]::ReadAllText((Join-Path $models 'model.bin')) -eq 'original-model') "Model changed: $case"
         Assert ([IO.File]::ReadAllText((Join-Path $script:StateRoot 'data\history.txt')) -eq 'original-history') "History changed: $case"
+        Assert ([IO.File]::ReadAllText((Join-Path $script:StateRoot 'data\manage\manager.sqlite3')) -eq 'original-nodes-and-encrypted-credentials') "Manager registry changed: $case"
+        Assert ([IO.File]::ReadAllText((Join-Path $script:StateRoot 'data\model-jobs.sqlite3')) -eq 'original-owned-jobs') "Owned jobs changed: $case"
         if ($case -in $successfulCases) {
             $expectedProxyUrl=if ($case -eq 'custom-proxy') {'http://[::1]:19136/healthz'} else {'http://127.0.0.1:11436/healthz'}
             Assert ($script:ProbeUrls.Contains($expectedProxyUrl)) 'Proxy listener readiness was not checked'
@@ -187,7 +192,7 @@ try {
             [xml]$backend=Get-Content -LiteralPath (Join-Path $script:InstallRoot ($script:BackendName+'.xml')) -Raw
             Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_CONTEXT_LENGTH').value -eq '32768') 'Context tuning lost'
             Assert (($backend.service.env | Where-Object name -eq 'CUDA_VISIBLE_DEVICES').value -eq '0') 'GPU tuning lost'
-            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.2.5') 'Wrong installed version'
+            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.4.0') 'Wrong installed version'
             if ($case -eq 'service-model-overrides-record') {
                 Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).models -eq $activeModels) 'Reinstall used stale model path'
                 Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_MODELS').value -eq $activeModels) 'Backend model path was not preserved'

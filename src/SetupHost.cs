@@ -11,8 +11,8 @@ using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-[assembly: System.Reflection.AssemblyFileVersion("1.2.5")]
-[assembly: System.Reflection.AssemblyInformationalVersion("1.2.5")]
+[assembly: System.Reflection.AssemblyFileVersion("1.4.0")]
+[assembly: System.Reflection.AssemblyInformationalVersion("1.4.0")]
 
 // A Windows-subsystem executable owns the only UI. The elevated copy has no UI;
 // it starts the existing PowerShell installation engine with CREATE_NO_WINDOW.
@@ -131,7 +131,7 @@ internal sealed class SetupForm : Form
         FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         Icon = SystemIcons.Application;
-        AddLabel("Ollama 状态服务 · 1.2.5", 22, 18, 690, 30).Font = new Font(Font.FontFamily, 16F, FontStyle.Bold);
+        AddLabel("Ollama 状态服务 · 1.4.0", 22, 18, 690, 30).Font = new Font(Font.FontFamily, 16F, FontStyle.Bold);
         AddLabel("直连 11434 · 代理入口 11436 · 共享队列与本机优先", 22, 58, 690, 28);
         AddLabel("Ollama 主程序", 22, 99, 680, 24);
         exeBox.SetBounds(22, 126, 589, 28); Controls.Add(exeBox);
@@ -176,14 +176,14 @@ internal sealed class SetupForm : Form
         }
         EnableInputs(!uninstall && !verify);
         if (!uninstall && !verify && hasInstall) {
-            upgrade = true; primary.Text = "升级到 1.2.5"; state.Text = "检测到已有服务，可直接升级";
+            upgrade = true; primary.Text = "升级到 1.4.0"; state.Text = "检测到已有服务，可直接升级";
             Text = "升级 Ollama 状态服务"; EnableInputs(false);
             note.Text = "升级将自动卸载旧版，再安装新版，期间 Ollama 会短暂停服。\r\n请先暂停本机和远端提交，等待当前任务完成，再点击升级。";
-            details.Text = "无需手动卸载。保留原 Ollama、模型和服务配置。1.2.5 修复模型目录权限：自动核实 LocalService 访问权限，并检查模型列表。保留并发 pull/push 修复。代理入口仍为 127.0.0.1:11436。";
+            details.Text = "无需手动卸载。保留原 Ollama、模型和服务配置。1.4.0 内置 /manage 网页，管理多台服务器和模型，支持暂停与继续。沿用现有反代认证；关闭网页后远端下载继续。代理入口仍为 127.0.0.1:11436。";
             try {
                 var installed = SetupHost.Read(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OllamaStatusService\installation.json"));
                 exeBox.Text = (string)installed["source_exe"];
-                state.Text = "当前版本 " + installed["version"] + " → 1.2.5";
+                state.Text = "当前版本 " + installed["version"] + " → 1.4.0";
                 if (!models.Found) { primary.Enabled = false; details.Text = models.Warning; }
             } catch (Exception ex) { primary.Enabled = false; details.Text = "无法读取旧安装记录，未修改系统：" + ex.Message; }
         }

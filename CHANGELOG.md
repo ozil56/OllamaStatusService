@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.4.0 — 2026-10-17
+
+- Embed the multi-server manager at `/manage` with a persistent local node, peer CRUD/import, model inventory, downloads/deletions and durable pull pause/resume.
+- Use the existing Nginx/reverse proxy authentication for page, assets and API; no new account, password, listener or process. Mutations require a per-process CSRF token.
+- Execute every job on its target OSS. Closing a browser or the managing node does not cancel work on another server. Paused jobs and registries survive restart/upgrade.
+- Encrypt stored peer credentials using the service account's Windows DPAPI. Provide a separate private migration export for old manager registries; never bundle credentials in the public release.
+
+
+## 1.3.1 — 2026-10-17 (local build)
+
+- Add persistent pause/resume controls for server-owned pull jobs. Pausing closes the task's Ollama stream and retains partial download data; resuming reuses the same task ID and reissues pull.
+- Keep paused jobs paused across service restarts. Repeated controls do not create duplicate streams; completed jobs and deletes reject pause/resume.
+- Advertise controls in status/help/list/OpenAPI. Preserve last known progress while reconnecting and exclude pre-existing bytes from the initial speed estimate.
+- Extend real HTTP tests for cancellation, restart, concurrency, retries and local manager reconnection.
+
+## 1.3.0 — 2026-10-16 (local build)
+
+- Add durable server-owned pull/delete jobs with immediate acceptance, stable idempotency keys and queryable progress. Client disconnection and client shutdown do not cancel accepted jobs.
+- Resume incomplete pulls after OSS restart. Never replay an unconfirmed delete. Keep deletion in the existing origin-aware inference queue.
+- Advertise task capabilities in status/help and include active owned jobs in maintenance busy checks. Keep the legacy `/api/pull` streaming contract unchanged.
+- Existing legacy transfers must finish before upgrading; no live transfer migration is attempted.
+
+
 ## 1.2.5 — 2026-10-16
 
 - Fix empty model lists caused by LocalService lacking access to an existing model library, including default Windows user-profile directories and descendants with protected ACLs.

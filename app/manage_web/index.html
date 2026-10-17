@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OSS · 服务器与模型管理</title>
+  <link rel="icon" href="/manage/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/manage/style.css"><script src="/manage/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/manage" aria-label="OSS Server 首页"><span class="brand-mark">O<span>·</span></span><span>OSS<span class="brand-sub">SERVER MANAGER</span></span></a>
+    <div class="nav-label">工作空间</div>
+    <nav aria-label="主导航">
+      <button class="nav-item active" id="nav-servers"><span class="nav-icon">▦</span>服务器与模型<span class="nav-count" id="server-count">0</span></button>
+      <button class="nav-item" id="nav-tasks"><span class="nav-icon">⇣</span>任务中心<span class="nav-count" id="task-count">0</span></button>
+    </nav>
+    <div class="sidebar-note"><div class="note-icon">↗</div><strong>一个入口，管理所有节点</strong><p>管理当前 OSS，也可添加其他服务器，集中查看模型和任务。</p><button id="import-side" class="text-link">导入服务器 <span>→</span></button></div>
+    <div class="sidebar-bottom"><span class="local-dot"></span><div><span id="access-title">服务器管理器</span><small id="access-detail">正在读取访问设置</small></div><span class="version">v1.4.0</span></div>
+  </aside>
+  <main>
+    <header class="topbar"><span class="breadcrumb">工作空间 <span>/</span> <b id="crumb">服务器与模型</b></span><div class="connection"><span id="connection-dot" class="local-dot"></span><span id="connection-text">正在连接管理器</span></div></header>
+    <div class="page">
+      <section class="page-heading"><div><div class="eyebrow">INFRASTRUCTURE</div><h1 id="page-title">服务器与模型<span class="title-dot">.</span></h1><p id="page-desc">查看节点状态，让模型在需要的服务器上就绪。</p></div><div class="heading-actions"><button class="btn secondary" id="refresh-all"><span>↻</span> 刷新状态</button><button class="btn primary" id="add-server"><span>＋</span> 添加服务器</button></div></section>
+      <div id="notice" class="banner" role="status" hidden></div>
+      <section class="stats" aria-label="服务器概览">
+        <article class="stat"><div class="stat-label">在线服务器 <span class="stat-symbol">◉</span></div><div class="stat-number"><span id="stat-online">—</span><small id="stat-total">/ —</small></div><div class="stat-foot" id="stat-enabled">正在探测节点</div></article>
+        <article class="stat"><div class="stat-label">已安装模型 <span class="stat-symbol">◇</span></div><div class="stat-number" id="stat-models">—</div><div class="stat-foot">按服务器分别统计</div></article>
+        <article class="stat"><div class="stat-label">模型标称大小合计 <span class="stat-symbol">▤</span></div><div class="stat-number" id="stat-size">—</div><div class="stat-foot">共享文件可能重复计算</div></article>
+        <article class="stat accent"><div class="stat-label">进行中的任务 <span class="stat-symbol">↓</span></div><div class="stat-number" id="stat-jobs">0</div><div class="stat-foot" id="stat-job-foot">下载与删除任务</div></article>
+      </section>
+      <section class="workspace" id="servers-view">
+        <div class="panel servers-panel"><div class="panel-heading"><h2>服务器列表 <span id="list-count" class="count">0</span></h2><button class="icon-btn" id="import-v3" title="导入服务器配置" aria-label="导入服务器配置">↙</button></div><label class="search"><span>⌕</span><input id="server-search" type="search" placeholder="搜索名称或地址" aria-label="搜索服务器"></label><div id="server-list" class="server-list"><div class="empty">正在读取服务器…</div></div><div class="list-footer"><span class="local-dot"></span> 每 3 秒自动探测 <button id="add-server-small">添加节点 ＋</button></div></div>
+        <section class="panel models-panel" id="models-panel"><div class="empty spacious">选择一台服务器，查看它的模型。</div></section>
+      </section>
+      <section class="panel tasks-panel" id="tasks-panel"><div class="panel-heading"><div class="task-heading"><h2 id="tasks-heading">最近任务</h2><span class="subtle" id="tasks-subtitle">后台执行，关闭网页后仍可继续</span></div><select id="task-filter" aria-label="筛选任务"><option value="all">全部任务</option><option value="active">进行中</option><option value="paused">已暂停</option><option value="success">已完成</option><option value="failed">需关注</option></select></div><div id="task-list"></div></section>
+      <footer class="page-footer"><span>OSS Server <span class="footer-separator">/</span> Ollama 节点管理</span><span id="last-updated">等待首次更新</span></footer>
+    </div>
+  </main>
+  <dialog id="server-dialog" aria-labelledby="server-dialog-title"><form id="server-form"><div class="dialog-heading"><div><div class="eyebrow">SERVER CONNECTION</div><h2 id="server-dialog-title">添加服务器</h2></div><button type="button" class="icon-btn close-dialog" aria-label="关闭">×</button></div><p class="dialog-desc">填写目标 OSS 的访问地址；认证填写目标 Nginx 已有的 Basic Auth。</p><label class="field">服务器名称<input name="name" required maxlength="80" placeholder="例如：办公室 · GPU 01" autocomplete="off"></label><label class="field">服务地址<input name="url" type="url" required placeholder="http://127.0.0.1:11434" autocomplete="off" spellcheck="false"><small>填写 OSS 或 Ollama 的访问地址，支持 HTTP、HTTPS。</small></label><label class="field">访问认证<select name="auth_mode" id="auth-mode"><option value="none">无需认证</option><option value="basic">Basic · 用户名与密码</option><option value="keep">保留已保存的认证</option></select></label><div id="auth-fields" class="two-fields" hidden><label class="field">用户名<input name="username" autocomplete="off"></label><label class="field">密码<input name="password" type="password" autocomplete="new-password"></label></div><label class="check-field"><input name="enabled" type="checkbox" checked><span>启用此服务器<small>停用后不再探测，也不能提交模型任务。</small></span></label><p class="form-error" role="alert"></p><div class="dialog-footer"><button type="button" id="remove-server" class="btn danger-text">移除服务器</button><div class="dialog-buttons"><button type="button" class="btn secondary close-dialog">取消</button><button type="submit" class="btn primary">保存服务器</button></div></div></form></dialog>
+  <dialog id="download-dialog" aria-labelledby="download-title"><form id="download-form"><div class="dialog-heading"><div><div class="eyebrow">MODEL DOWNLOAD</div><h2 id="download-title">下载模型</h2></div><button type="button" class="icon-btn close-dialog" aria-label="关闭">×</button></div><p class="dialog-desc">服务器直接下载模型，进度会显示在任务中心。</p><label class="field">目标服务器<select name="server" id="download-server" required></select></label><label class="field">模型名称<input name="model" required maxlength="240" placeholder="例如 qwen3:8b 或 qwen2.5vl:7b" autocomplete="off" spellcheck="false"><small>填写 Ollama 支持的完整名称与标签，如 qwen3:8b。</small></label><div class="info-box">任务由远端 OSS 托管。OSS 1.3.1 起可在任务中心暂停、继续下载。关闭网页或浏览器所在电脑关机后，目标服务器仍继续下载。</div><p class="form-error" role="alert"></p><div class="dialog-footer end"><button type="button" class="btn secondary close-dialog">取消</button><button type="submit" class="btn primary">↓ 开始下载</button></div></form></dialog>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title"><form id="confirm-form"><div class="dialog-heading"><div><div class="eyebrow warning-text">CONFIRM ACTION</div><h2 id="confirm-title">删除模型</h2></div><button type="button" class="icon-btn close-dialog" aria-label="关闭">×</button></div><p class="dialog-desc" id="confirm-desc"></p><div id="confirm-target" class="confirm-target"></div><label class="field" id="confirm-input-label">输入完整模型名称以确认<input name="confirmation" autocomplete="off" spellcheck="false"></label><p class="form-error" role="alert"></p><div class="dialog-footer end"><button type="button" class="btn secondary close-dialog">取消</button><button type="submit" class="btn danger" id="confirm-submit">确认删除</button></div></form></dialog>
+  <dialog id="import-dialog" aria-labelledby="import-title"><form id="import-form"><div class="dialog-heading"><div><div class="eyebrow">IMPORT SERVERS</div><h2 id="import-title">导入服务器配置</h2></div><button type="button" class="icon-btn close-dialog" aria-label="关闭">×</button></div><p class="dialog-desc">选择从原管理器导出的 JSON 文件，导入节点及其已有访问认证。重复地址会跳过。</p><label class="field">配置文件<input name="config_file" type="file" accept=".json,application/json" required><small>配置保存在当前 OSS。其余服务器上的节点列表独立保存。</small></label><p class="form-error" role="alert"></p><div class="dialog-footer end"><button type="button" class="btn secondary close-dialog">取消</button><button type="submit" class="btn primary">导入服务器</button></div></form></dialog>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

@@ -19,9 +19,11 @@ import anyio
 import httpx
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
+from model_jobs import ModelJobs, JobError
+from manage import ManageService, install_routes
 
 LOG = logging.getLogger("ollama_status")
-VERSION = "1.2.5"
+VERSION = "1.4.0"
 INFERENCE = {"/api/chat", "/api/generate", "/api/embed", "/api/embeddings",
              "/v1/chat/completions", "/v1/completions", "/v1/embeddings",
              "/v1/responses", "/v1/messages"}
@@ -327,13 +329,24 @@ def create_app(settings: Settings):
                                                            write=30, pool=5)) as client:
             app.state.client = client
             app.state.probe_client = probe_client
+            async def delete_model(model, origin):
+                port = settings.proxy_listen_port if origin == "remote" else settings.listen_port
+                async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),
+                                            base_url=f"http://127.0.0.1:{port}", trust_env=False) as local:
+                    return await local.request("DELETE", "/api/delete", json={"model": model},
+                        headers={"X-Ollama-Queue-Timeout": str(settings.max_queue_timeout_seconds)})
+            app.state.model_jobs = ModelJobs(settings.data_dir, client, delete_model, transfers)
             await probe()
             checking = asyncio.create_task(health_loop())
             dispatcher = asyncio.create_task(dispatch())
+            app.state.model_jobs.start()
+            app.state.manage = ManageService(app, settings)
             try:
                 yield
             finally:
                 runtime["closing"] = True
+                await app.state.manage.close()
+                await app.state.model_jobs.close()
                 checking.cancel()
                 await asyncio.gather(checking, return_exceptions=True)
                 for job in list(pending):
@@ -368,6 +381,7 @@ def create_app(settings: Settings):
             "request_origin": client_origin(request, settings.proxy_listen_port),
             "description": "Ollama 兼容代理、状态查询和客户端可选限时排队。所有 URL 均相对于本次响应的服务器地址。",
             "urls": {"ollama_base": "/", "status": "/status", "dashboard": "/dashboard",
+                     "manage": "/manage", "manage_api": "/manage/api", "model_jobs": "/oss/model-jobs",
                      "health": "/healthz", "help": "/help", "openapi": "/openapi.json",
                      "installed_models": "/api/tags", "loaded_models": "/api/ps"},
             "status_fields": {
@@ -408,6 +422,13 @@ def create_app(settings: Settings):
                 "max_waiting_body_bytes": settings.max_queue_bytes,
                 "restart": "排队内容不自动重放；已开始但未确认完成的任务进入 unknown",
                 "client_disconnect": "排队中断开则移除；执行中断开则继续跟踪直到完成或 unknown"},
+            "manage_policy": {"authentication": "existing_reverse_proxy", "separate_login": False,
+                "registry": "per_OSS_server", "execution": "target_OSS_server", "csrf_header": "X-OSS-Token"},
+            "model_job_policy": {"schema": 1, "endpoint": "/oss/model-jobs", "kinds": ["pull", "delete"],
+                "controls": ["pause", "resume"], "paused_restart": "Paused pulls remain paused after restart.",
+                "execution": "server_owned", "client_disconnect": "Continues on this OSS server, including when the client computer shuts down.",
+                "restart": "Pulls resume on OSS restart; unconfirmed deletes are never automatically replayed.",
+                "request_key": "Required stable idempotency key; reuse the same key after an uncertain submission."},
             "model_transfer_policy": {
                 "endpoints": sorted(MODEL_TRANSFERS), "method": "POST",
                 "scheduling": "concurrent_passthrough", "uses_inference_queue": False,
@@ -453,6 +474,20 @@ def create_app(settings: Settings):
                  for path, title in [("/help", "Machine-readable capabilities and routing rules"),
                                      ("/status", "Current status snapshot"), ("/healthz", "Gateway liveness"),
                                      ("/api/tags", "Installed models"), ("/api/ps", "Loaded models")]}
+        paths["/oss/model-jobs"] = {
+            "get": {"summary": "List server-owned model jobs", "responses": {"200": {"description": "Active and recent jobs"}}},
+            "post": {"summary": "Submit a durable server-owned model task", "requestBody": {"required": True, "content": {
+                "application/json": {"schema": {"type": "object", "required": ["kind", "model", "request_key"], "properties": {
+                    "kind": {"enum": ["pull", "delete"]}, "model": {"type": "string"}, "request_key": {"type": "string", "minLength": 16, "maxLength": 128},
+                    "confirm_model": {"type": "string", "description": "Required for delete; must match model"}}}}}},
+                "responses": {"202": {"description": "Persisted task; client can disconnect"}, "409": {"description": "Conflicting operation or request key"}}}}
+        paths["/oss/model-jobs/{id}"] = {"get": {"summary": "Query a persistent model task", "parameters": [
+            {"name": "id", "in": "path", "required": True, "schema": {"type": "string"}}],
+            "responses": {"200": {"description": "Current job"}, "404": {"description": "Unknown job"}}}}
+        for action in ("pause", "resume"):
+            paths["/oss/model-jobs/{id}/" + action] = {"post": {"summary": action.title() + " a server-owned pull",
+                "parameters": [{"name": "id", "in": "path", "required": True, "schema": {"type": "string"}}],
+                "responses": {"200": {"description": "Persisted task state"}, "409": {"description": "Task state does not allow this action"}}}}
         for path in sorted(INFERENCE):
             paths[path] = {"post": {"summary": "Ollama-compatible inference with optional bounded queue",
                 "parameters": [parameter], "requestBody": {"required": True, "content": {
@@ -483,8 +518,10 @@ def create_app(settings: Settings):
             origins[active["id"]] = active["origin"]
         rows = [dict(row, origin=origins.get(row["id"], "unknown")) for row in rows]
         backend_online = online()
+        model_jobs = app.state.model_jobs.jobs()
+        active_model_jobs = sum(j["state"] in {"queued", "running"} for j in model_jobs)
         state = ("unknown" if uncertain or not runtime["journal_ok"] else
-                 "offline" if not backend_online else "busy" if inflight or queued or transfers else
+                 "offline" if not backend_online else "busy" if inflight or queued or transfers or active_model_jobs else
                  "stopping" if runtime["closing"] else "idle")
         return JSONResponse({"service": "OllamaStatusService", "version": VERSION,
                              "state": state, "ollama_online": backend_online,
@@ -492,6 +529,7 @@ def create_app(settings: Settings):
                              and runtime["queued_bytes"] < settings.max_queue_bytes and not runtime["closing"], "inflight_requests": inflight,
                              "can_start_now": state in {"idle", "busy"} and not inflight and not queued and not runtime["closing"],
                              "inflight_model_transfers": len(transfers), "model_transfers": list(transfers.values()),
+                             "model_jobs": {"schema": 1, "endpoint": "/oss/model-jobs", "execution": "server_owned", "active": active_model_jobs, "controls": ["pause", "resume"]},
                              "uncertain_requests": uncertain, "queued_requests": queued,
                              "queued_local_requests": sum(job["origin"] == "local" for job in pending),
                              "queued_remote_requests": sum(job["origin"] == "remote" for job in pending),
@@ -840,6 +878,48 @@ def create_app(settings: Settings):
         response_headers.update({"X-Request-ID": ident, "Cache-Control": "no-store"})
         return StreamingResponse(channel.body(), status_code=status_code, media_type=content_type,
                                  headers=response_headers)
+
+    @app.get("/oss/model-jobs")
+    async def list_model_jobs():
+        jobs = app.state.model_jobs.jobs()
+        active = [j for j in jobs if j["state"] in {"queued", "running", "paused"}]
+        recent = [j for j in jobs if j["state"] not in {"queued", "running", "paused"}][:200]
+        return JSONResponse({"schema": 1, "execution": "server_owned", "controls": ["pause", "resume"], "jobs": active + recent}, headers={"Cache-Control": "no-store"})
+
+    @app.post("/oss/model-jobs/{ident}/{action}")
+    async def control_model_job(ident: str, action: str):
+        try:
+            job = await app.state.model_jobs.control(ident, action)
+            return JSONResponse(job, headers={"Cache-Control": "no-store"})
+        except JobError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=exc.status)
+
+    @app.get("/oss/model-jobs/{ident}")
+    async def get_model_job(ident: str):
+        try:
+            return JSONResponse(app.state.model_jobs.get(ident), headers={"Cache-Control": "no-store"})
+        except JobError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=exc.status)
+
+    @app.post("/oss/model-jobs")
+    async def submit_model_job(request: Request):
+        try:
+            body = bytearray()
+            async for chunk in request.stream():
+                body.extend(chunk)
+                if len(body) > 8192:
+                    raise JobError("Request too large", 413)
+            payload = json.loads(body)
+            if not isinstance(payload, dict):
+                raise JobError("Expected a JSON object")
+            job = app.state.model_jobs.submit(payload, client_origin(request, settings.proxy_listen_port))
+            return JSONResponse(job, status_code=202, headers={"Cache-Control": "no-store"})
+        except (ValueError, UnicodeError):
+            return JSONResponse({"error": "Invalid JSON"}, status_code=400)
+        except JobError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=exc.status)
+
+    install_routes(app, VERSION)
 
     @app.api_route("/{rest:path}", methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
     async def proxy(request: Request, rest: str):

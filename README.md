@@ -6,13 +6,15 @@
 
 A Windows gateway, background service and system tray application for an existing Ollama installation. It tracks requests as they execute, exposes machine-readable status and help, and schedules local and remote work through one shared queue.
 
-**Current release: 1.2.5 · Windows x64 · Offline installer**
+**Current build: 1.4.0 · Windows x64 · Offline installer**
+
+Version 1.4.0 embeds a multi-server web manager at `/manage`: add/import nodes, download/delete models, and pause/resume durable server-owned pulls. It uses the existing reverse proxy authentication; no separate account, port or manager process is added. See [the manager guide](docs/MANAGE.md).
 
 Version 1.2.5 fixes empty model lists caused by missing LocalService permissions. Installation and upgrade repair model-tree permissions, verify access using the actual service account, and check backend/gateway model inventories before reporting success. The default C-drive user-profile model directory is supported. The concurrent `pull`/`push` fix from 1.2.4 is retained.
 
-[Download 1.2.5](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.2.5) · [Release notes](CHANGELOG.md) · [Build from source](docs/BUILD.md)
+[Download 1.4.0](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.4.0) · [Release notes](CHANGELOG.md) · [Build from source](docs/BUILD.md)
 
-> Download `OllamaStatusService-Windows-x64-v1.2.5.zip` from the release assets. GitHub's automatic “Source code” archives are not installable packages. The installer and tray interface currently use Simplified Chinese; these README translations do not change the application language.
+> Download `OllamaStatusService-Windows-x64-v1.4.0.zip` from the release assets. GitHub's automatic “Source code” archives are not installable packages. The installer and tray interface currently use Simplified Chinese; these README translations do not change the application language.
 
 ## Why a gateway?
 
@@ -95,7 +97,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11434/help
 curl.exe --noproxy "*" http://127.0.0.1:11436/help
 ```
 
-Check `version=1.2.5` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.
+Check `version=1.4.0` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.
 
 Acceptance sequence: run remote A, queue remote B, then queue local C with a positive wait timeout. A must finish uninterrupted; C runs before B. Both queued requests must remain within their wait deadline and queue capacity.
 
@@ -107,6 +109,7 @@ Acceptance sequence: run remote A, queue remote B, then queue local C with a pos
 | `GET /help` | Live limits, capabilities, origin and client guidance |
 | `GET /healthz` | Gateway liveness and this probe's origin; not proof of backend readiness |
 | `GET /dashboard` | Browser status panel |
+| `GET /manage` | Embedded multi-server and model manager; existing reverse proxy authentication |
 | `GET /api/tags`, `GET /api/ps` | Proxied Ollama model inventory / loaded models |
 
 Use `X-Ollama-Queue-Timeout` per inference request: `0` declines immediately when busy, a positive number waits up to that many seconds, and omission uses the server default (15 seconds). The default maximum is 3600 seconds; read `/help` for the running instance's limits. Waiting deadlines do not cut off inference once it has started. Scheduled execution concurrency is 1 (excluding pull/push), with up to 64 queued requests and 64 MiB of queued JSON data.
@@ -133,7 +136,7 @@ If a request's completion cannot be verified, `unknown` blocks further admission
 
 ## Development and validation
 
-See [build instructions](docs/BUILD.md) for test commands. Version 1.2.5 validation covers 68 Python tests, 13 isolated upgrade scenarios, real NTFS ACL repair and LocalService access checks in a C-drive user-profile fixture, plus package/configuration checks. The earlier reports retain the two concurrent Ollama CLI checks from 1.2.4 and the 1.2.3 installer UI checks. Tests do not prove deployment or GPU/FRP behavior on every production server. See [validation report](验证报告.txt).
+See [build instructions](docs/BUILD.md) for test commands. Version 1.4.0 validation covers 86 Python tests, including 7 embedded-manager checks and 11 durable-job checks, 13 isolated upgrade scenarios, and package/configuration checks. Version 1.2.5 additionally verified real NTFS ACL repair and LocalService access in a C-drive user-profile fixture. The earlier reports retain the two concurrent Ollama CLI checks from 1.2.4 and the 1.2.3 installer UI checks. Tests do not prove deployment or GPU/FRP behavior on every production server. See [validation report](验证报告.txt).
 
 Public examples use placeholders. Production configurations, logs and the original client/development Word and Markdown documents are intentionally excluded.
 

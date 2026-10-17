@@ -7,6 +7,9 @@ backup/
 *.db
 *.db-wal
 *.db-shm
+*.sqlite3
+*.sqlite3-*
+*-private.json
 *.log
 .env
 .env.*

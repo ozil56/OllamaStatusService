@@ -93,7 +93,7 @@ try {
     if (-not $removed) { throw 'Windows 尚未释放旧服务，请关闭 services.msc 等服务管理窗口后重试。' }
     Set-Progress '第 2/2 步：安装新版服务，沿用原配置并启用共享队列的代理专用入口…'
     . (Join-Path $PSScriptRoot 'Setup.ps1') -AsUpgrade
-    Complete-Setup $true "已升级到 1.2.5：已核实模型目录权限，并通过 LocalService 访问及模型列表检查。`r`n原配置和模型路径已保留；并发 pull/push 修复继续生效。FRP 等代理回源应使用 11436（自定义配置按实际值）。`r`n设置备份：$upgradeBackup"
+    Complete-Setup $true "已升级到 1.4.0：访问现有 OSS 地址的 /manage，即可管理多台服务器、下载删除模型和暂停继续；沿用现有 Nginx 认证。`r`n原配置和模型路径已保留；并发 pull/push 修复继续生效。FRP 等代理回源应使用 11436（自定义配置按实际值）。`r`n设置备份：$upgradeBackup"
 } catch {
     Write-SetupPhase $_.ScriptStackTrace
     throw ("升级未完成：" + $_.Exception.Message + "`r`n模型、日志和任务记录未删除。设置备份：" + $upgradeBackup +

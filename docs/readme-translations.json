@@ -1,0 +1,665 @@
+{
+  "languages": [
+    "en",
+    "zh-CN",
+    "zh-TW",
+    "ja",
+    "ko",
+    "de",
+    "fr",
+    "es"
+  ],
+  "blocks": [
+    {
+      "id": "b00",
+      "literal": "# Ollama Status Service"
+    },
+    {
+      "id": "b01",
+      "text": {
+        "en": "**Know when your Ollama machine can accept work — and give local users the next turn.**",
+        "zh-CN": "**看清 Ollama 机器何时可以接单，让本机用户优先获得下一次执行机会。**",
+        "zh-TW": "**看清 Ollama 機器何時可以接單，讓本機使用者優先獲得下一次執行機會。**",
+        "ja": "**Ollama マシンが処理を受け付けられる状態かを把握し、次の実行枠をローカルユーザーに優先します。**",
+        "ko": "**Ollama 컴퓨터가 작업을 받을 수 있는지 확인하고 로컬 사용자에게 다음 실행 순서를 우선 배정합니다.**",
+        "de": "**Erkennen, wann Ihr Ollama-Rechner Arbeit annehmen kann – und lokalen Nutzern den nächsten freien Platz geben.**",
+        "fr": "**Sachez quand votre machine Ollama peut accepter du travail et donnez aux utilisateurs locaux le prochain créneau.**",
+        "es": "**Sepa cuándo su equipo Ollama puede aceptar trabajo y dé a los usuarios locales el siguiente turno.**"
+      }
+    },
+    {
+      "id": "b02",
+      "text": {
+        "en": "A Windows gateway, background service and system tray application for an existing Ollama installation. It tracks requests as they execute, exposes machine-readable status and help, and schedules local and remote work through one shared queue.",
+        "zh-CN": "为已有 Ollama 安装提供 Windows HTTP 网关、后台服务和系统托盘应用。它跟踪请求的执行过程，提供机器可读的状态与帮助，并通过同一个队列调度本机和远端任务。",
+        "zh-TW": "為已有 Ollama 安裝提供 Windows HTTP 閘道器、背景服務和系統系統匣應用。它跟蹤請求的執行過程，提供機器可讀的狀態與幫助，並透過同一個佇列排程本機和遠端任務。",
+        "ja": "既存の Ollama 環境向けの Windows ゲートウェイ、バックグラウンドサービス、システムトレイアプリです。リクエストの実行を追跡し、機械可読の状態とヘルプを提供して、ローカルとリモートの処理を共通キューでスケジュールします。",
+        "ko": "기존 Ollama 설치를 위한 Windows 게이트웨이, 백그라운드 서비스, 시스템 트레이 앱입니다. 요청 실행을 추적하고 기계가 읽을 수 있는 상태와 도움말을 제공하며, 로컬 및 원격 작업을 하나의 공유 큐로 관리합니다.",
+        "de": "Ein Windows-Gateway mit Hintergrunddiensten und einer Tray-Anwendung für eine vorhandene Ollama-Installation. Es verfolgt die Ausführung von Anfragen, stellt maschinenlesbare Status- und Hilfeinformationen bereit und plant lokale sowie entfernte Arbeit über eine gemeinsame Warteschlange.",
+        "fr": "Une passerelle Windows, des services en arrière-plan et une application de zone de notification pour une installation Ollama existante. Elle suit l’exécution des requêtes, expose un état et une aide lisibles par les machines, et organise le travail local et distant dans une file commune.",
+        "es": "Una pasarela de Windows, servicios en segundo plano y una aplicación de bandeja para una instalación existente de Ollama. Sigue la ejecución de las solicitudes, ofrece estado y ayuda legibles por máquinas y organiza el trabajo local y remoto mediante una cola compartida."
+      }
+    },
+    {
+      "id": "b03",
+      "text": {
+        "en": "**Current build: 1.6.1 · Windows x64 · Offline installer**",
+        "zh-CN": "**当前版本：1.6.1 · Windows x64 · 离线安装包**",
+        "zh-TW": "**當前版本：1.6.1 · Windows x64 · 離線安裝套件**",
+        "ja": "**現在のバージョン：1.6.1 · Windows x64 · オフラインインストーラー**",
+        "ko": "**현재 버전: 1.6.1 · Windows x64 · 오프라인 설치 프로그램**",
+        "de": "**Aktuelle Version: 1.6.1 · Windows x64 · Offline-Installer**",
+        "fr": "**Version actuelle : 1.6.1 · Windows x64 · Installation hors ligne**",
+        "es": "**Versión actual: 1.6.1 · Windows x64 · Instalador sin conexión**"
+      }
+    },
+    {
+      "id": "b04",
+      "text": {
+        "en": "Version 1.6.1 fixes mixed languages in live version summaries, saved update history and installer completion messages. It includes eight UI languages with automatic matching and saved selection, automatic proxy discovery and a built-in loopback download relay for TUN/Fake-IP networks, fixes stale Ollama upgrade offers and removes command-window flashes from tray actions. See [download networking][link1]. It also includes official Ollama update checks and upgrades to the system tray. It checks stable releases every six hours, verifies the installer hash and publisher signature, refuses to interrupt active or uncertain work, and restores OSS ownership after validating the original models and configuration. See [Ollama updates][link2]. The downloadable Windows package is linked below.",
+        "zh-CN": "1.6.1 修复版本摘要、已保存的更新记录和安装完成提示中的语言混用。界面支持八种语言，自动匹配并保存手动选择；自动发现代理，内置适用于 TUN/Fake-IP 网络的本机下载转发入口；修复过时的 Ollama 升级提示和托盘操作时命令窗口闪现。详见[下载网络说明][link1]。托盘还提供官方 Ollama 更新检查与升级：每六小时检查稳定版，验证安装包哈希和发布者签名，拒绝中断活动任务或状态不确定的任务，并在验证原模型和配置后恢复 OSS 接管。详见[Ollama 更新说明][link2]。Windows 安装包见下方链接。",
+        "zh-TW": "1.6.1 修復版本摘要、已儲存的更新記錄和安裝完成提示中的語言混用。介面支援八種語言，自動匹配並儲存手動選擇；自動發現代理，內建適用於 TUN/Fake-IP 網路的本機下載轉發入口；修復過時的 Ollama 升級提示和系統匣操作時命令視窗閃現。詳見[下載網路說明][link1]。系統匣還提供官方 Ollama 更新檢查與升級：每六小時檢查穩定版，驗證安裝套件雜湊和發行者簽章，拒絕中斷活動任務或狀態不確定的任務，並在驗證原模型和設定後恢復 OSS 接管。詳見[Ollama 更新說明][link2]。Windows 安裝套件見下方連結。",
+        "ja": "1.6.1 では、バージョン表示、保存済み更新履歴、インストール完了メッセージで言語が混在する問題を修正しました。8 言語の自動選択と手動設定の保存、プロキシの自動検出、TUN/Fake-IP ネットワーク向けのローカルダウンロード中継を備えています。更新済み Ollama に古い更新案内が残る問題と、トレイ操作時にコンソールが一瞬表示される問題も修正しました。[ダウンロードネットワーク][link1]を参照してください。トレイから公式 Ollama の更新確認とアップグレードも行えます。6 時間ごとに安定版を確認し、インストーラーのハッシュと発行元署名を検証します。実行中または完了不明の処理は中断せず、既存モデルと設定を検証してから OSS の管理を復元します。[Ollama の更新][link2]を参照してください。Windows パッケージは以下から取得できます。",
+        "ko": "1.6.1은 버전 요약, 저장된 업데이트 기록, 설치 완료 메시지에서 언어가 섞이는 문제를 수정합니다. 자동 언어 선택과 수동 선택 저장을 지원하는 8개 UI 언어, 자동 프록시 검색, TUN/Fake-IP 네트워크용 내장 로컬 다운로드 중계 기능을 포함합니다. 이미 업데이트한 Ollama에 오래된 업그레이드 안내가 남는 문제와 트레이 작업 중 콘솔 창이 잠깐 나타나는 문제도 수정했습니다. [다운로드 네트워크][link1]를 참조하세요. 트레이에서 공식 Ollama 업데이트 확인과 업그레이드도 제공합니다. 6시간마다 안정 버전을 확인하고 설치 파일의 해시와 게시자 서명을 검증합니다. 실행 중이거나 완료 여부가 불확실한 작업은 중단하지 않으며, 기존 모델과 설정을 확인한 뒤 OSS 관리를 복원합니다. [Ollama 업데이트][link2]를 참조하세요. Windows 패키지는 아래 링크에서 받을 수 있습니다.",
+        "de": "Version 1.6.1 behebt gemischte Sprachen in Versionsanzeigen, gespeicherten Update-Verläufen und Abschlussmeldungen des Installers. Enthalten sind acht UI-Sprachen mit automatischer Zuordnung und gespeicherter Auswahl, automatische Proxy-Erkennung und eine integrierte lokale Download-Weiterleitung für TUN/Fake-IP-Netze. Veraltete Ollama-Update-Angebote und kurz aufblitzende Konsolenfenster bei Tray-Aktionen wurden behoben. Siehe [Download-Netzwerk][link1]. Das Tray kann außerdem offizielle Ollama-Updates prüfen und installieren: Alle sechs Stunden wird nach stabilen Versionen gesucht, Hash und Herausgebersignatur des Installers werden geprüft, laufende oder unklare Arbeit wird nicht unterbrochen, und nach Prüfung der ursprünglichen Modelle und Konfiguration übernimmt OSS wieder die Verwaltung. Siehe [Ollama-Updates][link2]. Das Windows-Paket ist unten verlinkt.",
+        "fr": "La version 1.6.1 corrige les mélanges de langues dans les résumés de version, l’historique des mises à jour et les messages de fin d’installation. Elle comprend huit langues d’interface avec sélection automatique et choix mémorisé, la détection automatique des proxys et un relais local de téléchargement intégré pour les réseaux TUN/Fake-IP. Les propositions de mise à jour Ollama périmées et les fenêtres de console fugitives lors des actions de notification sont corrigées. Voir [le réseau de téléchargement][link1]. La zone de notification permet aussi de vérifier et d’installer les mises à jour officielles d’Ollama : recherche des versions stables toutes les six heures, vérification du hachage et de la signature de l’éditeur, refus d’interrompre les tâches actives ou incertaines, puis reprise de la gestion par OSS après vérification des modèles et de la configuration d’origine. Voir [les mises à jour d’Ollama][link2]. Le paquet Windows est proposé ci-dessous.",
+        "es": "La versión 1.6.1 corrige la mezcla de idiomas en los resúmenes de versión, el historial de actualizaciones y los mensajes de instalación finalizada. Incluye ocho idiomas de interfaz con detección automática y selección guardada, detección automática de proxies y un relé local de descarga integrado para redes TUN/Fake-IP. Corrige avisos obsoletos de actualización de Ollama y ventanas de consola que aparecían brevemente al usar la bandeja. Consulte [la red de descarga][link1]. La bandeja también comprueba e instala actualizaciones oficiales de Ollama: busca versiones estables cada seis horas, verifica el hash y la firma del editor del instalador, rechaza interrumpir trabajos activos o inciertos y devuelve el control a OSS después de validar los modelos y la configuración originales. Consulte [las actualizaciones de Ollama][link2]. El paquete de Windows está enlazado abajo."
+      }
+    },
+    {
+      "id": "b05",
+      "text": {
+        "en": "Version 1.4.0 embeds a multi-server web manager at `/manage`: add/import nodes, download/delete models, and pause/resume durable server-owned pulls. It uses the existing reverse proxy authentication; no separate account, port or manager process is added. See [the manager guide][link3].",
+        "zh-CN": "1.4.0 起在 `/manage` 内置多服务器网页管理器：添加或导入节点、下载或删除模型，以及暂停或继续由服务器持久托管的下载。沿用现有反向代理认证，不新增账号、端口或管理器进程。详见[管理器指南][link3]。",
+        "zh-TW": "1.4.0 起在 `/manage` 內建多伺服器網頁管理器：新增或匯入節點、下載或刪除模型，以及暫停或繼續由伺服器持久託管的下載。沿用現有反向代理認證，不新增賬號、埠或管理器程序。詳見[管理器指南][link3]。",
+        "ja": "1.4.0 から `/manage` に複数サーバーの Web 管理画面を内蔵しています。ノードの追加・インポート、モデルのダウンロード・削除、サーバーが永続的に管理するダウンロードの一時停止・再開が可能です。既存のリバースプロキシ認証を利用し、別アカウント、ポート、管理プロセスは追加しません。[管理ガイド][link3]を参照してください。",
+        "ko": "1.4.0부터 `/manage`에 여러 서버를 관리하는 웹 화면이 내장되어 있습니다. 노드 추가/가져오기, 모델 다운로드/삭제, 서버가 영구적으로 관리하는 다운로드 일시 중지/재개를 지원합니다. 기존 역방향 프록시 인증을 사용하며 별도 계정, 포트, 관리 프로세스를 추가하지 않습니다. [관리 가이드][link3]를 참조하세요.",
+        "de": "Seit 1.4.0 ist unter `/manage` eine Webverwaltung für mehrere Server integriert: Knoten hinzufügen/importieren, Modelle herunterladen/löschen und dauerhaft vom Server verwaltete Downloads pausieren/fortsetzen. Die vorhandene Reverse-Proxy-Authentifizierung bleibt bestehen; zusätzliche Konten, Ports oder Verwaltungsprozesse sind nicht nötig. Siehe [Verwaltungsanleitung][link3].",
+        "fr": "Depuis la version 1.4.0, `/manage` intègre une interface Web multiserveur : ajout/importation de nœuds, téléchargement/suppression de modèles et suspension/reprise de téléchargements persistants gérés par le serveur. Elle réutilise l’authentification du reverse proxy existant, sans compte, port ni processus de gestion supplémentaire. Voir [le guide de gestion][link3].",
+        "es": "Desde 1.4.0, `/manage` integra un gestor web de varios servidores: añadir/importar nodos, descargar/eliminar modelos y pausar/reanudar descargas persistentes gestionadas por el servidor. Utiliza la autenticación del proxy inverso existente, sin cuentas, puertos ni procesos de gestión adicionales. Consulte [la guía de gestión][link3]."
+      }
+    },
+    {
+      "id": "b06",
+      "text": {
+        "en": "Version 1.2.5 fixes empty model lists caused by missing LocalService permissions. Installation and upgrade repair model-tree permissions, verify access using the actual service account, and check backend/gateway model inventories before reporting success. The default C-drive user-profile model directory is supported. The concurrent `pull`/`push` fix from 1.2.4 is retained.",
+        "zh-CN": "1.2.5 修复 LocalService 权限不足导致模型列表为空的问题。安装与升级会修复模型目录树的权限，以实际服务账户验证访问，并核对后端和网关的模型列表，全部通过后才报告成功。支持默认 C 盘用户目录中的模型路径，并保留 1.2.4 的并发 `pull`/`push` 修复。",
+        "zh-TW": "1.2.5 修復 LocalService 權限不足導致模型列表為空的問題。安裝與升級會修復模型目錄樹的權限，以實際服務帳戶驗證存取，並核對後端和閘道器的模型列表，全部透過後才報告成功。支援預設 C 盤使用者目錄中的模型路徑，並保留 1.2.4 的併發 `pull`/`push` 修復。",
+        "ja": "1.2.5 では LocalService の権限不足によってモデル一覧が空になる問題を修正しました。インストールとアップグレード時にモデルツリーの権限を修復し、実際のサービスアカウントでアクセスを検証して、バックエンドとゲートウェイのモデル一覧を照合した後に成功を報告します。C ドライブのユーザープロファイルにある標準モデルディレクトリにも対応しています。1.2.4 の同時 `pull`/`push` に関する修正も維持しています。",
+        "ko": "1.2.5는 LocalService 권한 부족으로 모델 목록이 비는 문제를 수정합니다. 설치 및 업그레이드 시 모델 디렉터리 트리 권한을 복구하고 실제 서비스 계정으로 접근을 확인하며, 백엔드와 게이트웨이의 모델 목록을 비교한 뒤 성공을 보고합니다. C: 드라이브 사용자 프로필의 기본 모델 디렉터리를 지원합니다. 1.2.4의 동시 `pull`/`push` 수정도 유지합니다.",
+        "de": "Version 1.2.5 behebt leere Modelllisten durch fehlende LocalService-Berechtigungen. Installation und Upgrade reparieren die Rechte im Modellverzeichnis, prüfen den Zugriff mit dem tatsächlichen Dienstkonto und vergleichen Backend- und Gateway-Modelllisten, bevor Erfolg gemeldet wird. Das Standard-Modellverzeichnis im Benutzerprofil auf C: wird unterstützt. Die Korrektur paralleler `pull`/`push`-Vorgänge aus 1.2.4 bleibt enthalten.",
+        "fr": "La version 1.2.5 corrige les listes de modèles vides dues à des droits LocalService insuffisants. L’installation et la mise à niveau réparent les droits de l’arborescence des modèles, vérifient l’accès avec le véritable compte de service et comparent les inventaires du backend et de la passerelle avant d’annoncer la réussite. Le dossier de modèles par défaut du profil utilisateur sur C: est pris en charge. La correction des transferts `pull`/`push` simultanés de la version 1.2.4 est conservée.",
+        "es": "La versión 1.2.5 corrige listas vacías de modelos debidas a permisos insuficientes de LocalService. La instalación y actualización reparan los permisos del árbol de modelos, comprueban el acceso con la cuenta de servicio real y comparan los inventarios del backend y de la pasarela antes de informar de éxito. Se admite la carpeta predeterminada de modelos del perfil de usuario en C:. Se mantiene la corrección de transferencias simultáneas `pull`/`push` de 1.2.4."
+      }
+    },
+    {
+      "id": "b07",
+      "text": {
+        "en": "[Release 1.6.1][link4] · [Windows ZIP][link5] · [SHA256][link6] · [Release notes][link7] · [Build from source][link8]",
+        "zh-CN": "[1.6.1 发布页][link4] · [Windows ZIP][link5] · [SHA256][link6] · [更新记录][link7] · [源码构建][link8]",
+        "zh-TW": "[1.6.1 釋出頁][link4] · [Windows ZIP][link5] · [SHA256][link6] · [更新記錄][link7] · [原始碼構建][link8]",
+        "ja": "[1.6.1 リリース][link4] · [Windows ZIP][link5] · [SHA256][link6] · [変更履歴][link7] · [ソースからビルド][link8]",
+        "ko": "[1.6.1 릴리스][link4] · [Windows ZIP][link5] · [SHA256][link6] · [변경 기록][link7] · [소스 빌드][link8]",
+        "de": "[Release 1.6.1][link4] · [Windows-ZIP][link5] · [SHA256][link6] · [Änderungen][link7] · [Aus Quellcode bauen][link8]",
+        "fr": "[Version 1.6.1][link4] · [ZIP Windows][link5] · [SHA256][link6] · [Historique][link7] · [Compiler les sources][link8]",
+        "es": "[Versión 1.6.1][link4] · [ZIP de Windows][link5] · [SHA256][link6] · [Cambios][link7] · [Compilar desde el código][link8]"
+      }
+    },
+    {
+      "id": "b08",
+      "text": {
+        "en": "> Download `OllamaStatusService-Windows-x64-v1.6.1.zip` and its checksum from the release above, or build it from source. GitHub's automatic “Source code” archives are not installable packages. The installer, tray, /manage and /dashboard support Simplified Chinese, Traditional Chinese, English, Japanese, Korean, German, French and Spanish. Automatic language matching and saved manual selection are available; /status and /help localize display text while preserving protocol keys. See [languages][link9].",
+        "zh-CN": "> 从上方发布页下载 `OllamaStatusService-Windows-x64-v1.6.1.zip` 和校验文件，或从源码构建。GitHub 自动生成的“Source code”归档不是可安装的软件包。安装器、托盘、/manage 和 /dashboard 支持简体中文、繁体中文、英文、日文、韩文、德文、法文和西班牙文，可自动匹配语言或保存手动选择；/status 和 /help 翻译显示文字，同时保留协议字段。详见[语言设置][link9]。",
+        "zh-TW": "> 從上方釋出頁下載 `OllamaStatusService-Windows-x64-v1.6.1.zip` 和校驗檔案，或從原始碼構建。GitHub 自動生成的“Source code”歸檔不是可安裝的套件。安裝器、系統匣、/manage 和 /dashboard 支援簡體中文、繁體中文、英文、日文、韓文、德文、法文和西班牙文，可自動匹配語言或儲存手動選擇；/status 和 /help 翻譯顯示文字，同時保留協議欄位。詳見[語言設定][link9]。",
+        "ja": "> 上のリリースから `OllamaStatusService-Windows-x64-v1.6.1.zip` とチェックサムを取得するか、ソースからビルドしてください。GitHub が自動生成する「Source code」アーカイブはインストール用パッケージではありません。インストーラー、トレイ、/manage、/dashboard は簡体字中国語、繁体字中国語、英語、日本語、韓国語、ドイツ語、フランス語、スペイン語に対応します。言語の自動選択と手動選択の保存が可能です。/status と /help はプロトコルのキーを保持し、表示テキストを翻訳します。[言語設定][link9]を参照してください。",
+        "ko": "> 위 릴리스에서 `OllamaStatusService-Windows-x64-v1.6.1.zip`과 체크섬을 다운로드하거나 소스에서 빌드하세요. GitHub가 자동 생성하는 “Source code” 압축 파일은 설치 패키지가 아닙니다. 설치 프로그램, 트레이, /manage, /dashboard는 중국어 간체·번체, 영어, 일본어, 한국어, 독일어, 프랑스어, 스페인어를 지원합니다. 언어 자동 선택과 수동 선택 저장이 가능하며, /status와 /help는 프로토콜 키를 유지하면서 표시 문구를 번역합니다. [언어 설정][link9]을 참조하세요.",
+        "de": "> Laden Sie `OllamaStatusService-Windows-x64-v1.6.1.zip` und die Prüfsumme aus dem oben verlinkten Release herunter oder bauen Sie das Paket selbst. GitHubs automatisch erzeugte „Source code“-Archive sind keine Installationspakete. Installer, Tray, /manage und /dashboard unterstützen vereinfachtes und traditionelles Chinesisch, Englisch, Japanisch, Koreanisch, Deutsch, Französisch und Spanisch. Automatische Spracherkennung und gespeicherte manuelle Auswahl sind verfügbar; /status und /help übersetzen Anzeigetexte und behalten die Protokollfelder bei. Siehe [Sprachen][link9].",
+        "fr": "> Téléchargez `OllamaStatusService-Windows-x64-v1.6.1.zip` et sa somme de contrôle depuis la version ci-dessus, ou compilez les sources. Les archives « Source code » automatiques de GitHub ne sont pas des paquets installables. L’installateur, la zone de notification, /manage et /dashboard prennent en charge le chinois simplifié et traditionnel, l’anglais, le japonais, le coréen, l’allemand, le français et l’espagnol. La langue est détectée automatiquement ou choisie et mémorisée ; /status et /help traduisent les textes d’affichage tout en préservant les clés du protocole. Voir [les langues][link9].",
+        "es": "> Descargue `OllamaStatusService-Windows-x64-v1.6.1.zip` y su suma de comprobación desde la publicación anterior, o compílelo desde el código fuente. Los archivos «Source code» generados automáticamente por GitHub no son instaladores. El instalador, la bandeja, /manage y /dashboard admiten chino simplificado y tradicional, inglés, japonés, coreano, alemán, francés y español. Puede detectar el idioma automáticamente o guardar una selección manual; /status y /help traducen el texto visible y mantienen las claves del protocolo. Consulte [los idiomas][link9]."
+      }
+    },
+    {
+      "id": "b09",
+      "text": {
+        "en": "Model `pull`/`push` transfers bypass the inference queue and its timeouts, can run concurrently and continue streaming progress. `/status` counts them separately: they make maintenance state `busy` without consuming an inference slot. Use `can_start_now` for inference readiness.",
+        "zh-CN": "模型 `pull`/`push` 传输绕过推理队列及其超时限制，可以并发执行并持续输出流式进度。`/status` 单独统计这些传输：它们使维护状态显示为 `busy`，但不占用推理执行名额。判断能否开始推理请使用 `can_start_now`。",
+        "zh-TW": "模型 `pull`/`push` 傳輸繞過推理佇列及其超時限制，可以併發執行並持續輸出流式進度。`/status` 單獨統計這些傳輸：它們使維護狀態顯示為 `busy`，但不佔用推理執行名額。判斷能否開始推理請使用 `can_start_now`。",
+        "ja": "モデルの `pull`/`push` 転送は推論キューとそのタイムアウトを経由せず、同時実行と進捗のストリーミングを継続できます。`/status` では別に集計し、メンテナンス上の状態は `busy` にしますが、推論の実行枠は消費しません。推論を開始できるかは `can_start_now` で確認してください。",
+        "ko": "모델 `pull`/`push` 전송은 추론 큐와 해당 시간 제한을 거치지 않으며, 동시에 실행되고 진행 상태를 계속 스트리밍할 수 있습니다. `/status`는 이를 별도로 집계합니다. 유지보수 상태는 `busy`가 되지만 추론 실행 자리를 차지하지는 않습니다. 추론을 시작할 수 있는지는 `can_start_now`로 판단하세요.",
+        "de": "Modellübertragungen mit `pull`/`push` umgehen die Inferenzwarteschlange und deren Zeitlimits, können parallel laufen und streamen weiterhin ihren Fortschritt. `/status` zählt sie separat: Für Wartungszwecke setzen sie den Zustand auf `busy`, ohne einen Inferenzplatz zu belegen. Für die Inferenzbereitschaft gilt `can_start_now`.",
+        "fr": "Les transferts de modèles `pull`/`push` contournent la file d’inférence et ses délais ; ils peuvent fonctionner simultanément et continuer à diffuser leur progression. `/status` les compte séparément : ils placent l’état de maintenance sur `busy` sans occuper de créneau d’inférence. Utilisez `can_start_now` pour connaître la disponibilité pour l’inférence.",
+        "es": "Las transferencias de modelos `pull`/`push` evitan la cola de inferencia y sus tiempos de espera, pueden ejecutarse simultáneamente y mantienen el flujo de progreso. `/status` las cuenta por separado: establecen el estado de mantenimiento en `busy` sin ocupar un puesto de inferencia. Use `can_start_now` para conocer la disponibilidad de inferencia."
+      }
+    },
+    {
+      "id": "b10",
+      "text": {
+        "en": "## Why a gateway?",
+        "zh-CN": "## 为什么需要网关？",
+        "zh-TW": "## 為什麼需要閘道器？",
+        "ja": "## ゲートウェイが必要な理由",
+        "ko": "## 게이트웨이가 필요한 이유",
+        "de": "## Warum ein Gateway?",
+        "fr": "## Pourquoi une passerelle ?",
+        "es": "## ¿Por qué una pasarela?"
+      }
+    },
+    {
+      "id": "b11",
+      "text": {
+        "en": "An installed or loaded model is not necessarily busy. `/api/tags` lists models and `/api/ps` lists loaded models; neither is a request scheduler. This service observes the requests it forwards, including streaming responses, disconnects and uncertain completion.",
+        "zh-CN": "模型已安装或已加载，不代表它正在执行请求。`/api/tags` 列出已有模型，`/api/ps` 列出已加载模型，两者都不是请求调度器。本服务观察实际转发的请求，包括流式响应、断线和无法确认完成的情况。",
+        "zh-TW": "模型已安裝或已載入，不代表它正在執行請求。`/api/tags` 列出已有模型，`/api/ps` 列出已載入模型，兩者都不是請求排程器。本服務觀察實際轉發的請求，包括流式響應、斷線和無法確認完成的情況。",
+        "ja": "モデルがインストール済み、またはロード済みでも、処理中とは限りません。`/api/tags` はモデル一覧、`/api/ps` はロード済みモデルを返し、どちらもリクエストスケジューラーではありません。本サービスは転送するリクエストを観察し、ストリーミング応答、切断、完了を確認できない状態も扱います。",
+        "ko": "설치되거나 메모리에 로드된 모델이 반드시 작업 중인 것은 아닙니다. `/api/tags`는 모델을, `/api/ps`는 로드된 모델을 나열하며 둘 다 요청 스케줄러가 아닙니다. 이 서비스는 전달하는 요청을 관찰하며 스트리밍 응답, 연결 끊김, 완료를 확인할 수 없는 상태도 추적합니다.",
+        "de": "Ein installiertes oder geladenes Modell ist nicht zwangsläufig beschäftigt. `/api/tags` listet Modelle und `/api/ps` geladene Modelle auf; beide sind keine Anfrageplaner. Dieser Dienst beobachtet die weitergeleiteten Anfragen einschließlich Streaming-Antworten, Verbindungsabbrüchen und unklarem Abschluss.",
+        "fr": "Un modèle installé ou chargé n’est pas nécessairement occupé. `/api/tags` énumère les modèles et `/api/ps` les modèles chargés ; aucun de ces points d’accès n’ordonnance les requêtes. Ce service observe les requêtes qu’il transmet, y compris les réponses en flux, les déconnexions et les fins d’exécution incertaines.",
+        "es": "Un modelo instalado o cargado no está necesariamente ocupado. `/api/tags` enumera modelos y `/api/ps` modelos cargados; ninguno organiza las solicitudes. Este servicio observa las solicitudes que reenvía, incluidas respuestas en flujo, desconexiones y finalizaciones inciertas."
+      }
+    },
+    {
+      "id": "b12",
+      "text": {
+        "en": "All managed requests must pass through the gateway. Direct access to the underlying Ollama port is outside its accounting. This project is independent of Ollama and does not bundle Ollama, models, GPU libraries or drivers.",
+        "zh-CN": "所有受管理的请求都必须经过网关。直接访问底层 Ollama 端口的任务不在统计范围内。本项目独立于 Ollama，不附带 Ollama、模型、GPU 库或驱动。",
+        "zh-TW": "所有受管理的請求都必須經過閘道器。直接存取底層 Ollama 埠的任務不在統計範圍內。本專案獨立於 Ollama，不附帶 Ollama、模型、GPU 庫或驅動。",
+        "ja": "管理対象のリクエストはすべてゲートウェイを通す必要があります。内部の Ollama ポートへの直接アクセスは集計対象外です。本プロジェクトは Ollama とは独立しており、Ollama 本体、モデル、GPU ライブラリ、ドライバーは同梱しません。",
+        "ko": "관리할 요청은 모두 게이트웨이를 통과해야 합니다. 내부 Ollama 포트에 직접 접근하는 작업은 집계 범위 밖입니다. 이 프로젝트는 Ollama와 독립적이며 Ollama, 모델, GPU 라이브러리, 드라이버를 포함하지 않습니다.",
+        "de": "Alle verwalteten Anfragen müssen das Gateway passieren. Direkter Zugriff auf den darunterliegenden Ollama-Port wird nicht erfasst. Dieses Projekt ist unabhängig von Ollama und enthält weder Ollama noch Modelle, GPU-Bibliotheken oder Treiber.",
+        "fr": "Toutes les requêtes gérées doivent passer par la passerelle. Les accès directs au port Ollama sous-jacent échappent à son suivi. Ce projet est indépendant d’Ollama et ne fournit ni Ollama, ni modèles, ni bibliothèques GPU, ni pilotes.",
+        "es": "Todas las solicitudes gestionadas deben pasar por la pasarela. El acceso directo al puerto subyacente de Ollama queda fuera de su seguimiento. Este proyecto es independiente de Ollama y no incluye Ollama, modelos, bibliotecas GPU ni controladores."
+      }
+    },
+    {
+      "id": "b13",
+      "text": {
+        "en": "## Highlights",
+        "zh-CN": "## 主要功能",
+        "zh-TW": "## 主要功能",
+        "ja": "## 主な機能",
+        "ko": "## 주요 기능",
+        "de": "## Funktionen",
+        "fr": "## Fonctionnalités",
+        "es": "## Funciones destacadas"
+      }
+    },
+    {
+      "id": "b14",
+      "text": {
+        "en": "- **Reliable state:** `idle`, `busy`, `offline`, `unknown` and `stopping`; active and queued request counts, origin and IDs.\n- **Local priority without preemption:** an active request finishes first; waiting local requests precede waiting remote requests, with FIFO within each class. No reservation for future batches.\n- **Dedicated proxy ingress:** FRP, SSH tunnels and reverse proxies use `11436`, always classified as `remote`. Client-supplied headers cannot promote a request to `local`.\n- **Self-describing API:** `/help`, `/.well-known/ollama-status-service` and `/openapi.json` describe capabilities, queue limits and retry rules.\n- **Useful tray feedback:** colored symbols, queue counts, dashboard, logs and service controls. Closing the tray does not stop the background services.\n- **Practical installer:** model-path discovery with provenance, package integrity checks, upgrade preflight and a single progress window.\n- **Conservative recovery:** uncertain execution is persisted in SQLite and blocks new work until recovery. Full prompts and generated responses are not stored in the request database.",
+        "zh-CN": "- **明确的状态：** `idle`、`busy`、`offline`、`unknown` 和 `stopping`，以及执行中和排队请求的数量、来源与 ID。\n- **本机优先且不抢占：** 当前请求先完成；等待中的本机请求排在远端请求之前，同类内部按 FIFO 排序。不为未来批次预留位置。\n- **代理专用入口：** FRP、SSH 隧道和反向代理使用 `11436`，固定识别为 `remote`。客户端请求头不能将请求提升为 `local`。\n- **自描述 API：** `/help`、`/.well-known/ollama-status-service` 和 `/openapi.json` 说明能力、队列限制及重试规则。\n- **直观的托盘反馈：** 彩色图标、队列数量、状态面板、日志与服务控制。退出托盘不会停止后台服务。\n- **实用的安装器：** 发现模型路径并显示来源、校验软件包、升级前检查，以及同一个窗口内的进度显示。\n- **谨慎的恢复机制：** 执行状态不确定时，将记录持久化到 SQLite，恢复前阻止新任务。请求数据库不保存完整提示词或生成结果。",
+        "zh-TW": "- **明確的狀態：** `idle`、`busy`、`offline`、`unknown` 和 `stopping`，以及執行中和排隊請求的數量、來源與 ID。\n- **本機優先且不搶佔：** 當前請求先完成；等待中的本機請求排在遠端請求之前，同類內部按 FIFO 排序。不為未來批次預留位置。\n- **代理專用入口：** FRP、SSH 隧道和反向代理使用 `11436`，固定識別為 `remote`。用戶端請求頭不能將請求提升為 `local`。\n- **自描述 API：** `/help`、`/.well-known/ollama-status-service` 和 `/openapi.json` 說明能力、佇列限制及重試規則。\n- **直觀的系統匣回饋：** 彩色圖示、佇列數量、狀態面板、日誌與服務控制。退出系統匣不會停止背景服務。\n- **實用的安裝器：** 發現模型路徑並顯示來源、校驗套件、升級前檢查，以及同一個視窗內的進度顯示。\n- **謹慎的恢復機制：** 執行狀態不確定時，將記錄持久化到 SQLite，恢復前阻止新任務。請求資料庫不儲存完整提示詞或生成結果。",
+        "ja": "- **明確な状態：** `idle`、`busy`、`offline`、`unknown`、`stopping` と、実行中・待機中のリクエスト数、送信元、ID を表示します。\n- **実行中の処理を奪わないローカル優先：** 現在のリクエストを完了させてから、待機中のローカルをリモートより先に実行します。同じ区分では FIFO です。将来のバッチ用に枠を予約しません。\n- **プロキシ専用入口：** FRP、SSH トンネル、リバースプロキシは `11436` を使い、常に `remote` と判定します。クライアントのヘッダーで `local` に昇格させることはできません。\n- **自己記述型 API：** `/help`、`/.well-known/ollama-status-service`、`/openapi.json` が機能、キュー上限、再試行ルールを説明します。\n- **便利なトレイ表示：** 色付き記号、キュー数、ダッシュボード、ログ、サービス操作を提供します。トレイを終了してもバックグラウンドサービスは停止しません。\n- **実用的なインストーラー：** モデルパスと検出元の表示、パッケージの整合性検証、アップグレード前チェック、単一ウィンドウでの進捗表示を備えます。\n- **慎重な復旧：** 実行状態が不明な場合は SQLite に永続化し、復旧まで新しい処理を止めます。リクエスト DB にプロンプト全文や生成結果は保存しません。",
+        "ko": "- **명확한 상태:** `idle`, `busy`, `offline`, `unknown`, `stopping`과 실행 중/대기 중 요청 수, 출처 및 ID를 제공합니다.\n- **실행 중 작업을 중단하지 않는 로컬 우선:** 현재 요청이 먼저 완료되며, 대기 중 로컬 요청이 원격 요청보다 먼저 실행됩니다. 같은 종류에서는 FIFO 순서입니다. 미래 배치를 위해 자리를 예약하지 않습니다.\n- **프록시 전용 진입점:** FRP, SSH 터널, 역방향 프록시는 `11436`을 사용하며 항상 `remote`로 분류됩니다. 클라이언트 헤더로 요청을 `local`로 승격할 수 없습니다.\n- **자체 설명 API:** `/help`, `/.well-known/ollama-status-service`, `/openapi.json`에서 기능, 큐 제한, 재시도 규칙을 안내합니다.\n- **유용한 트레이 표시:** 색상 아이콘, 큐 수, 대시보드, 로그, 서비스 제어를 제공합니다. 트레이를 닫아도 백그라운드 서비스는 중지되지 않습니다.\n- **실용적인 설치 프로그램:** 출처가 표시되는 모델 경로 검색, 패키지 무결성 확인, 업그레이드 사전 검사, 단일 창 진행 표시를 제공합니다.\n- **신중한 복구:** 실행이 불확실하면 SQLite에 기록하고 복구할 때까지 새 작업을 차단합니다. 요청 데이터베이스에 전체 프롬프트나 생성 응답을 저장하지 않습니다.",
+        "de": "- **Verlässlicher Zustand:** `idle`, `busy`, `offline`, `unknown` und `stopping` sowie Anzahl, Herkunft und IDs aktiver und wartender Anfragen.\n- **Lokaler Vorrang ohne Verdrängung:** Die aktive Anfrage endet zuerst; wartende lokale Anfragen stehen vor entfernten, innerhalb jeder Klasse gilt FIFO. Keine Reservierung für zukünftige Stapel.\n- **Eigener Proxy-Eingang:** FRP, SSH-Tunnel und Reverse-Proxys verwenden `11436` und gelten immer als `remote`. Client-Header können eine Anfrage nicht zu `local` aufwerten.\n- **Selbstbeschreibende API:** `/help`, `/.well-known/ollama-status-service` und `/openapi.json` erläutern Fähigkeiten, Warteschlangenlimits und Wiederholungsregeln.\n- **Nützliche Tray-Rückmeldungen:** Farbsymbole, Warteschlangenzähler, Dashboard, Protokolle und Dienststeuerung. Das Schließen des Trays beendet keine Hintergrunddienste.\n- **Praktischer Installer:** Modellpfaderkennung mit Herkunftsangabe, Paketprüfung, Upgrade-Vorabprüfung und ein gemeinsames Fortschrittsfenster.\n- **Vorsichtige Wiederherstellung:** Unklare Ausführungen werden in SQLite gespeichert und blockieren neue Arbeit bis zur Wiederherstellung. Vollständige Prompts und generierte Antworten werden nicht in der Anfragedatenbank gespeichert.",
+        "fr": "- **État fiable :** `idle`, `busy`, `offline`, `unknown` et `stopping`, avec nombre, origine et identifiants des requêtes actives et en attente.\n- **Priorité locale sans préemption :** la requête active se termine d’abord ; les requêtes locales en attente précèdent les distantes, avec FIFO dans chaque catégorie. Aucun créneau n’est réservé aux lots futurs.\n- **Entrée dédiée aux proxys :** FRP, tunnels SSH et reverse proxys utilisent `11436` et sont toujours classés `remote`. Les en-têtes clients ne peuvent pas promouvoir une requête en `local`.\n- **API descriptive :** `/help`, `/.well-known/ollama-status-service` et `/openapi.json` décrivent les capacités, limites de file et règles de nouvelle tentative.\n- **Notification utile :** symboles colorés, compteurs de file, tableau de bord, journaux et commandes des services. Fermer l’application de notification n’arrête pas les services en arrière-plan.\n- **Installation pratique :** détection du chemin des modèles avec sa provenance, contrôle d’intégrité, vérification avant mise à niveau et fenêtre unique de progression.\n- **Récupération prudente :** les exécutions incertaines sont enregistrées dans SQLite et bloquent les nouvelles tâches jusqu’à récupération. La base des requêtes ne conserve ni prompts complets ni réponses générées.",
+        "es": "- **Estado fiable:** `idle`, `busy`, `offline`, `unknown` y `stopping`, con número, origen e identificadores de solicitudes activas y en cola.\n- **Prioridad local sin interrupción:** la solicitud activa termina primero; las locales en espera preceden a las remotas, con FIFO dentro de cada clase. No se reservan turnos para lotes futuros.\n- **Entrada exclusiva para proxies:** FRP, túneles SSH y proxies inversos usan `11436` y siempre se clasifican como `remote`. Las cabeceras del cliente no pueden convertir una solicitud en `local`.\n- **API autodescriptiva:** `/help`, `/.well-known/ollama-status-service` y `/openapi.json` describen capacidades, límites de cola y reglas de reintento.\n- **Información útil en la bandeja:** símbolos de colores, contadores de cola, panel, registros y control de servicios. Cerrar la bandeja no detiene los servicios en segundo plano.\n- **Instalador práctico:** detección de rutas de modelos con su procedencia, comprobación de integridad, revisión previa a actualizar y una única ventana de progreso.\n- **Recuperación prudente:** la ejecución incierta se guarda en SQLite y bloquea trabajo nuevo hasta recuperarse. La base de solicitudes no almacena prompts completos ni respuestas generadas."
+      }
+    },
+    {
+      "id": "b15",
+      "text": {
+        "en": "| Tray | Meaning |\n| --- | --- |\n| ![Idle][link10] | Idle |\n| ![Busy][link11] | Busy / requests queued |\n| ![Offline][link12] | Backend unavailable |\n| ![Unknown][link13] | Completion uncertain; recovery required |",
+        "zh-CN": "| 托盘 | 含义 |\n| --- | --- |\n| ![空闲][link10] | 空闲 |\n| ![忙碌][link11] | 正在执行或有请求排队 |\n| ![离线][link12] | 后端不可用 |\n| ![未知][link13] | 无法确认完成，需要恢复 |",
+        "zh-TW": "| 系統匣 | 含義 |\n| --- | --- |\n| ![空閒][link10] | 空閒 |\n| ![忙碌][link11] | 正在執行或有請求排隊 |\n| ![離線][link12] | 後端不可用 |\n| ![未知][link13] | 無法確認完成，需要恢復 |",
+        "ja": "| トレイ | 意味 |\n| --- | --- |\n| ![待機][link10] | アイドル |\n| ![処理中][link11] | 処理中／リクエスト待機あり |\n| ![オフライン][link12] | バックエンド利用不可 |\n| ![不明][link13] | 完了不明、復旧が必要 |",
+        "ko": "| 트레이 | 의미 |\n| --- | --- |\n| ![유휴][link10] | 유휴 |\n| ![작업 중][link11] | 작업 중 / 대기 요청 있음 |\n| ![오프라인][link12] | 백엔드 사용 불가 |\n| ![알 수 없음][link13] | 완료 여부 불확실, 복구 필요 |",
+        "de": "| Tray | Bedeutung |\n| --- | --- |\n| ![Frei][link10] | Frei |\n| ![Beschäftigt][link11] | Beschäftigt / Anfragen warten |\n| ![Offline][link12] | Backend nicht verfügbar |\n| ![Unklar][link13] | Abschluss unklar; Wiederherstellung erforderlich |",
+        "fr": "| Icône | Signification |\n| --- | --- |\n| ![Libre][link10] | Libre |\n| ![Occupé][link11] | Occupé / requêtes en attente |\n| ![Hors ligne][link12] | Backend indisponible |\n| ![Inconnu][link13] | Fin incertaine ; récupération nécessaire |",
+        "es": "| Bandeja | Significado |\n| --- | --- |\n| ![Libre][link10] | Libre |\n| ![Ocupado][link11] | Ocupado / solicitudes en cola |\n| ![Sin conexión][link12] | Backend no disponible |\n| ![Desconocido][link13] | Finalización incierta; requiere recuperación |"
+      }
+    },
+    {
+      "id": "b16",
+      "text": {
+        "en": "## Architecture",
+        "zh-CN": "## 架构",
+        "zh-TW": "## 架構",
+        "ja": "## 構成",
+        "ko": "## 구성",
+        "de": "## Architektur",
+        "fr": "## Architecture",
+        "es": "## Arquitectura"
+      }
+    },
+    {
+      "id": "b17",
+      "text": {
+        "en": "```mermaid\nflowchart LR\n    L[Local clients] --> D[11434: socket-based origin]\n    N[Direct network clients] --> D\n    R[Remote clients] --> P[FRP / reverse proxy]\n    P --> I[127.0.0.1:11436: always remote]\n    D --> Q[One shared scheduler and request store]\n    D --> T[Parallel pull/push transfers]\n    I --> Q\n    I --> T\n    T --> O\n    Q --> O[Existing Ollama on 127.0.0.1:11435]\n```",
+        "zh-CN": "```mermaid\nflowchart LR\n    L[本机客户端] --> D[11434：按 Socket 判断来源]\n    N[网络直连客户端] --> D\n    R[远端客户端] --> P[FRP / 反向代理]\n    P --> I[127.0.0.1:11436：固定 remote]\n    D --> Q[共享调度器和请求库]\n    D --> T[并行 pull/push 传输]\n    I --> Q\n    I --> T\n    T --> O\n    Q --> O[已有 Ollama：127.0.0.1:11435]\n```",
+        "zh-TW": "```mermaid\nflowchart LR\n    L[本機用戶端] --> D[11434：依 Socket 判定來源]\n    N[網路直連用戶端] --> D\n    R[遠端用戶端] --> P[FRP / 反向代理]\n    P --> I[127.0.0.1:11436：固定 remote]\n    D --> Q[共用排程器與請求資料庫]\n    D --> T[平行 pull/push 傳輸]\n    I --> Q\n    I --> T\n    T --> O\n    Q --> O[現有 Ollama：127.0.0.1:11435]\n```",
+        "ja": "```mermaid\nflowchart LR\n    L[ローカルクライアント] --> D[11434: ソケットによる送信元判定]\n    N[ネットワーク直接接続] --> D\n    R[リモートクライアント] --> P[FRP / リバースプロキシ]\n    P --> I[127.0.0.1:11436: 常に remote]\n    D --> Q[共通スケジューラーとリクエスト DB]\n    D --> T[並列 pull/push 転送]\n    I --> Q\n    I --> T\n    T --> O\n    Q --> O[既存 Ollama: 127.0.0.1:11435]\n```",
+        "ko": "```mermaid\nflowchart LR\n    L[로컬 클라이언트] --> D[11434: 소켓 기준 출처 판정]\n    N[직접 네트워크 클라이언트] --> D\n    R[원격 클라이언트] --> P[FRP / 역방향 프록시]\n    P --> I[127.0.0.1:11436: 항상 remote]\n    D --> Q[공유 스케줄러 및 요청 저장소]\n    D --> T[병렬 pull/push 전송]\n    I --> Q\n    I --> T\n    T --> O\n    Q --> O[기존 Ollama: 127.0.0.1:11435]\n```",
+        "de": "```mermaid\nflowchart LR\n    L[Lokale Clients] --> D[11434: Herkunft vom Socket]\n    N[Direkte Netzwerkclients] --> D\n    R[Entfernte Clients] --> P[FRP / Reverse-Proxy]\n    P --> I[127.0.0.1:11436: immer remote]\n    D --> Q[Gemeinsamer Planer und Anfragespeicher]\n    D --> T[Parallele pull/push-Übertragungen]\n    I --> Q\n    I --> T\n    T --> O\n    Q --> O[Vorhandenes Ollama: 127.0.0.1:11435]\n```",
+        "fr": "```mermaid\nflowchart LR\n    L[Clients locaux] --> D[11434: origine du socket]\n    N[Clients réseau directs] --> D\n    R[Clients distants] --> P[FRP / reverse proxy]\n    P --> I[127.0.0.1:11436: toujours remote]\n    D --> Q[Ordonnanceur et stockage communs]\n    D --> T[Transferts pull/push parallèles]\n    I --> Q\n    I --> T\n    T --> O\n    Q --> O[Ollama existant: 127.0.0.1:11435]\n```",
+        "es": "```mermaid\nflowchart LR\n    L[Clientes locales] --> D[11434: origen según socket]\n    N[Clientes de red directos] --> D\n    R[Clientes remotos] --> P[FRP / proxy inverso]\n    P --> I[127.0.0.1:11436: siempre remote]\n    D --> Q[Planificador y registro compartidos]\n    D --> T[Transferencias pull/push paralelas]\n    I --> Q\n    I --> T\n    T --> O\n    Q --> O[Ollama existente: 127.0.0.1:11435]\n```"
+      }
+    },
+    {
+      "id": "b18",
+      "text": {
+        "en": "| Port | Default role | Origin |\n| --- | --- | --- |\n| `11434` | IPv4/IPv6 direct gateway | Real socket peer; use loopback for local clients |\n| `11436` | IPv4 loopback proxy ingress | Always `remote` |\n| `11435` | IPv4 loopback Ollama backend | Internal only; do not bypass the gateway |",
+        "zh-CN": "| 端口 | 默认用途 | 来源分类 |\n| --- | --- | --- |\n| `11434` | IPv4/IPv6 直连网关 | 按真实 Socket 对端判断；本机客户端使用回环地址 |\n| `11436` | IPv4 回环代理入口 | 固定为 `remote` |\n| `11435` | IPv4 回环 Ollama 后端 | 仅供内部使用，不应绕过网关 |",
+        "zh-TW": "| 埠 | 預設用途 | 來源分類 |\n| --- | --- | --- |\n| `11434` | IPv4/IPv6 直連閘道器 | 按真實 Socket 對端判斷；本機用戶端使用迴環位址 |\n| `11436` | IPv4 迴環代理入口 | 固定為 `remote` |\n| `11435` | IPv4 迴環 Ollama 後端 | 僅供內部使用，不應繞過閘道器 |",
+        "ja": "| ポート | 標準の役割 | 送信元判定 |\n| --- | --- | --- |\n| `11434` | IPv4/IPv6 直接接続ゲートウェイ | 実際のソケット相手を使用。ローカルクライアントはループバックを使用 |\n| `11436` | IPv4 ループバックのプロキシ入口 | 常に `remote` |\n| `11435` | IPv4 ループバックの Ollama バックエンド | 内部専用。ゲートウェイを迂回しないこと |",
+        "ko": "| 포트 | 기본 역할 | 출처 |\n| --- | --- | --- |\n| `11434` | IPv4/IPv6 직접 접속 게이트웨이 | 실제 소켓 상대 기준; 로컬 클라이언트는 루프백 사용 |\n| `11436` | IPv4 루프백 프록시 진입점 | 항상 `remote` |\n| `11435` | IPv4 루프백 Ollama 백엔드 | 내부 전용; 게이트웨이를 우회하지 않음 |",
+        "de": "| Port | Standardaufgabe | Herkunft |\n| --- | --- | --- |\n| `11434` | Direkter IPv4/IPv6-Gateway-Zugang | Tatsächlicher Socket-Gegenpart; lokale Clients verwenden Loopback |\n| `11436` | IPv4-Loopback-Proxy-Eingang | Immer `remote` |\n| `11435` | Ollama-Backend auf IPv4-Loopback | Nur intern; das Gateway nicht umgehen |",
+        "fr": "| Port | Rôle par défaut | Origine |\n| --- | --- | --- |\n| `11434` | Passerelle directe IPv4/IPv6 | Pair réel du socket ; utiliser le bouclage pour les clients locaux |\n| `11436` | Entrée proxy sur bouclage IPv4 | Toujours `remote` |\n| `11435` | Backend Ollama sur bouclage IPv4 | Usage interne uniquement ; ne pas contourner la passerelle |",
+        "es": "| Puerto | Función predeterminada | Origen |\n| --- | --- | --- |\n| `11434` | Pasarela directa IPv4/IPv6 | Extremo real del socket; usar bucle local para clientes locales |\n| `11436` | Entrada proxy en bucle local IPv4 | Siempre `remote` |\n| `11435` | Backend Ollama en bucle local IPv4 | Solo interno; no eludir la pasarela |"
+      }
+    },
+    {
+      "id": "b19",
+      "text": {
+        "en": "The two gateway listeners share one process, lifecycle, execution limit and queue. This is request-level scheduling, not distributed GPU memory. Multi-machine selection remains the client's responsibility; a standard-library example is in [`examples/route_request.py`][link14].",
+        "zh-CN": "两个网关监听入口共用一个进程、生命周期、执行限制和队列。这是请求级调度，不是多机显存拼接。选择哪台机器仍由客户端负责；仅使用标准库的示例见 [`examples/route_request.py`][link14]。",
+        "zh-TW": "兩個閘道器監聽入口共用一個程序、生命週期、執行限制和佇列。這是請求級排程，不是多機視訊記憶體拼接。選擇哪臺機器仍由用戶端負責；僅使用標準庫的示例見 [`examples/route_request.py`][link14]。",
+        "ja": "2 つのゲートウェイリスナーは、プロセス、ライフサイクル、実行上限、キューを共有します。これはリクエスト単位のスケジュールであり、GPU メモリの分散共有ではありません。複数マシンの選択はクライアントの責任です。標準ライブラリのみを使う例は [`examples/route_request.py`][link14] にあります。",
+        "ko": "두 게이트웨이 리스너는 프로세스, 수명 주기, 실행 제한, 큐를 공유합니다. 이는 요청 단위 스케줄링이며 분산 GPU 메모리가 아닙니다. 여러 컴퓨터 중 선택하는 책임은 클라이언트에 있습니다. 표준 라이브러리만 사용하는 예제는 [`examples/route_request.py`][link14]에 있습니다.",
+        "de": "Beide Gateway-Listener teilen einen Prozess, Lebenszyklus, Ausführungslimit und Warteschlange. Dies ist Planung einzelner Anfragen, kein verteilter GPU-Speicher. Die Auswahl zwischen mehreren Rechnern bleibt Aufgabe des Clients; ein Beispiel nur mit Standardbibliothek steht in [`examples/route_request.py`][link14].",
+        "fr": "Les deux écouteurs partagent le même processus, cycle de vie, plafond d’exécution et file. Il s’agit d’ordonnancement de requêtes, pas de mémoire GPU distribuée. Le choix entre plusieurs machines reste à la charge du client ; un exemple utilisant uniquement la bibliothèque standard figure dans [`examples/route_request.py`][link14].",
+        "es": "Los dos puntos de escucha comparten proceso, ciclo de vida, límite de ejecución y cola. Se organizan solicitudes, no memoria GPU distribuida. La selección entre varias máquinas sigue siendo responsabilidad del cliente; hay un ejemplo que solo usa la biblioteca estándar en [`examples/route_request.py`][link14]."
+      }
+    },
+    {
+      "id": "b20",
+      "text": {
+        "en": "## Install or upgrade",
+        "zh-CN": "## 安装或升级",
+        "zh-TW": "## 安裝或升級",
+        "ja": "## インストール／アップグレード",
+        "ko": "## 설치 또는 업그레이드",
+        "de": "## Installation oder Upgrade",
+        "fr": "## Installer ou mettre à niveau",
+        "es": "## Instalar o actualizar"
+      }
+    },
+    {
+      "id": "b21",
+      "text": {
+        "en": "Requirements: Windows 10/11 x64 or Windows Server with a desktop, an existing Ollama installation and local models, Windows PowerShell 5.1, .NET Framework 4.8, and administrator access for installation. Task Scheduler and Windows Firewall management must be available.",
+        "zh-CN": "环境要求：Windows 10/11 x64 或带桌面的 Windows Server、已有 Ollama 和本地模型、Windows PowerShell 5.1、.NET Framework 4.8，以及安装所需的管理员权限。系统必须提供任务计划程序和 Windows 防火墙管理功能。",
+        "zh-TW": "環境要求：Windows 10/11 x64 或帶桌面的 Windows Server、已有 Ollama 和本地模型、Windows PowerShell 5.1、.NET Framework 4.8，以及安裝所需的管理員權限。系統必須提供任務計劃程式和 Windows 防火牆管理功能。",
+        "ja": "必要環境：Windows 10/11 x64 またはデスクトップ付き Windows Server、既存の Ollama とローカルモデル、Windows PowerShell 5.1、.NET Framework 4.8、インストール時の管理者権限。タスクスケジューラと Windows ファイアウォールの管理機能も必要です。",
+        "ko": "요구 사항: Windows 10/11 x64 또는 데스크톱이 있는 Windows Server, 기존 Ollama와 로컬 모델, Windows PowerShell 5.1, .NET Framework 4.8, 설치용 관리자 권한. 작업 스케줄러와 Windows 방화벽 관리 기능도 사용할 수 있어야 합니다.",
+        "de": "Voraussetzungen: Windows 10/11 x64 oder Windows Server mit Desktop, vorhandenes Ollama und lokale Modelle, Windows PowerShell 5.1, .NET Framework 4.8 sowie Administratorrechte für die Installation. Aufgabenplanung und Windows-Firewall-Verwaltung müssen verfügbar sein.",
+        "fr": "Prérequis : Windows 10/11 x64 ou Windows Server avec bureau, Ollama déjà installé et modèles locaux, Windows PowerShell 5.1, .NET Framework 4.8 et droits administrateur pour l’installation. Le Planificateur de tâches et la gestion du pare-feu Windows doivent être disponibles.",
+        "es": "Requisitos: Windows 10/11 x64 o Windows Server con escritorio, Ollama instalado y modelos locales, Windows PowerShell 5.1, .NET Framework 4.8 y permisos de administrador para instalar. Deben estar disponibles el Programador de tareas y la administración del Firewall de Windows."
+      }
+    },
+    {
+      "id": "b22",
+      "text": {
+        "en": "1. Download the release ZIP and its `.sha256.txt`. Verify the ZIP with `Get-FileHash -Algorithm SHA256` and compare it with the supplied checksum.\n2. Pause new submissions and let running and queued work finish. Extract the **whole** archive to a new folder, outside the installed program directory.\n3. Run **`Install.exe`**. Check the detected Ollama executable and model directory, then approve the Windows UAC prompt. For an existing installation, the same executable offers the upgrade flow.\n4. Open the tray icon, or visit `http://127.0.0.1:11434/dashboard`. The runtime, dependencies and service wrapper are bundled; installation does not download them.\n5. For FRP or another same-machine proxy, migrate its local destination to `127.0.0.1:11436`, then verify origin before resuming clients.",
+        "zh-CN": "1. 下载发布 ZIP 及其 `.sha256.txt` 文件。使用 `Get-FileHash -Algorithm SHA256` 计算 ZIP 的哈希，与提供的校验值比较。\n2. 暂停提交新任务，等待执行中和排队中的任务完成。将**整个**压缩包解压到新的文件夹，不要放进已安装的程序目录。\n3. 运行 **`Install.exe`**，核对识别出的 Ollama 程序和模型目录，然后确认 Windows UAC 提示。已有安装也使用同一个程序进入升级流程。\n4. 打开托盘图标，或访问 `http://127.0.0.1:11434/dashboard`。运行时、依赖和服务包装器已包含在安装包内，安装时无需下载。\n5. FRP 或其他同机代理的本地回源改为 `127.0.0.1:11436`，验证请求来源后再恢复客户端提交。",
+        "zh-TW": "1. 下載釋出 ZIP 及其 `.sha256.txt` 檔案。使用 `Get-FileHash -Algorithm SHA256` 計算 ZIP 的雜湊，與提供的校驗值比較。\n2. 暫停提交新任務，等待執行中和排隊中的任務完成。將**整個**壓縮包解壓到新的資料夾，不要放進已安裝的程式目錄。\n3. 執行 **`Install.exe`**，核對識別出的 Ollama 程式和模型目錄，然後確認 Windows UAC 提示。已有安裝也使用同一個程式進入升級流程。\n4. 開啟系統匣圖示，或存取 `http://127.0.0.1:11434/dashboard`。執行時、依賴和服務包裝器已包含在安裝套件內，安裝時無需下載。\n5. FRP 或其他同機代理的本地回源改為 `127.0.0.1:11436`，驗證請求來源後再恢復用戶端提交。",
+        "ja": "1. リリース ZIP と `.sha256.txt` をダウンロードし、`Get-FileHash -Algorithm SHA256` で計算した ZIP のハッシュを付属の値と照合します。\n2. 新規リクエストの送信を止め、実行中と待機中の処理が終わるまで待ちます。インストール先とは別の新規フォルダーにアーカイブ**全体**を展開します。\n3. **`Install.exe`** を起動し、検出された Ollama 実行ファイルとモデルディレクトリを確認して Windows UAC を承認します。既存環境のアップグレードにも同じプログラムを使います。\n4. トレイアイコン、または `http://127.0.0.1:11434/dashboard` を開きます。ランタイム、依存関係、サービスラッパーは同梱済みで、インストール時にはダウンロードしません。\n5. FRP など同一マシンのプロキシはローカル転送先を `127.0.0.1:11436` に変更し、送信元判定を確認してからクライアントを再開します。",
+        "ko": "1. 릴리스 ZIP과 `.sha256.txt`를 다운로드합니다. `Get-FileHash -Algorithm SHA256`으로 ZIP 해시를 계산하여 제공된 체크섬과 비교합니다.\n2. 새 요청 제출을 중지하고 실행 중 및 대기 중 작업이 끝날 때까지 기다립니다. 설치된 프로그램 디렉터리 밖의 새 폴더에 압축 파일 **전체**를 풉니다.\n3. **`Install.exe`**를 실행하고 검색된 Ollama 실행 파일과 모델 디렉터리를 확인한 뒤 Windows UAC 요청을 승인합니다. 기존 설치도 같은 프로그램에서 업그레이드합니다.\n4. 트레이 아이콘을 열거나 `http://127.0.0.1:11434/dashboard`에 접속합니다. 런타임, 의존성, 서비스 래퍼가 포함되어 있어 설치 중 다운로드하지 않습니다.\n5. FRP 또는 같은 컴퓨터의 다른 프록시는 로컬 목적지를 `127.0.0.1:11436`으로 바꾸고, 출처를 확인한 뒤 클라이언트 요청을 재개합니다.",
+        "de": "1. Release-ZIP und `.sha256.txt` herunterladen. Das ZIP mit `Get-FileHash -Algorithm SHA256` prüfen und mit der mitgelieferten Prüfsumme vergleichen.\n2. Neue Aufträge pausieren und laufende sowie wartende Arbeit abschließen lassen. Das **gesamte** Archiv in einen neuen Ordner außerhalb des installierten Programmverzeichnisses entpacken.\n3. **`Install.exe`** starten, erkannte Ollama-Datei und Modellverzeichnis prüfen und die Windows-UAC-Abfrage bestätigen. Bei vorhandener Installation bietet dasselbe Programm das Upgrade an.\n4. Das Tray-Symbol öffnen oder `http://127.0.0.1:11434/dashboard` aufrufen. Laufzeit, Abhängigkeiten und Dienst-Wrapper sind enthalten; die Installation lädt sie nicht herunter.\n5. Bei FRP oder einem anderen lokalen Proxy das lokale Ziel auf `127.0.0.1:11436` umstellen und die Herkunft prüfen, bevor Clients wieder Anfragen senden.",
+        "fr": "1. Télécharger le ZIP de la version et son fichier `.sha256.txt`. Calculer le hachage du ZIP avec `Get-FileHash -Algorithm SHA256` et le comparer à la somme fournie.\n2. Suspendre les nouveaux envois et laisser finir les tâches actives et en attente. Extraire **toute** l’archive dans un nouveau dossier, en dehors du répertoire du programme installé.\n3. Exécuter **`Install.exe`**, vérifier l’exécutable Ollama et le dossier de modèles détectés, puis accepter l’invite UAC de Windows. Le même exécutable propose la mise à niveau d’une installation existante.\n4. Ouvrir l’icône de notification ou `http://127.0.0.1:11434/dashboard`. L’environnement d’exécution, les dépendances et le wrapper de service sont inclus ; l’installation ne les télécharge pas.\n5. Pour FRP ou un autre proxy sur la même machine, changer la destination locale en `127.0.0.1:11436`, puis vérifier l’origine avant de réactiver les clients.",
+        "es": "1. Descargar el ZIP de la versión y su `.sha256.txt`. Verificar el ZIP con `Get-FileHash -Algorithm SHA256` y comparar con la suma proporcionada.\n2. Pausar nuevos envíos y esperar a que terminen los trabajos activos y en cola. Extraer **todo** el archivo en una carpeta nueva, fuera del directorio del programa instalado.\n3. Ejecutar **`Install.exe`**, comprobar el ejecutable de Ollama y la carpeta de modelos detectados y aceptar la solicitud UAC de Windows. El mismo programa ofrece actualizar instalaciones existentes.\n4. Abrir el icono de bandeja o visitar `http://127.0.0.1:11434/dashboard`. El entorno de ejecución, las dependencias y el contenedor de servicio están incluidos; no se descargan al instalar.\n5. Para FRP u otro proxy en la misma máquina, cambiar su destino local a `127.0.0.1:11436` y verificar el origen antes de reactivar los clientes."
+      }
+    },
+    {
+      "id": "b23",
+      "text": {
+        "en": "The installer reuses your existing Ollama and models, changes the backend to `11435`, and installs gateway/backend services. Installation, upgrades, recovery and stopping services can interrupt work: **non-preemption applies to normal scheduling, not maintenance**. Upgrade checks reject busy/queued/unknown state and proxy-port conflicts before uninstalling. If installation fails after uninstalling the old version, the installer reports the error and retains backups; it does not promise automatic rollback.",
+        "zh-CN": "安装器复用现有 Ollama 和模型，将后端改为 `11435`，并安装网关与后端服务。安装、升级、恢复和停止服务可能中断任务：**不抢占适用于正常调度，不适用于维护操作**。升级在卸载旧版前检查忙碌、排队、未知状态和代理端口冲突。如果旧版卸载后新版安装失败，安装器会报告错误并保留备份，但不承诺自动回滚。",
+        "zh-TW": "安裝器複用現有 Ollama 和模型，將後端改為 `11435`，並安裝閘道器與後端服務。安裝、升級、恢復和停止服務可能中斷任務：**不搶佔適用於正常排程，不適用於維護操作**。升級在解除安裝舊版前檢查忙碌、排隊、未知狀態和代理埠衝突。如果舊版解除安裝後新版安裝失敗，安裝器會報告錯誤並保留備份，但不承諾自動回滾。",
+        "ja": "インストーラーは既存の Ollama とモデルを再利用し、バックエンドを `11435` に変更して、ゲートウェイとバックエンドのサービスを登録します。インストール、アップグレード、復旧、サービス停止は処理を中断する場合があります。**実行中の処理を奪わない保証は通常のスケジュールに適用され、保守作業には適用されません**。アップグレードは旧版を削除する前に、処理中・待機中・状態不明やプロキシポートの競合を検出して拒否します。旧版削除後にインストールが失敗した場合はエラーを報告しバックアップを保持しますが、自動ロールバックは保証しません。",
+        "ko": "설치 프로그램은 기존 Ollama와 모델을 재사용하고 백엔드를 `11435`로 변경하며 게이트웨이/백엔드 서비스를 설치합니다. 설치, 업그레이드, 복구, 서비스 중지는 작업을 중단할 수 있습니다. **비선점은 정상 스케줄링에 적용되며 유지보수에는 적용되지 않습니다.** 업그레이드는 기존 버전을 제거하기 전에 작업 중/대기 중/불확실 상태와 프록시 포트 충돌을 검사하여 거부합니다. 이전 버전 제거 후 설치가 실패하면 오류를 알리고 백업을 유지하지만 자동 롤백을 보장하지 않습니다.",
+        "de": "Der Installer verwendet vorhandenes Ollama und Modelle, verlegt das Backend auf `11435` und installiert Gateway- und Backend-Dienste. Installation, Upgrade, Wiederherstellung und Dienststopp können Arbeit unterbrechen: **Nichtverdrängung gilt für normale Planung, nicht für Wartung**. Die Upgrade-Vorabprüfung lehnt beschäftigte, wartende oder unklare Zustände und Proxy-Portkonflikte vor der Deinstallation ab. Scheitert die Installation nach Entfernung der alten Version, meldet der Installer den Fehler und behält Sicherungen; ein automatisches Rollback wird nicht zugesichert.",
+        "fr": "L’installateur réutilise Ollama et les modèles existants, déplace le backend vers `11435` et installe les services de passerelle et de backend. Installation, mise à niveau, récupération et arrêt des services peuvent interrompre le travail : **l’absence de préemption concerne l’ordonnancement normal, pas la maintenance**. Les contrôles de mise à niveau refusent les états occupés, en attente ou inconnus et les conflits du port proxy avant toute désinstallation. Si l’installation échoue après suppression de l’ancienne version, l’erreur est signalée et les sauvegardes sont conservées ; aucun retour arrière automatique n’est garanti.",
+        "es": "El instalador reutiliza Ollama y los modelos existentes, mueve el backend a `11435` e instala los servicios de pasarela y backend. Instalar, actualizar, recuperar o detener servicios puede interrumpir trabajo: **la ausencia de interrupción se aplica a la planificación normal, no al mantenimiento**. La revisión previa rechaza estados ocupados, con cola o desconocidos y conflictos del puerto proxy antes de desinstalar. Si la instalación falla después de eliminar la versión anterior, se informa del error y se conservan copias de seguridad; no se promete una reversión automática."
+      }
+    },
+    {
+      "id": "b24",
+      "text": {
+        "en": "Run **`Uninstall.exe`** to remove this service and restore backed-up integration settings. The original Ollama installation and models are retained. Detailed Chinese instructions: [deployment guide][link15], [AI integration guide][link16].",
+        "zh-CN": "运行 **`Uninstall.exe`** 可移除本服务并恢复备份的集成设置，原 Ollama 安装和模型保留。中文详细说明见[部署指南][link15]和 [AI 接入指南][link16]。",
+        "zh-TW": "執行 **`Uninstall.exe`** 可移除本服務並恢復備份的整合設定，原 Ollama 安裝和模型保留。中文詳細說明見[部署指南][link15]和 [AI 接入指南][link16]。",
+        "ja": "**`Uninstall.exe`** で本サービスを削除し、バックアップした連携設定を復元します。元の Ollama とモデルは保持します。中国語の詳細説明は[導入ガイド][link15]と [AI 連携ガイド][link16]を参照してください。",
+        "ko": "**`Uninstall.exe`**를 실행하면 이 서비스를 제거하고 백업한 통합 설정을 복원합니다. 원래 Ollama 설치와 모델은 유지됩니다. 중국어 상세 안내는 [배포 가이드][link15]와 [AI 연동 가이드][link16]를 참조하세요.",
+        "de": "**`Uninstall.exe`** entfernt diesen Dienst und stellt gesicherte Integrationseinstellungen wieder her. Die ursprüngliche Ollama-Installation und Modelle bleiben erhalten. Ausführliche chinesische Anleitungen: [Bereitstellung][link15] und [KI-Integration][link16].",
+        "fr": "Exécuter **`Uninstall.exe`** pour retirer ce service et restaurer les paramètres d’intégration sauvegardés. L’installation Ollama et les modèles d’origine sont conservés. Instructions détaillées en chinois : [déploiement][link15] et [intégration IA][link16].",
+        "es": "Ejecute **`Uninstall.exe`** para quitar este servicio y restaurar la configuración de integración respaldada. Se conservan la instalación original de Ollama y los modelos. Instrucciones detalladas en chino: [guía de despliegue][link15] y [guía de integración de IA][link16]."
+      }
+    },
+    {
+      "id": "b25",
+      "text": {
+        "en": "Model permissions are granted only to **LocalService (`S-1-5-19`)** with **Modify**, including protected child directories/files. Original rules are recorded before changes and restored on uninstall or failed installation; unrelated accounts, ownership and inheritance protection are retained. A temporary task tests real service-account access and is removed after the check. Explicit denies/encryption can still block access and produce a path-specific error. Model-tree junctions/reparse points are rejected; select the actual directory instead.",
+        "zh-CN": "模型权限仅向 **LocalService（`S-1-5-19`）** 授予**修改（Modify）**，包括受保护的子目录和文件。修改前记录原规则，在卸载或安装失败时恢复；其他账户、所有者和继承保护保持不变。临时任务会验证真实服务账户的访问能力，检查后移除。显式拒绝或加密仍可能阻止访问，此时报告具体路径的错误。模型目录树不允许目录联接或重解析点，请选择实际目录。",
+        "zh-TW": "模型權限僅向 **LocalService（`S-1-5-19`）** 授予**修改（Modify）**，包括受保護的子目錄和檔案。修改前記錄原規則，在解除安裝或安裝失敗時恢復；其他帳戶、所有者和繼承保護保持不變。臨時任務會驗證真實服務帳戶的存取能力，檢查後移除。顯式拒絕或加密仍可能阻止存取，此時報告具體路徑的錯誤。模型目錄樹不允許目錄聯接或重解析點，請選擇實際目錄。",
+        "ja": "モデルへの権限は **LocalService（`S-1-5-19`）** にのみ**変更（Modify）**として付与し、保護された子ディレクトリやファイルも対象にします。変更前に元の規則を記録し、アンインストール時やインストール失敗時に復元します。他のアカウント、所有者、継承の保護は維持します。一時タスクで実際のサービスアカウントからアクセスを確認し、終了後に削除します。明示的な拒否や暗号化によってアクセスできない場合は対象パスのエラーを報告します。モデルツリー内のジャンクションや再解析ポイントは拒否するため、実体のディレクトリを指定してください。",
+        "ko": "모델 권한은 **LocalService (`S-1-5-19`)**에만 **수정(Modify)** 권한으로 부여하며 보호된 하위 폴더와 파일도 포함합니다. 변경 전에 원래 규칙을 기록하고 제거 또는 설치 실패 시 복원합니다. 다른 계정, 소유자, 상속 보호는 유지합니다. 임시 작업으로 실제 서비스 계정 접근을 검사하고 검사 후 제거합니다. 명시적 거부나 암호화는 여전히 접근을 막을 수 있으며 해당 경로를 포함한 오류가 표시됩니다. 모델 트리의 디렉터리 연결 및 재분석 지점은 허용하지 않으므로 실제 디렉터리를 선택하세요.",
+        "de": "Modellberechtigungen werden ausschließlich **LocalService (`S-1-5-19`)** als **Ändern (Modify)** erteilt, einschließlich geschützter Unterverzeichnisse und Dateien. Originalregeln werden vorher aufgezeichnet und bei Deinstallation oder fehlgeschlagener Installation wiederhergestellt; andere Konten, Eigentümer und Vererbungsschutz bleiben erhalten. Eine temporäre Aufgabe prüft den tatsächlichen Dienstkontozugriff und wird danach entfernt. Explizite Verweigerungen oder Verschlüsselung können weiterhin blockieren und einen pfadbezogenen Fehler auslösen. Junctions und Reparse Points im Modellbaum werden abgelehnt; wählen Sie das tatsächliche Verzeichnis.",
+        "fr": "Les droits sur les modèles sont accordés uniquement à **LocalService (`S-1-5-19`)** avec **Modification (Modify)**, y compris les sous-dossiers et fichiers protégés. Les règles d’origine sont enregistrées avant modification et restaurées à la désinstallation ou en cas d’échec ; les autres comptes, propriétaires et protections d’héritage sont préservés. Une tâche temporaire vérifie l’accès réel du compte de service puis est supprimée. Un refus explicite ou le chiffrement peut encore bloquer l’accès, avec une erreur indiquant le chemin. Les jonctions et points d’analyse dans l’arborescence des modèles sont refusés ; sélectionner le dossier réel.",
+        "es": "Los permisos de los modelos se conceden únicamente a **LocalService (`S-1-5-19`)** con **Modificar (Modify)**, incluidos subdirectorios y archivos protegidos. Las reglas originales se registran antes del cambio y se restauran al desinstalar o si falla la instalación; se mantienen las demás cuentas, propietarios y protecciones de herencia. Una tarea temporal prueba el acceso real de la cuenta de servicio y después se elimina. Las denegaciones explícitas o el cifrado aún pueden impedir el acceso y generar un error con la ruta afectada. Se rechazan uniones de directorio y puntos de reanálisis en el árbol de modelos; seleccione el directorio real."
+      }
+    },
+    {
+      "id": "b26",
+      "text": {
+        "en": "## FRP and reverse-proxy setup",
+        "zh-CN": "## FRP 与反向代理设置",
+        "zh-TW": "## FRP 與反向代理設定",
+        "ja": "## FRP とリバースプロキシの設定",
+        "ko": "## FRP 및 역방향 프록시 설정",
+        "de": "## FRP und Reverse-Proxy einrichten",
+        "fr": "## Configuration de FRP et des reverse proxys",
+        "es": "## Configurar FRP y el proxy inverso"
+      }
+    },
+    {
+      "id": "b27",
+      "text": {
+        "en": "For the existing Ollama proxy entry on **each server**, change only the local destination:",
+        "zh-CN": "在**每台服务器**现有的 Ollama 代理条目中，只修改本地回源目标：",
+        "zh-TW": "在**每臺伺服器**現有的 Ollama 代理條目中，只修改本地回源目標：",
+        "ja": "**各サーバー**の既存 Ollama プロキシ設定で、ローカル転送先だけを変更します：",
+        "ko": "**각 서버**의 기존 Ollama 프록시 항목에서 로컬 목적지만 변경합니다.",
+        "de": "Ändern Sie im vorhandenen Ollama-Proxy-Eintrag auf **jedem Server** nur das lokale Ziel:",
+        "fr": "Dans l’entrée proxy Ollama existante de **chaque serveur**, changer uniquement la destination locale :",
+        "es": "En la entrada proxy Ollama existente de **cada servidor**, cambie únicamente el destino local:"
+      }
+    },
+    {
+      "id": "b28",
+      "literal": "```toml\nlocalIP = \"127.0.0.1\"\nlocalPort = 11436\n```"
+    },
+    {
+      "id": "b29",
+      "text": {
+        "en": "For INI configurations, use `local_ip` and `local_port`. Preserve the existing proxy name, type, public port/domain, authentication and TLS configuration. External client URLs normally stay the same. Examples are configuration fragments, not replacement files: [`frpc-ollama.toml`][link17], [`frpc-ollama.ini`][link18].",
+        "zh-CN": "INI 配置对应 `local_ip` 和 `local_port`。保留原代理名称、类型、公网端口或域名、认证及 TLS 配置，外部客户端 URL 通常不变。下列示例是配置片段，不应整文件替换：[`frpc-ollama.toml`][link17]、[`frpc-ollama.ini`][link18]。",
+        "zh-TW": "INI 設定對應 `local_ip` 和 `local_port`。保留原代理名稱、型別、公網埠或域名、認證及 TLS 設定，外部用戶端 URL 通常不變。下列示例是設定片段，不應整檔案替換：[`frpc-ollama.toml`][link17]、[`frpc-ollama.ini`][link18]。",
+        "ja": "INI では `local_ip` と `local_port` を使います。既存のプロキシ名、種類、公開ポート／ドメイン、認証、TLS 設定を維持してください。外部クライアントの URL は通常そのままです。例は設定断片であり、ファイル全体の置き換え用ではありません：[`frpc-ollama.toml`][link17]、[`frpc-ollama.ini`][link18]。",
+        "ko": "INI 설정에서는 `local_ip`와 `local_port`를 사용합니다. 기존 프록시 이름, 종류, 공개 포트/도메인, 인증, TLS 설정은 유지합니다. 외부 클라이언트 URL은 보통 바뀌지 않습니다. 예제는 전체 교체용 파일이 아니라 설정 조각입니다: [`frpc-ollama.toml`][link17], [`frpc-ollama.ini`][link18].",
+        "de": "Bei INI heißen die Felder `local_ip` und `local_port`. Proxy-Name, Typ, öffentlicher Port/Domain, Authentifizierung und TLS bleiben erhalten. Externe Client-URLs ändern sich normalerweise nicht. Die Beispiele sind Konfigurationsfragmente, keine Ersatzdateien: [`frpc-ollama.toml`][link17], [`frpc-ollama.ini`][link18].",
+        "fr": "En configuration INI, utiliser `local_ip` et `local_port`. Conserver le nom, le type, le port public/domaine, l’authentification et les paramètres TLS. Les URL des clients externes restent généralement identiques. Les exemples sont des fragments, pas des fichiers de remplacement : [`frpc-ollama.toml`][link17], [`frpc-ollama.ini`][link18].",
+        "es": "En INI se usan `local_ip` y `local_port`. Conserve el nombre, tipo, puerto público/dominio, autenticación y TLS existentes. Normalmente no cambian las URL de los clientes externos. Los ejemplos son fragmentos de configuración, no archivos de reemplazo: [`frpc-ollama.toml`][link17], [`frpc-ollama.ini`][link18]."
+      }
+    },
+    {
+      "id": "b30",
+      "text": {
+        "en": "Nginx, Caddy and SSH tunnels on the same machine should also target `11436`. An off-machine proxy requires an explicit reachable bind address and appropriately restricted firewall access. The ingress accepts ordinary HTTP, **not PROXY protocol**.",
+        "zh-CN": "同机 Nginx、Caddy 和 SSH 隧道也应回源到 `11436`。异机代理需要明确配置可达的绑定地址，并适当限制防火墙访问。此入口接收普通 HTTP，**不支持 PROXY protocol**。",
+        "zh-TW": "同機 Nginx、Caddy 和 SSH 隧道也應回源到 `11436`。異機代理需要明確設定可達的繫結位址，並適當限制防火牆存取。此入口接收普通 HTTP，**不支援 PROXY protocol**。",
+        "ja": "同一マシンの Nginx、Caddy、SSH トンネルも `11436` を転送先にします。別マシンのプロキシには、到達可能なバインドアドレスの明示的な設定と、適切に制限したファイアウォール許可が必要です。この入口は通常の HTTP を受け付け、**PROXY protocol には対応しません**。",
+        "ko": "같은 컴퓨터의 Nginx, Caddy, SSH 터널도 `11436`을 가리켜야 합니다. 다른 컴퓨터의 프록시는 접근 가능한 바인드 주소를 명시적으로 설정하고 방화벽 접근을 적절히 제한해야 합니다. 이 진입점은 일반 HTTP를 받으며 **PROXY protocol은 지원하지 않습니다**.",
+        "de": "Nginx, Caddy und SSH-Tunnel auf demselben Rechner sollen ebenfalls `11436` verwenden. Ein Proxy auf einem anderen Rechner benötigt eine ausdrücklich konfigurierte erreichbare Bind-Adresse und passend eingeschränkte Firewall-Freigaben. Der Eingang akzeptiert normales HTTP, **kein PROXY protocol**.",
+        "fr": "Nginx, Caddy et les tunnels SSH de la même machine doivent également viser `11436`. Un proxy situé sur une autre machine nécessite une adresse d’écoute explicitement accessible et des accès pare-feu convenablement limités. L’entrée accepte le HTTP ordinaire, **pas PROXY protocol**.",
+        "es": "Nginx, Caddy y túneles SSH de la misma máquina también deben apuntar a `11436`. Un proxy en otra máquina requiere una dirección de escucha accesible configurada explícitamente y acceso de firewall restringido de forma adecuada. La entrada admite HTTP normal, **no PROXY protocol**."
+      }
+    },
+    {
+      "id": "b31",
+      "literal": "```powershell\ncurl.exe --noproxy \"*\" http://127.0.0.1:11434/help\ncurl.exe --noproxy \"*\" http://127.0.0.1:11436/help\n```"
+    },
+    {
+      "id": "b32",
+      "text": {
+        "en": "Check `version=1.6.1` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.",
+        "zh-CN": "检查 `version=1.6.1`，确认两个入口的来源分别为 `request_origin=local` / `remote`，再通过现有公网代理 URL 检查 `/help`。推理期间查看 `/status.active_origin` 和 `requests[].origin`。代理若仍回源到 `11434`，回环转发仍可能被误判为本机任务。",
+        "zh-TW": "檢查 `version=1.6.1`，確認兩個入口的來源分別為 `request_origin=local` / `remote`，再透過現有公網代理 URL 檢查 `/help`。推理期間檢視 `/status.active_origin` 和 `requests[].origin`。代理若仍回源到 `11434`，迴環轉發仍可能被誤判為本機任務。",
+        "ja": "`version=1.6.1` と、各入口でそれぞれ `request_origin=local` / `remote` になることを確認し、既存の公開プロキシ URL 経由でも `/help` を確認します。推論中は `/status.active_origin` と `requests[].origin` を確認してください。プロキシが依然として `11434` を向いていると、ループバック転送をローカル処理と誤判定する場合があります。",
+        "ko": "`version=1.6.1`과 각 진입점의 `request_origin=local` / `remote`를 확인한 뒤 기존 공개 프록시 URL로 `/help`를 확인합니다. 추론 중에는 `/status.active_origin`과 `requests[].origin`을 확인하세요. 프록시가 계속 `11434`를 가리키면 루프백 전달이 로컬 작업으로 오인될 수 있습니다.",
+        "de": "Prüfen Sie `version=1.6.1` und jeweils `request_origin=local` / `remote`, anschließend `/help` über die vorhandene öffentliche Proxy-URL. Während der Inferenz prüfen Sie `/status.active_origin` und `requests[].origin`. Zeigt der Proxy weiterhin auf `11434`, kann Loopback-Weiterleitung weiterhin irrtümlich als lokale Arbeit gelten.",
+        "fr": "Vérifier `version=1.6.1` et respectivement `request_origin=local` / `remote`, puis consulter `/help` via l’URL publique du proxy existant. Pendant l’inférence, examiner `/status.active_origin` et `requests[].origin`. Si le proxy vise toujours `11434`, la transmission par bouclage peut encore être prise à tort pour une requête locale.",
+        "es": "Compruebe `version=1.6.1` y respectivamente `request_origin=local` / `remote`, después consulte `/help` a través de la URL pública del proxy existente. Durante la inferencia, revise `/status.active_origin` y `requests[].origin`. Si el proxy sigue apuntando a `11434`, el reenvío por bucle local aún puede confundirse con trabajo local."
+      }
+    },
+    {
+      "id": "b33",
+      "text": {
+        "en": "Acceptance sequence: run remote A, queue remote B, then queue local C with a positive wait timeout. A must finish uninterrupted; C runs before B. Both queued requests must remain within their wait deadline and queue capacity.",
+        "zh-CN": "验收顺序：运行远端 A，排入远端 B，再以正数等待超时排入本机 C。A 必须完整执行，不被中断；随后 C 先于 B 执行。两个排队请求都不能超过各自等待期限和队列容量限制。",
+        "zh-TW": "驗收順序：執行遠端 A，排入遠端 B，再以正數等待超時排入本機 C。A 必須完整執行，不被中斷；隨後 C 先於 B 執行。兩個排隊請求都不能超過各自等待期限和佇列容量限制。",
+        "ja": "受け入れ確認：リモート A を実行し、リモート B をキューに入れ、その後ローカル C を正の待機タイムアウトで入れます。A は中断せずに完了し、その後 C が B より先に実行される必要があります。待機中の両リクエストは待機期限とキュー容量の範囲内に収めてください。",
+        "ko": "검증 순서: 원격 A를 실행하고, 원격 B를 대기열에 넣은 뒤, 양수 대기 시간으로 로컬 C를 넣습니다. A는 중단 없이 완료되어야 하며 다음에는 C가 B보다 먼저 실행되어야 합니다. 대기 중인 두 요청은 각각의 대기 기한과 큐 용량을 넘지 않아야 합니다.",
+        "de": "Abnahmefolge: Entfernte Anfrage A ausführen, entfernte B einreihen und danach lokale C mit positiver Wartefrist einreihen. A muss ohne Unterbrechung enden; C wird vor B ausgeführt. Beide wartenden Anfragen müssen ihre Wartefrist und die Warteschlangenkapazität einhalten.",
+        "fr": "Séquence de validation : exécuter la requête distante A, mettre la distante B en file, puis la locale C avec un délai d’attente positif. A doit finir sans interruption ; C s’exécute avant B. Les deux requêtes en attente doivent respecter leur délai et la capacité de la file.",
+        "es": "Secuencia de aceptación: ejecutar la solicitud remota A, poner la remota B en cola y después la local C con un tiempo de espera positivo. A debe terminar sin interrupción; C se ejecuta antes que B. Ambas solicitudes en cola deben mantenerse dentro de su plazo y de la capacidad de la cola."
+      }
+    },
+    {
+      "id": "b34",
+      "text": {
+        "en": "## API and queue policy",
+        "zh-CN": "## API 与队列策略",
+        "zh-TW": "## API 與佇列策略",
+        "ja": "## API とキューポリシー",
+        "ko": "## API와 큐 정책",
+        "de": "## API und Warteschlangenregeln",
+        "fr": "## API et politique de file",
+        "es": "## API y política de cola"
+      }
+    },
+    {
+      "id": "b35",
+      "text": {
+        "en": "| Endpoint | Purpose |\n| --- | --- |\n| `GET /status` | Current state, readiness, active/queued counts and request metadata |\n| `GET /help` | Live limits, capabilities, origin and client guidance |\n| `GET /healthz` | Gateway liveness and this probe's origin; not proof of backend readiness |\n| `GET /dashboard` | Browser status panel |\n| `GET /manage` | Embedded multi-server and model manager; existing reverse proxy authentication |\n| `GET /api/tags`, `GET /api/ps` | Proxied Ollama model inventory / loaded models |",
+        "zh-CN": "| 接口 | 用途 |\n| --- | --- |\n| `GET /status` | 当前状态、就绪情况、执行和排队数量、请求元数据 |\n| `GET /help` | 实时限制、能力、来源和客户端接入说明 |\n| `GET /healthz` | 网关存活与本次探测的来源；不代表后端就绪 |\n| `GET /dashboard` | 浏览器状态面板 |\n| `GET /manage` | 内置多服务器和模型管理，沿用反向代理认证 |\n| `GET /api/tags`, `GET /api/ps` | 代理 Ollama 的模型列表和已加载模型列表 |",
+        "zh-TW": "| 介面 | 用途 |\n| --- | --- |\n| `GET /status` | 當前狀態、就緒情況、執行和排隊數量、請求後設資料 |\n| `GET /help` | 實時限制、能力、來源和用戶端接入說明 |\n| `GET /healthz` | 閘道器存活與本次探測的來源；不代表後端就緒 |\n| `GET /dashboard` | 瀏覽器狀態面板 |\n| `GET /manage` | 內建多伺服器和模型管理，沿用反向代理認證 |\n| `GET /api/tags`, `GET /api/ps` | 代理 Ollama 的模型列表和已載入模型列表 |",
+        "ja": "| エンドポイント | 用途 |\n| --- | --- |\n| `GET /status` | 現在の状態、準備状況、実行中／待機中の数、リクエスト情報 |\n| `GET /help` | 実際の上限、機能、送信元、クライアント向け説明 |\n| `GET /healthz` | ゲートウェイの生存と今回のプローブの送信元。バックエンド準備完了の証明ではない |\n| `GET /dashboard` | ブラウザーの状態パネル |\n| `GET /manage` | 複数サーバーとモデルの内蔵管理。既存リバースプロキシ認証を利用 |\n| `GET /api/tags`, `GET /api/ps` | Ollama のモデル一覧／ロード済みモデルを転送 |",
+        "ko": "| 엔드포인트 | 용도 |\n| --- | --- |\n| `GET /status` | 현재 상태, 준비 여부, 실행/대기 수 및 요청 메타데이터 |\n| `GET /help` | 실제 제한, 기능, 출처 및 클라이언트 안내 |\n| `GET /healthz` | 게이트웨이 생존 여부와 이번 검사 출처; 백엔드 준비 완료를 보증하지 않음 |\n| `GET /dashboard` | 브라우저 상태 패널 |\n| `GET /manage` | 내장 다중 서버/모델 관리, 기존 역방향 프록시 인증 사용 |\n| `GET /api/tags`, `GET /api/ps` | 프록시로 전달한 Ollama 모델 목록 / 로드된 모델 |",
+        "de": "| Endpunkt | Zweck |\n| --- | --- |\n| `GET /status` | Zustand, Bereitschaft, aktive/wartende Anzahl und Anfragemetadaten |\n| `GET /help` | Aktuelle Limits, Fähigkeiten, Herkunft und Client-Hinweise |\n| `GET /healthz` | Gateway-Erreichbarkeit und Herkunft dieser Probe; kein Beleg für Backend-Bereitschaft |\n| `GET /dashboard` | Statusanzeige im Browser |\n| `GET /manage` | Integrierte Server- und Modellverwaltung mit vorhandener Reverse-Proxy-Authentifizierung |\n| `GET /api/tags`, `GET /api/ps` | Weitergeleitete Ollama-Modellliste / geladene Modelle |",
+        "fr": "| Point d’accès | Fonction |\n| --- | --- |\n| `GET /status` | État, disponibilité, compteurs actifs/en attente et métadonnées des requêtes |\n| `GET /help` | Limites effectives, capacités, origine et conseils au client |\n| `GET /healthz` | Disponibilité de la passerelle et origine de cette sonde ; ne prouve pas que le backend est prêt |\n| `GET /dashboard` | Tableau d’état dans le navigateur |\n| `GET /manage` | Gestion intégrée des serveurs et modèles, avec authentification du reverse proxy existant |\n| `GET /api/tags`, `GET /api/ps` | Inventaire Ollama transmis / modèles chargés |",
+        "es": "| Endpoint | Finalidad |\n| --- | --- |\n| `GET /status` | Estado, disponibilidad, recuentos activos/en cola y metadatos de solicitudes |\n| `GET /help` | Límites actuales, capacidades, origen y orientación al cliente |\n| `GET /healthz` | Disponibilidad de la pasarela y origen de esta comprobación; no demuestra que el backend esté listo |\n| `GET /dashboard` | Panel de estado en el navegador |\n| `GET /manage` | Gestión integrada de servidores y modelos, con autenticación del proxy inverso existente |\n| `GET /api/tags`, `GET /api/ps` | Inventario de modelos de Ollama reenviado / modelos cargados |"
+      }
+    },
+    {
+      "id": "b36",
+      "text": {
+        "en": "Use `X-Ollama-Queue-Timeout` per inference request: `0` declines immediately when busy, a positive number waits up to that many seconds, and omission uses the server default (15 seconds). The default maximum is 3600 seconds; read `/help` for the running instance's limits. Waiting deadlines do not cut off inference once it has started. Scheduled execution concurrency is 1 (excluding pull/push), with up to 64 queued requests and 64 MiB of queued JSON data.",
+        "zh-CN": "每个推理请求可设置 `X-Ollama-Queue-Timeout`：`0` 表示忙时立即拒绝，正数表示最多等待的秒数，省略则使用服务器默认值（15 秒）。默认上限为 3600 秒，运行实例的实际限制见 `/help`。推理开始后不会被等待期限截断。调度执行并发为 1（不含 pull/push），最多排队 64 个请求，排队 JSON 数据总量最多 64 MiB。",
+        "zh-TW": "每個推理請求可設定 `X-Ollama-Queue-Timeout`：`0` 表示忙時立即拒絕，正數表示最多等待的秒數，省略則使用伺服器預設值（15 秒）。預設上限為 3600 秒，執行例項的實際限制見 `/help`。推理開始後不會被等待期限截斷。排程執行併發為 1（不含 pull/push），最多排隊 64 個請求，排隊 JSON 資料總量最多 64 MiB。",
+        "ja": "推論リクエストごとに `X-Ollama-Queue-Timeout` を指定できます。`0` は処理中なら即時拒否、正数はその秒数まで待機、省略時はサーバーの既定値（15 秒）です。既定の最大値は 3600 秒で、実際のインスタンスの上限は `/help` を確認してください。待機期限は開始済みの推論を中断しません。スケジュール対象の実行並列数は 1（pull/push を除く）、待機は最大 64 リクエスト、待機 JSON の合計は最大 64 MiB です。",
+        "ko": "추론 요청마다 `X-Ollama-Queue-Timeout`을 사용할 수 있습니다. `0`은 사용 중이면 즉시 거부하고, 양수는 그 초 수까지 기다리며, 생략하면 서버 기본값(15초)을 사용합니다. 기본 최대값은 3600초이며 실행 중 인스턴스의 제한은 `/help`에서 확인합니다. 대기 기한은 이미 시작한 추론을 중단하지 않습니다. 스케줄된 실행 동시성은 1(pull/push 제외), 대기 요청은 최대 64개, 대기 JSON 데이터는 총 64 MiB입니다.",
+        "de": "Setzen Sie pro Inferenzanfrage `X-Ollama-Queue-Timeout`: `0` lehnt bei Auslastung sofort ab, ein positiver Wert wartet höchstens diese Anzahl Sekunden, ohne Header gilt der Serverstandard (15 Sekunden). Das Standardmaximum beträgt 3600 Sekunden; aktuelle Instanzlimits stehen in `/help`. Eine gestartete Inferenz wird nicht durch die Wartefrist beendet. Die geplante Ausführungsparallelität beträgt 1 (ohne pull/push), mit höchstens 64 wartenden Anfragen und 64 MiB wartenden JSON-Daten.",
+        "fr": "Définir `X-Ollama-Queue-Timeout` pour chaque requête d’inférence : `0` refuse immédiatement si le serveur est occupé ; une valeur positive attend au plus ce nombre de secondes ; l’absence d’en-tête utilise la valeur serveur par défaut (15 secondes). Le maximum par défaut est 3600 secondes ; consulter `/help` pour les limites de l’instance. Le délai d’attente n’interrompt pas une inférence déjà commencée. La concurrence d’exécution planifiée est de 1 (hors pull/push), avec au plus 64 requêtes en file et 64 MiB de données JSON en attente.",
+        "es": "Use `X-Ollama-Queue-Timeout` por solicitud de inferencia: `0` rechaza inmediatamente si está ocupado; un número positivo espera como máximo esos segundos; sin cabecera se usa el valor predeterminado del servidor (15 segundos). El máximo predeterminado es 3600 segundos; consulte `/help` para conocer los límites efectivos. El plazo de espera no corta una inferencia ya iniciada. La concurrencia de ejecución planificada es 1 (sin contar pull/push), con hasta 64 solicitudes en cola y 64 MiB de datos JSON pendientes."
+      }
+    },
+    {
+      "id": "b37",
+      "literal": "```powershell\n$body = @{ model='qwen3:8b'; prompt='Hello'; stream=$false } | ConvertTo-Json\nInvoke-RestMethod -Uri 'http://127.0.0.1:11434/api/generate' `\n  -Method Post -ContentType 'application/json; charset=utf-8' `\n  -Headers @{'X-Ollama-Queue-Timeout'='30'} `\n  -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 3700\n```"
+    },
+    {
+      "id": "b38",
+      "text": {
+        "en": "Replace the model with one installed locally. A local request only gains priority **after actually joining the queue**. Zero-wait requests can be refused while busy; a continuous local workload can delay remote work until its deadline expires.",
+        "zh-CN": "将示例模型替换为本机已安装的模型。本机请求只有在**实际加入队列后**才获得优先权。忙时零等待请求也可能被拒绝；持续的本机工作负载可能使远端请求一直等到其期限届满。",
+        "zh-TW": "將示例模型替換為本機已安裝的模型。本機請求只有在**實際加入佇列後**才獲得優先權。忙時零等待請求也可能被拒絕；持續的本機工作負載可能使遠端請求一直等到其期限屆滿。",
+        "ja": "例のモデルはローカルにインストール済みのものに置き換えてください。ローカルリクエストが優先されるのは**実際にキューに入った後**です。待機ゼロのリクエストは処理中なら拒否される場合があり、継続的なローカル処理によってリモートが期限まで待たされる場合もあります。",
+        "ko": "예제 모델을 로컬에 설치된 모델로 바꾸세요. 로컬 요청은 **실제로 큐에 들어간 뒤에만** 우선권을 얻습니다. 대기 시간이 0이면 사용 중일 때 거부될 수 있으며, 지속적인 로컬 작업 때문에 원격 요청이 기한까지 지연될 수 있습니다.",
+        "de": "Ersetzen Sie das Beispielmodell durch ein lokal installiertes Modell. Lokaler Vorrang entsteht erst **nach dem tatsächlichen Einreihen**. Anfragen ohne Wartezeit können bei Auslastung abgelehnt werden; dauerhafte lokale Last kann entfernte Arbeit bis zum Ablauf ihrer Frist verzögern.",
+        "fr": "Remplacer le modèle d’exemple par un modèle installé localement. Une requête locale devient prioritaire **après son entrée effective dans la file**. Les requêtes sans attente peuvent être refusées si le serveur est occupé ; une charge locale continue peut retarder le travail distant jusqu’à expiration de son délai.",
+        "es": "Sustituya el modelo del ejemplo por uno instalado localmente. La solicitud local obtiene prioridad **después de entrar realmente en la cola**. Una solicitud sin espera puede rechazarse si el servidor está ocupado; una carga local continua puede retrasar las solicitudes remotas hasta que venza su plazo."
+      }
+    },
+    {
+      "id": "b39",
+      "text": {
+        "en": "`can_start_now` is a snapshot, not a reservation. Safe automatic failover requires **HTTP 429/503 + `X-Ollama-Forwarded: false` + JSON `forwarded: false`**. Timeouts, disconnects or partial output do not prove that execution never began; do not silently replay uncertain requests on another machine. The service does not provide cross-server exactly-once execution.",
+        "zh-CN": "`can_start_now` 是状态快照，不是资源预留。安全的自动换机需要同时满足 **HTTP 429/503 + `X-Ollama-Forwarded: false` + JSON `forwarded: false`**。超时、断线或部分输出不能证明任务从未开始；不要静默地把状态不确定的请求在其他机器上重放。本服务不提供跨服务器恰好执行一次的保证。",
+        "zh-TW": "`can_start_now` 是狀態快照，不是資源預留。安全的自動換機需要同時滿足 **HTTP 429/503 + `X-Ollama-Forwarded: false` + JSON `forwarded: false`**。超時、斷線或部分輸出不能證明任務從未開始；不要靜默地把狀態不確定的請求在其他機器上重放。本服務不提供跨伺服器恰好執行一次的保證。",
+        "ja": "`can_start_now` は状態のスナップショットであり予約ではありません。安全な自動切り替えには **HTTP 429/503 + `X-Ollama-Forwarded: false` + JSON `forwarded: false`** のすべてが必要です。タイムアウト、切断、部分出力だけでは実行が始まらなかった証明になりません。不確定なリクエストを別のマシンに黙って再送しないでください。サーバー間で厳密に一度だけ実行される保証はありません。",
+        "ko": "`can_start_now`는 상태 스냅샷이며 예약이 아닙니다. 안전한 자동 서버 전환에는 **HTTP 429/503 + `X-Ollama-Forwarded: false` + JSON `forwarded: false`**가 모두 필요합니다. 시간 초과, 연결 끊김, 부분 출력은 실행이 시작되지 않았다는 증거가 아닙니다. 불확실한 요청을 다른 컴퓨터에서 사용자에게 알리지 않고 재실행하지 마세요. 서비스는 서버 간 정확히 한 번 실행을 보장하지 않습니다.",
+        "de": "`can_start_now` ist eine Momentaufnahme, keine Reservierung. Sicheres automatisches Ausweichen erfordert **HTTP 429/503 + `X-Ollama-Forwarded: false` + JSON `forwarded: false` gemeinsam**. Zeitüberschreitungen, Verbindungsabbrüche oder Teilausgaben beweisen nicht, dass die Ausführung nie begonnen hat; unklare Anfragen dürfen nicht stillschweigend auf einem anderen Rechner wiederholt werden. Der Dienst garantiert keine serverübergreifende Exactly-once-Ausführung.",
+        "fr": "`can_start_now` est un instantané, pas une réservation. Un basculement automatique sûr exige simultanément **HTTP 429/503 + `X-Ollama-Forwarded: false` + JSON `forwarded: false`**. Un délai dépassé, une déconnexion ou une sortie partielle ne prouve pas l’absence d’exécution ; ne pas rejouer silencieusement une requête incertaine sur une autre machine. Le service ne garantit pas une exécution exactement une fois entre serveurs.",
+        "es": "`can_start_now` es una instantánea, no una reserva. El cambio automático seguro a otro servidor requiere a la vez **HTTP 429/503 + `X-Ollama-Forwarded: false` + JSON `forwarded: false`**. Los tiempos de espera agotados, desconexiones o resultados parciales no demuestran que la ejecución nunca empezó; no repita silenciosamente solicitudes inciertas en otra máquina. El servicio no garantiza ejecución exactamente una vez entre servidores."
+      }
+    },
+    {
+      "id": "b40",
+      "text": {
+        "en": "## Network and recovery boundaries",
+        "zh-CN": "## 网络与恢复边界",
+        "zh-TW": "## 網路與恢復邊界",
+        "ja": "## ネットワークと復旧の境界",
+        "ko": "## 네트워크와 복구 범위",
+        "de": "## Netzwerk- und Wiederherstellungsgrenzen",
+        "fr": "## Limites réseau et récupération",
+        "es": "## Límites de red y recuperación"
+      }
+    },
+    {
+      "id": "b41",
+      "text": {
+        "en": "**The gateway adds no authentication.** Since 1.2.2, installation/upgrade sets this product's TCP `11434` allow rule to any source, any local address and any network profile, restricted to the bundled Python program. Earlier custom source restrictions are backed up but not automatically retained. Review the rule after upgrading and enforce appropriate authentication, HTTPS and network controls. `11435` and `11436` default to loopback and are not automatically opened externally.",
+        "zh-CN": "**网关不新增身份认证。** 自 1.2.2 起，安装或升级会将本产品 TCP `11434` 的允许规则设置为所有来源、所有本地地址和所有网络配置文件，且限定于随包 Python 程序。原自定义来源限制会备份，但不会自动保留。升级后请检查规则，落实适当的认证、HTTPS 和网络访问控制。`11435` 和 `11436` 默认仅监听回环，不会自动对外开放。",
+        "zh-TW": "**閘道器不新增身分驗證。** 自 1.2.2 起，安裝或升級會將本產品 TCP `11434` 的允許規則設定為所有來源、所有本地位址和所有網路設定檔，且限定於隨包 Python 程式。原自定義來源限制會備份，但不會自動保留。升級後請檢查規則，落實適當的認證、HTTPS 和網路存取控制。`11435` 和 `11436` 預設僅監聽迴環，不會自動對外開放。",
+        "ja": "**ゲートウェイ自体は認証を追加しません。** 1.2.2 以降、インストール／アップグレードで本製品の TCP `11434` 許可規則を全送信元、全ローカルアドレス、全ネットワークプロファイルに設定し、同梱 Python プログラムに限定します。以前の送信元制限はバックアップしますが自動継承しません。アップグレード後に規則を確認し、適切な認証、HTTPS、ネットワーク制御を適用してください。`11435` と `11436` は既定でループバックのみで、外部には自動開放しません。",
+        "ko": "**게이트웨이는 인증을 추가하지 않습니다.** 1.2.2부터 설치/업그레이드는 이 제품의 TCP `11434` 허용 규칙을 모든 출처, 로컬 주소, 네트워크 프로필에 적용하고 번들 Python 프로그램으로 제한합니다. 이전 사용자 지정 출처 제한은 백업하지만 자동으로 유지하지 않습니다. 업그레이드 후 규칙을 확인하고 적절한 인증, HTTPS, 네트워크 접근 제어를 적용하세요. `11435`와 `11436`은 기본적으로 루프백만 사용하며 외부에 자동 개방되지 않습니다.",
+        "de": "**Das Gateway fügt keine Authentifizierung hinzu.** Seit 1.2.2 setzt Installation/Upgrade die produktspezifische TCP-`11434`-Freigabe auf alle Quellen, lokalen Adressen und Netzwerkprofile, beschränkt auf das mitgelieferte Python-Programm. Frühere Quellbeschränkungen werden gesichert, aber nicht automatisch beibehalten. Prüfen Sie die Regel nach einem Upgrade und sorgen Sie für passende Authentifizierung, HTTPS und Netzwerkkontrollen. `11435` und `11436` sind standardmäßig auf Loopback beschränkt und werden nicht automatisch extern geöffnet.",
+        "fr": "**La passerelle n’ajoute aucune authentification.** Depuis 1.2.2, l’installation/mise à niveau règle l’autorisation TCP `11434` du produit pour toutes les sources, adresses locales et catégories de réseau, en la limitant au programme Python fourni. Les anciennes restrictions de source sont sauvegardées mais pas automatiquement conservées. Vérifier la règle après mise à niveau et appliquer l’authentification, HTTPS et les contrôles réseau appropriés. `11435` et `11436` restent par défaut sur le bouclage et ne sont pas automatiquement ouverts vers l’extérieur.",
+        "es": "**La pasarela no añade autenticación.** Desde 1.2.2, instalar/actualizar configura la regla TCP `11434` de este producto para cualquier origen, dirección local y perfil de red, restringida al programa Python incluido. Las restricciones anteriores se respaldan, pero no se conservan automáticamente. Revise la regla tras actualizar y aplique autenticación, HTTPS y controles de red adecuados. `11435` y `11436` usan bucle local de forma predeterminada y no se abren automáticamente al exterior."
+      }
+    },
+    {
+      "id": "b42",
+      "text": {
+        "en": "Persistent configuration and history live under `%ProgramData%\\OllamaStatusService`; application files live under `%ProgramFiles%\\OllamaStatusService`. See [`config.example.json`][link19]. No remote configuration-write API is provided.",
+        "zh-CN": "持久配置与历史记录位于 `%ProgramData%\\OllamaStatusService`，程序文件位于 `%ProgramFiles%\\OllamaStatusService`。参见 [`config.example.json`][link19]。不提供远程写入配置的 API。",
+        "zh-TW": "持久設定與歷史記錄位於 `%ProgramData%\\OllamaStatusService`，程式檔案位於 `%ProgramFiles%\\OllamaStatusService`。參見 [`config.example.json`][link19]。不提供遠端寫入設定的 API。",
+        "ja": "永続設定と履歴は `%ProgramData%\\OllamaStatusService`、プログラムファイルは `%ProgramFiles%\\OllamaStatusService` に保存します。[`config.example.json`][link19] を参照してください。設定をリモートから書き換える API はありません。",
+        "ko": "영구 설정과 기록은 `%ProgramData%\\OllamaStatusService`, 프로그램 파일은 `%ProgramFiles%\\OllamaStatusService`에 있습니다. [`config.example.json`][link19]을 참조하세요. 원격으로 설정을 쓰는 API는 제공하지 않습니다.",
+        "de": "Persistente Konfiguration und Verlauf liegen unter `%ProgramData%\\OllamaStatusService`, Programmdateien unter `%ProgramFiles%\\OllamaStatusService`. Siehe [`config.example.json`][link19]. Eine API zum entfernten Schreiben der Konfiguration ist nicht vorgesehen.",
+        "fr": "La configuration persistante et l’historique sont dans `%ProgramData%\\OllamaStatusService`, les fichiers du programme dans `%ProgramFiles%\\OllamaStatusService`. Voir [`config.example.json`][link19]. Aucune API d’écriture distante de la configuration n’est fournie.",
+        "es": "La configuración persistente y el historial están en `%ProgramData%\\OllamaStatusService`; los archivos de la aplicación, en `%ProgramFiles%\\OllamaStatusService`. Consulte [`config.example.json`][link19]. No hay una API para modificar la configuración de forma remota."
+      }
+    },
+    {
+      "id": "b43",
+      "text": {
+        "en": "If a request's completion cannot be verified, `unknown` blocks further admissions. Use the tray's recovery action only when terminating unfinished work is acceptable. Recovery stops and checks the backend before clearing uncertain records. Do not delete the database while Ollama may still be running. Queued payloads are in memory and are not replayed after restart.",
+        "zh-CN": "无法确认请求是否完成时，`unknown` 会阻止接收新任务。只有在可以终止未完成任务时，才使用托盘恢复操作。恢复会先停止并检查后端，再清理不确定记录。Ollama 可能仍在运行时，不要删除数据库。队列载荷保存在内存中，重启后不会重放。",
+        "zh-TW": "無法確認請求是否完成時，`unknown` 會阻止接收新任務。只有在可以終止未完成任務時，才使用系統匣恢復操作。恢復會先停止並檢查後端，再清理不確定記錄。Ollama 可能仍在執行時，不要刪除資料庫。佇列載荷儲存在記憶體中，重啟後不會重放。",
+        "ja": "リクエストの完了を確認できない場合、`unknown` が新規受け付けを止めます。未完了処理を終了してよい場合にのみトレイの復旧を使ってください。復旧はバックエンドを停止・確認してから不確定な記録を消去します。Ollama が動作している可能性がある間は DB を削除しないでください。キューのペイロードはメモリに保持し、再起動後には再実行しません。",
+        "ko": "요청 완료를 확인할 수 없으면 `unknown`이 새 요청 수락을 막습니다. 미완료 작업을 종료해도 되는 경우에만 트레이 복구를 사용하세요. 복구는 백엔드를 중지하고 확인한 뒤 불확실한 기록을 지웁니다. Ollama가 여전히 실행 중일 수 있을 때는 데이터베이스를 삭제하지 마세요. 큐의 데이터는 메모리에 있으며 다시 시작한 후 재실행되지 않습니다.",
+        "de": "Ist der Abschluss einer Anfrage nicht verifizierbar, blockiert `unknown` weitere Annahmen. Verwenden Sie die Tray-Wiederherstellung nur, wenn das Beenden unfertiger Arbeit akzeptabel ist. Sie stoppt und prüft das Backend, bevor unklare Datensätze gelöscht werden. Löschen Sie die Datenbank nicht, während Ollama möglicherweise noch läuft. Wartende Nutzdaten liegen im Arbeitsspeicher und werden nach einem Neustart nicht wiederholt.",
+        "fr": "Si la fin d’une requête ne peut être vérifiée, `unknown` bloque les nouvelles admissions. Utiliser la récupération depuis la notification uniquement lorsque l’arrêt des tâches inachevées est acceptable. Elle arrête et vérifie le backend avant d’effacer les enregistrements incertains. Ne pas supprimer la base alors qu’Ollama peut encore fonctionner. Les charges utiles en attente restent en mémoire et ne sont pas rejouées après redémarrage.",
+        "es": "Si no puede verificarse la finalización de una solicitud, `unknown` bloquea nuevas admisiones. Use la recuperación de la bandeja solo cuando sea aceptable terminar trabajos pendientes. La recuperación detiene y comprueba el backend antes de borrar registros inciertos. No elimine la base de datos mientras Ollama pueda seguir ejecutándose. Las cargas en cola están en memoria y no se repiten después de reiniciar."
+      }
+    },
+    {
+      "id": "b44",
+      "text": {
+        "en": "## Development and validation",
+        "zh-CN": "## 开发与验证",
+        "zh-TW": "## 開發與驗證",
+        "ja": "## 開発と検証",
+        "ko": "## 개발 및 검증",
+        "de": "## Entwicklung und Validierung",
+        "fr": "## Développement et validation",
+        "es": "## Desarrollo y validación"
+      }
+    },
+    {
+      "id": "b45",
+      "text": {
+        "en": "See [build instructions][link8] for test commands. Version 1.6.1 passed 18 native localization checks, 11 web localization checks, 18 isolated OSS upgrade scenarios, 21 tray/release checks, 12 Ollama update coordinator scenarios with additional recovery checks, four real installer GUI checks and five compiled hidden-worker checks. The preceding 1.6.0 integration run passed 118 Python tests, including 15 download-network checks and seven upgrade-admission checks. Package hashes, archive integrity, ASCII filenames and source/package consistency are verified before publishing. Version 1.2.5 additionally verified real NTFS ACL repair and LocalService access in a C-drive user-profile fixture. The earlier reports retain the two concurrent Ollama CLI checks from 1.2.4 and the 1.2.3 installer UI checks. Tests do not prove deployment or GPU/FRP behavior on every production server. See [validation report][link20].",
+        "zh-CN": "测试命令见[构建说明][link8]。1.6.1 已通过 18 项原生国际化、11 项网页国际化、18 个隔离 OSS 升级场景、21 项托盘与发行版检查、12 个 Ollama 更新协调场景及恢复附加检查、4 项真实安装器 GUI 检查和 5 项编译后隐藏工作进程检查。此前 1.6.0 的集成回归通过 118 项 Python 测试，其中包括 15 项下载网络和 7 项升级接单保护测试。发布前核对包内哈希、归档完整性、ASCII 文件名及源码和安装包的一致性。1.2.5 还在 C 盘用户目录测试环境中验证了真实 NTFS ACL 修复和 LocalService 访问。历史报告保留 1.2.4 的两项 Ollama CLI 并发检查和 1.2.3 的安装器界面检查。测试不代表每台生产服务器的部署或 GPU/FRP 行为都已验收。详见[验证报告][link20]。",
+        "zh-TW": "測試命令見[構建說明][link8]。1.6.1 已透過 18 項原生國際化、11 項網頁國際化、18 個隔離 OSS 升級場景、21 項系統匣與發行版檢查、12 個 Ollama 更新協調場景及恢復附加檢查、4 項真實安裝器 GUI 檢查和 5 項編譯後隱藏工作程序檢查。此前 1.6.0 的整合迴歸透過 118 項 Python 測試，其中包括 15 項下載網路和 7 項升級接單保護測試。釋出前核對包內雜湊、歸檔完整性、ASCII 檔名及原始碼和安裝套件的一致性。1.2.5 還在 C 盤使用者目錄測試環境中驗證了真實 NTFS ACL 修復和 LocalService 存取。歷史報告保留 1.2.4 的兩項 Ollama CLI 併發檢查和 1.2.3 的安裝器介面檢查。測試不代表每臺生產伺服器的部署或 GPU/FRP 行為都已驗收。詳見[驗證報告][link20]。",
+        "ja": "テストコマンドは[ビルド手順][link8]を参照してください。1.6.1 ではネイティブ国際化 18 件、Web 国際化 11 件、隔離 OSS アップグレード 18 シナリオ、トレイ／リリース 21 件、Ollama 更新コーディネーター 12 シナリオと追加復旧チェック、実際のインストーラー GUI 4 件、コンパイル済み非表示ワーカー 5 件に合格しました。先行する 1.6.0 の統合検証は Python 118 件に合格し、ダウンロードネットワーク 15 件とアップグレード受け付け保護 7 件を含みます。公開前にパッケージハッシュ、アーカイブ整合性、ASCII ファイル名、ソースとパッケージの一致を確認します。1.2.5 では C ドライブのユーザープロファイル試験環境で実際の NTFS ACL 修復と LocalService アクセスも検証しました。過去の報告には 1.2.4 の Ollama CLI 同時実行 2 件と 1.2.3 のインストーラー UI 確認も残しています。これらはすべての本番サーバーでの導入や GPU/FRP の動作を保証するものではありません。[検証報告][link20]を参照してください。",
+        "ko": "테스트 명령은 [빌드 안내][link8]를 참조하세요. 1.6.1은 네이티브 현지화 18개, 웹 현지화 11개, 격리된 OSS 업그레이드 시나리오 18개, 트레이/릴리스 검사 21개, Ollama 업데이트 조정기 시나리오 12개와 추가 복구 검사, 실제 설치 프로그램 GUI 검사 4개, 컴파일된 숨김 작업 프로세스 검사 5개를 통과했습니다. 앞선 1.6.0 통합 검증은 Python 테스트 118개를 통과했으며 다운로드 네트워크 15개와 업그레이드 요청 수락 보호 7개를 포함합니다. 게시 전 패키지 해시, 압축 무결성, ASCII 파일명, 소스/패키지 일치를 확인합니다. 1.2.5는 C: 사용자 프로필 시험 환경에서 실제 NTFS ACL 복구와 LocalService 접근도 검증했습니다. 이전 보고서에는 1.2.4의 Ollama CLI 동시 실행 검사 2개와 1.2.3 설치 UI 검사도 남아 있습니다. 모든 운영 서버의 배포나 GPU/FRP 동작을 검증했다는 뜻은 아닙니다. [검증 보고서][link20]를 참조하세요.",
+        "de": "Testbefehle stehen in der [Build-Anleitung][link8]. Version 1.6.1 bestand 18 native Lokalisierungsprüfungen, 11 Web-Lokalisierungsprüfungen, 18 isolierte OSS-Upgradeszenarien, 21 Tray-/Release-Prüfungen, 12 Ollama-Update-Koordinatorszenarien samt weiteren Wiederherstellungsprüfungen, vier echte Installer-GUI-Prüfungen und fünf Prüfungen kompilierter versteckter Worker. Der vorherige 1.6.0-Integrationslauf bestand 118 Python-Tests, darunter 15 Download-Netzwerk- und sieben Upgrade-Zulassungsprüfungen. Paket-Hashes, Archivintegrität, ASCII-Dateinamen und Übereinstimmung von Quellcode und Paket werden vor Veröffentlichung geprüft. Version 1.2.5 prüfte zusätzlich echte NTFS-ACL-Reparaturen und LocalService-Zugriff in einem Benutzerprofil-Testverzeichnis auf C:. Frühere Berichte enthalten die zwei parallelen Ollama-CLI-Prüfungen aus 1.2.4 und die Installer-UI-Prüfungen aus 1.2.3. Tests beweisen keine korrekte Bereitstellung oder GPU-/FRP-Funktion auf jedem Produktionsserver. Siehe [Prüfbericht][link20].",
+        "fr": "Les commandes de test figurent dans [les instructions de compilation][link8]. La version 1.6.1 a réussi 18 contrôles de localisation native, 11 contrôles Web, 18 scénarios isolés de mise à niveau OSS, 21 contrôles de notification/version, 12 scénarios du coordinateur de mise à jour Ollama avec contrôles de récupération supplémentaires, quatre contrôles de l’interface réelle de l’installateur et cinq contrôles de processus compilés sans console. La précédente intégration 1.6.0 a réussi 118 tests Python, dont 15 tests réseau de téléchargement et sept contrôles d’admission pendant une mise à niveau. Hachages, intégrité de l’archive, noms ASCII et concordance sources/paquet sont vérifiés avant publication. La version 1.2.5 a également testé la réparation réelle des ACL NTFS et l’accès LocalService dans un profil utilisateur de test sur C:. Les anciens rapports conservent les deux contrôles Ollama CLI concurrents de 1.2.4 et les contrôles d’interface de 1.2.3. Ces tests ne prouvent pas le bon déploiement ou le comportement GPU/FRP de chaque serveur de production. Voir [le rapport de validation][link20].",
+        "es": "Los comandos de prueba están en [las instrucciones de compilación][link8]. La versión 1.6.1 superó 18 comprobaciones de localización nativa, 11 de localización web, 18 escenarios aislados de actualización OSS, 21 comprobaciones de bandeja/versiones, 12 escenarios del coordinador de actualización Ollama con comprobaciones de recuperación adicionales, cuatro pruebas de la interfaz real del instalador y cinco de procesos compilados sin consola. La integración anterior de 1.6.0 superó 118 pruebas Python, incluidas 15 de red de descarga y siete de admisión durante actualizaciones. Antes de publicar se verifican hashes, integridad del archivo, nombres ASCII y coincidencia del código con el paquete. La versión 1.2.5 también validó reparación real de ACL NTFS y acceso LocalService en un perfil de usuario de prueba en C:. Los informes anteriores conservan las dos comprobaciones de Ollama CLI simultáneo de 1.2.4 y las pruebas de interfaz del instalador de 1.2.3. Las pruebas no demuestran despliegue correcto ni comportamiento GPU/FRP en todos los servidores de producción. Consulte [el informe de validación][link20]."
+      }
+    },
+    {
+      "id": "b46",
+      "text": {
+        "en": "All eight README editions contain the same sections, tables, examples and operational boundaries. They are generated from shared translation blocks, and packaging rejects missing or stale editions. See [README translation maintenance][link21].",
+        "zh-CN": "八种语言的 README 包含相同的章节、表格、示例和运行边界。文档由共享翻译块生成，打包时拒绝缺失或过时的版本。参见 [README 翻译维护说明][link21]。",
+        "zh-TW": "八種語言的 README 包含相同的章節、表格、示例和執行邊界。文件由共享翻譯塊生成，打包時拒絕缺失或過時的版本。參見 [README 翻譯維護說明][link21]。",
+        "ja": "8 言語の README は同じ章、表、例、運用上の境界を含みます。共通の翻訳ブロックから生成し、欠落や古い版があるとパッケージ作成を中止します。[README 翻訳の保守][link21]を参照してください。",
+        "ko": "8개 언어의 README는 동일한 절, 표, 예제, 운영상 범위를 포함합니다. 공통 번역 블록으로 생성하며 누락되거나 오래된 문서가 있으면 패키징을 거부합니다. [README 번역 유지보수][link21]를 참조하세요.",
+        "de": "Alle acht README-Ausgaben enthalten dieselben Abschnitte, Tabellen, Beispiele und Betriebsgrenzen. Sie werden aus gemeinsamen Übersetzungsblöcken erzeugt; fehlende oder veraltete Ausgaben verhindern die Paketerstellung. Siehe [Pflege der README-Übersetzungen][link21].",
+        "fr": "Les huit éditions du README contiennent les mêmes sections, tableaux, exemples et limites d’exploitation. Elles sont générées à partir de blocs de traduction communs ; la création du paquet refuse toute édition absente ou périmée. Voir [la maintenance des traductions README][link21].",
+        "es": "Las ocho ediciones del README contienen las mismas secciones, tablas, ejemplos y límites operativos. Se generan a partir de bloques de traducción compartidos; el empaquetado rechaza ediciones ausentes o desactualizadas. Consulte [el mantenimiento de las traducciones README][link21]."
+      }
+    },
+    {
+      "id": "b47",
+      "text": {
+        "en": "Public examples use placeholders. Production configurations, logs and the original client/development Word and Markdown documents are intentionally excluded.",
+        "zh-CN": "公开示例使用占位内容。生产配置、日志，以及原客户端和开发过程的 Word、Markdown 文档均不包含在公开仓库中。",
+        "zh-TW": "公開示例使用佔位內容。生產設定、日誌，以及原用戶端和開發過程的 Word、Markdown 文件均不包含在公開倉庫中。",
+        "ja": "公開例ではプレースホルダーを使います。本番設定、ログ、元のクライアント／開発過程の Word・Markdown 文書は公開対象から除外しています。",
+        "ko": "공개 예제는 자리표시자 값을 사용합니다. 운영 설정, 로그, 원래 클라이언트/개발 과정의 Word 및 Markdown 문서는 공개 대상에서 제외합니다.",
+        "de": "Öffentliche Beispiele verwenden Platzhalter. Produktionskonfigurationen, Protokolle und ursprüngliche Client-/Entwicklungsdokumente in Word und Markdown sind bewusst ausgeschlossen.",
+        "fr": "Les exemples publics utilisent des valeurs fictives. Configurations de production, journaux et documents Word/Markdown originaux de développement ou du client sont volontairement exclus.",
+        "es": "Los ejemplos públicos usan datos de muestra. Se excluyen deliberadamente configuraciones de producción, registros y documentos Word/Markdown originales del cliente y del desarrollo."
+      }
+    },
+    {
+      "id": "b48",
+      "text": {
+        "en": "## License",
+        "zh-CN": "## 许可证",
+        "zh-TW": "## 許可證",
+        "ja": "## ライセンス",
+        "ko": "## 라이선스",
+        "de": "## Lizenz",
+        "fr": "## Licence",
+        "es": "## Licencia"
+      }
+    },
+    {
+      "id": "b49",
+      "text": {
+        "en": "No project source-code license has been selected yet. Publication does not grant a general license to use, modify or redistribute the project source. Third-party notices do not license this project’s own code.",
+        "zh-CN": "本项目尚未选定源码许可证。公开发布不等于普遍授权使用、修改或再分发项目源码。第三方组件的许可声明不适用于本项目自身代码。",
+        "zh-TW": "本專案尚未選定原始碼許可證。公開發布不等於普遍授權使用、修改或再分發專案原始碼。第三方元件的許可宣告不適用於本專案自身程式碼。",
+        "ja": "本プロジェクトのソースコードには、まだライセンスを選定していません。公開したことによって、ソースの利用、変更、再配布を一般的に許可するものではありません。第三者コンポーネントのライセンス表記は、本プロジェクト自身のコードには適用されません。",
+        "ko": "이 프로젝트 소스 코드의 라이선스는 아직 정하지 않았습니다. 공개가 소스의 사용, 수정, 재배포에 대한 일반적인 허가를 뜻하지는 않습니다. 제3자 구성 요소의 라이선스 고지는 프로젝트 자체 코드에 적용되지 않습니다.",
+        "de": "Für den Projektquellcode wurde noch keine Lizenz ausgewählt. Die Veröffentlichung erteilt keine allgemeine Erlaubnis zur Nutzung, Änderung oder Weiterverbreitung des Quellcodes. Hinweise zu Drittanbieter-Lizenzen lizenzieren nicht den eigenen Code dieses Projekts.",
+        "fr": "Aucune licence n’a encore été choisie pour le code source du projet. Sa publication n’accorde pas une autorisation générale de l’utiliser, le modifier ou le redistribuer. Les mentions de licences tierces ne couvrent pas le code propre à ce projet.",
+        "es": "Aún no se ha elegido una licencia para el código fuente del proyecto. Su publicación no concede autorización general para usarlo, modificarlo o redistribuirlo. Los avisos de licencias de terceros no licencian el código propio de este proyecto."
+      }
+    },
+    {
+      "id": "b50",
+      "text": {
+        "en": "Third-party components retain their own licenses; see [`licenses/THIRD-PARTY-NOTICES.txt`][link22]. The release carries the Python and vendored dependency license files.",
+        "zh-CN": "第三方组件保留各自许可证，见 [`licenses/THIRD-PARTY-NOTICES.txt`][link22]。发布包包含 Python 和随包依赖的许可证文件。",
+        "zh-TW": "第三方元件保留各自許可證，見 [`licenses/THIRD-PARTY-NOTICES.txt`][link22]。釋出包包含 Python 和隨包依賴的許可證檔案。",
+        "ja": "第三者コンポーネントは各自のライセンスに従います。[`licenses/THIRD-PARTY-NOTICES.txt`][link22] を参照してください。リリースには Python と同梱依存関係のライセンスファイルを含みます。",
+        "ko": "제3자 구성 요소에는 각자의 라이선스가 적용됩니다. [`licenses/THIRD-PARTY-NOTICES.txt`][link22]를 참조하세요. 릴리스에는 Python과 번들 의존성의 라이선스 파일이 포함됩니다.",
+        "de": "Drittanbieter-Komponenten behalten ihre jeweiligen Lizenzen; siehe [`licenses/THIRD-PARTY-NOTICES.txt`][link22]. Das Release enthält die Lizenzdateien von Python und den mitgelieferten Abhängigkeiten.",
+        "fr": "Les composants tiers conservent leurs licences respectives ; voir [`licenses/THIRD-PARTY-NOTICES.txt`][link22]. Le paquet publié inclut les licences de Python et des dépendances fournies.",
+        "es": "Los componentes de terceros conservan sus propias licencias; consulte [`licenses/THIRD-PARTY-NOTICES.txt`][link22]. La publicación incluye las licencias de Python y de las dependencias distribuidas."
+      }
+    }
+  ],
+  "links": {
+    "link1": "docs/DOWNLOAD-NETWORK.md",
+    "link2": "docs/OLLAMA-UPDATES.md",
+    "link3": "docs/MANAGE.md",
+    "link4": "https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.1",
+    "link5": "https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.1/OllamaStatusService-Windows-x64-v1.6.1.zip",
+    "link6": "https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.1/OllamaStatusService-Windows-x64-v1.6.1.zip.sha256.txt",
+    "link7": "CHANGELOG.md",
+    "link8": "docs/BUILD.md",
+    "link9": "docs/LANGUAGES.md",
+    "link10": "docs/images/idle.png",
+    "link11": "docs/images/busy.png",
+    "link12": "docs/images/offline.png",
+    "link13": "docs/images/unknown.png",
+    "link14": "examples/route_request.py",
+    "link15": "Deployment-Guide.txt",
+    "link16": "Integration-Guide.txt",
+    "link17": "examples/frpc-ollama.toml",
+    "link18": "examples/frpc-ollama.ini",
+    "link19": "config.example.json",
+    "link20": "Verification-Report.txt",
+    "link21": "docs/README-TRANSLATIONS.md",
+    "link22": "licenses/THIRD-PARTY-NOTICES.txt"
+  }
+}

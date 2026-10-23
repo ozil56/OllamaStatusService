@@ -32,6 +32,7 @@ internal static class ModelDiscoveryTests
         File.WriteAllText(Path.Combine(input.InstallRoot,"OllamaStatusBackend.xml"),"<service><env name=\"OLLAMA_MODELS\" value=\""+System.Security.SecurityElement.Escape(path)+"\"/></service>",Encoding.UTF8);
     }
     static int Main() {
+        L.Select("zh-CN", false);
         root=Path.Combine(Path.GetTempPath(),"OllamaModelDiscovery-"+Guid.NewGuid().ToString("N")); Directory.CreateDirectory(root);
         try {
             Case("machine registry candidate, blank user ignored",delegate {

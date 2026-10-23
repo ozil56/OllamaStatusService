@@ -1,6 +1,6 @@
 ﻿param([switch]$AsUpgrade)
-# Headless installation engine. Start through 安装.exe / SetupWorker.ps1.
-if (-not (Get-Variable context -ErrorAction SilentlyContinue)) { throw '请双击安装.exe。' }
+# Headless installation engine. Start through Install.exe / SetupWorker.ps1.
+if (-not (Get-Variable context -ErrorAction SilentlyContinue)) { throw '请双击 Install.exe。' }
 $CallerProfile=[string]$context.CallerProfile
 $CallerSid=[string]$context.CallerSid
 $sourceExe=[IO.Path]::GetFullPath([string]$context.SourceExe)
@@ -8,6 +8,7 @@ $models=[IO.Path]::GetFullPath([string]$context.Models)
 $registration=$null
 $mutated=$false
 $transcript=$false
+. (Join-Path $PSScriptRoot 'DownloadNetwork.ps1')
 foreach ($name in @($script:BackendName, $script:GatewayName)) {
     if (Get-Service -Name $name -ErrorAction SilentlyContinue) { throw "发现已有服务 $name，请先卸载旧版；当前服务未修改。" }
 }
@@ -45,7 +46,7 @@ try {
     Set-Progress '正在安装状态服务和自带 Python；直接使用现有 Ollama，不复制 GPU 库…'
     Write-Host '正在复制状态服务运行环境，请稍候……'
     New-Item -ItemType Directory -Path $script:InstallRoot -Force | Out-Null
-    foreach ($entry in @('app','runtime','vendor','scripts','src','licenses','bin','examples','OllamaTray.exe','部署说明.html','部署说明.txt','AI接入说明.txt','config.example.json','requirements.lock.txt')) {
+    foreach ($entry in @('app','locales','runtime','vendor','scripts','src','licenses','bin','examples','OllamaTray.exe','Deployment-Guide.html','Deployment-Guide.txt','Integration-Guide.txt','config.example.json','requirements.lock.txt')) {
         Copy-Item -LiteralPath (Join-Path $packageRoot $entry) -Destination $script:InstallRoot -Recurse -Force
     }
     foreach ($directory in @('data','logs','temp','backup','backend-profile')) {
@@ -56,7 +57,8 @@ try {
         Grant-Directory (Join-Path $script:StateRoot $directory) 'S-1-5-19' 'Modify'
     }
     Grant-Directory $script:StateRoot 'S-1-5-32-545' 'ReadAndExecute'
-    $registration = [ordered]@{ version='1.4.0'; caller_sid=$CallerSid; caller_profile=$CallerProfile; source_exe=$sourceExe; source_dir=$sourceDir; source_acl=(Get-Acl -LiteralPath $sourceDir).Sddl; models=$models; model_acl=(Get-Acl -LiteralPath $models).Sddl; startup_values=@(); startup_links=@(); installed_at=(Get-Date).ToString('o') }
+    Initialize-OllamaUpdateDirectory
+    $registration = [ordered]@{ version='1.6.1'; caller_sid=$CallerSid; caller_profile=$CallerProfile; source_exe=$sourceExe; source_dir=$sourceDir; source_acl=(Get-Acl -LiteralPath $sourceDir).Sddl; models=$models; model_acl=(Get-Acl -LiteralPath $models).Sddl; startup_values=@(); startup_links=@(); installed_at=(Get-Date).ToString('o') }
     # Registry values are saved durably before removal, including when installation fails.
     foreach ($key in @("Registry::HKEY_USERS\$CallerSid\Software\Microsoft\Windows\CurrentVersion\Run", 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run')) {
         if (-not (Test-Path -LiteralPath $key)) { continue }
@@ -129,11 +131,28 @@ try {
             $backendEnvironment[$environmentName]=$script:UpgradeState.BackendEnvironment[$environmentName]
         }
     }
+    # The relay stays in the gateway process; only new connections rediscover
+    # proxies, so changing a user's proxy settings never restarts a service.
+    $priorNetwork=$null; $priorProxy=''
+    if ($AsUpgrade) {
+        if ($script:UpgradeState.ContainsKey('DownloadNetwork')) { $priorNetwork=$script:UpgradeState.DownloadNetwork }
+        if ($script:UpgradeState.ContainsKey('DownloadProxy')) { $priorProxy=$script:UpgradeState.DownloadProxy }
+    }
+    $directPort=11434
+    if ($AsUpgrade -and $upgradeConfig.PSObject.Properties['listen_port']) { $directPort=[int]$upgradeConfig.listen_port }
+    $downloadConfig=New-DownloadNetworkConfig $CallerSid @(11435,$proxyPort,$directPort) $priorNetwork $priorProxy
+    Save-Json $downloadConfig (Join-Path $script:InstallRoot 'download-network.json')
+    $downloadProxy='http://127.0.0.1:'+$downloadConfig.port
+    $backendEnvironment['HTTPS_PROXY']=$downloadProxy
+    $backendEnvironment['HTTP_PROXY']=''
+    $backendEnvironment['ALL_PROXY']=''
+    $backendEnvironment['NO_PROXY']='localhost,127.0.0.1,::1'
     $environmentXml=(@(foreach ($environmentName in $backendEnvironment.Keys) {
         '  <env name="{0}" value="{1}"/>' -f (Escape-Xml $environmentName), (Escape-Xml $backendEnvironment[$environmentName])
     }) -join "`r`n")
     $tempXml=Escape-Xml (Join-Path $script:StateRoot 'temp')
     $profileXml=Escape-Xml (Join-Path $script:StateRoot 'backend-profile')
+    $downloadConfigXml=Escape-Xml (Join-Path $script:InstallRoot 'download-network.json')
     $configXml=Escape-Xml (Join-Path $script:StateRoot 'config.json')
     $commonXml=@"
   <startmode>Automatic</startmode><delayedAutoStart>true</delayedAutoStart>
@@ -157,6 +176,7 @@ $commonXml
   <description>Ollama status API with shared local-priority queue for direct and remote-only proxy listeners.</description>
   <executable>%BASE%\runtime\python.exe</executable><arguments>-u "%BASE%\app\run.py" --config "$configXml"</arguments><workingdirectory>%BASE%</workingdirectory>
   <depend>$script:BackendName</depend><env name="PYTHONUNBUFFERED" value="1"/>
+  <env name="OSS_DOWNLOAD_NETWORK" value="$downloadConfigXml"/>
 $commonXml
 </service>
 "@
@@ -166,7 +186,7 @@ $commonXml
     foreach ($name in @($script:BackendName, $script:GatewayName)) { Invoke-Native (Join-Path $script:InstallRoot ($name + '.exe')) @('install') }
     Set-Progress '正在配置 11434 防火墙例外、开机托盘和健康检查…'
     Get-NetFirewallRule -Name $script:FirewallName -ErrorAction SilentlyContinue | Remove-NetFirewallRule
-    # 1.4.0 intentionally applies the same all-source rule on install AND upgrade.
+    # 1.6.1 intentionally applies the same all-source rule on install AND upgrade.
     # The previous rule is retained in the upgrade backup for inspection/restoration.
     $ruleSettings=@{RemoteAddress='Any';LocalAddress='Any';Profile='Any';Enabled='True'}
     New-NetFirewallRule -Name $script:FirewallName -DisplayName 'Ollama 状态服务 TCP 11434（IPv4/IPv6）' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 11434 -Program (Join-Path $script:InstallRoot 'runtime\python.exe') @ruleSettings | Out-Null
@@ -177,7 +197,7 @@ $commonXml
     Register-ScheduledTask -TaskName $script:TaskName -Action $action -Trigger $trigger -Principal $principal -Settings $taskSettings -Force | Out-Null
     foreach ($folder in @([Environment]::GetFolderPath('CommonStartup'), [Environment]::GetFolderPath('CommonPrograms'))) {
         if (-not $folder) { continue }
-        $link = $shell.CreateShortcut((Join-Path $folder 'Ollama 状态服务.lnk'))
+        $link = $shell.CreateShortcut((Join-Path $folder 'Ollama Status Service.lnk'))
         $link.TargetPath=Join-Path $script:InstallRoot 'OllamaTray.exe'; $link.WorkingDirectory=$script:InstallRoot; $link.Description='查看 Ollama 空闲、忙碌及后台服务状态'; $link.Save()
     }
     Start-ManagedServices
@@ -186,13 +206,13 @@ $commonXml
     for ($i=0; $i -lt 45; $i++) {
         try {
             $status=Invoke-RestMethod 'http://127.0.0.1:11434/status' -TimeoutSec 2
-            if ($status.ollama_online -and $status.version -eq '1.4.0' -and $status.scheduling_policy -eq 'local_first_fifo_per_origin') {
+            if ($status.ollama_online -and $status.version -eq '1.6.1' -and $status.scheduling_policy -eq 'local_first_fifo_per_origin') {
                 $probeHost=$proxyHost
                 if ($probeHost -eq '0.0.0.0') { $probeHost='127.0.0.1' }
                 if ($probeHost -eq '::') { $probeHost='::1' }
                 if ($probeHost.Contains(':')) { $probeHost='['+$probeHost+']' }
                 $proxyHealth=Invoke-RestMethod ('http://'+$probeHost+':'+$proxyPort+'/healthz') -TimeoutSec 2
-                if ($proxyHealth.ok -and $proxyHealth.service -eq 'OllamaStatusService' -and $proxyHealth.version -eq '1.4.0' -and $proxyHealth.request_origin -eq 'remote') {
+                if ($proxyHealth.ok -and $proxyHealth.service -eq 'OllamaStatusService' -and $proxyHealth.version -eq '1.6.1' -and $proxyHealth.request_origin -eq 'remote') {
                     $ok=$true; break
                 }
             }

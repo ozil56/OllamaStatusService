@@ -7,13 +7,13 @@ The repository contains application source, C# GUI source, PowerShell lifecycle 
 Use Windows x64 with Windows PowerShell 5.1 and the .NET Framework 4.8 compiler. No service installation or administrator session is required to compile and package.
 
 1. Download the **1.4.0 Windows release ZIP and checksum** from the project's Releases page. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW.
-2. Obtain the source checkout at tag `v1.4.0`. The 1.2.3/1.2.4/1.2.5 dependency bundles are also compatible because dependencies are unchanged.
+2. Obtain the 1.6.1 source checkout. The 1.2.3/1.2.4/1.2.5 dependency bundles are also compatible because dependencies are unchanged.
 3. Run this from the source root, replacing the example dependency path:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\Build-Package.ps1 `
   -DependencyBundle 'C:\Build\Dependencies\OllamaStatusService' `
-  -OutputDirectory 'C:\Build\Output-1.4.0'
+  -OutputDirectory 'C:\Build\Output-1.6.1'
 ```
 
 `Build-Package.ps1` verifies the dependency bundle's manifest, dependency lock, Python version and WinSW hash. It copies only an explicit public source list, recompiles the installer/uninstaller and tray from C#, regenerates the HTML guide and encoding-sensitive launchers, then creates the ZIP, internal file manifest and external SHA256. It refuses to overwrite an existing output package.
@@ -32,6 +32,8 @@ This is an **offline source rebuild using dependencies from the verified release
 If recreating dependencies independently, use a Python 3.13 x64 environment to install the locked requirements into `vendor`, preserve all license files, and validate the resulting package. The supplied build command deliberately uses the already verified release dependencies.
 
 ## Run isolated checks
+
+The 1.6.1 source uses the same verified dependencies as 1.4.0. Its new checks are `runtime\python.exe tests\ollama_update_guard.py` and `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\ollama_update_checks.ps1`. Neither runs an official installer or changes production services.
 
 Run these commands **from the newly built package directory**, which contains `runtime` and `vendor`:
 
@@ -54,7 +56,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\package_integrity_
 
 The eight Python suites contain 86 tests, including seven embedded-manager checks, eleven durable-job checks and eight model-transfer regressions. They use temporary ports and a mock inference backend, not production models. The upgrade scenarios replace system service/firewall/task interfaces with isolated fixtures. `setup_ui_checks.ps1` additionally opens real installer windows for interactive GUI checks; it does not install or uninstall production services.
 
-For the real NTFS permissions regression, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\model_permissions_checks.ps1` from an **elevated** terminal. It creates isolated C-drive user-profile fixtures and short-lived LocalService tasks, reproduces the old root-only permission failure, then verifies repair, file preservation and ACL restoration. It does not change production Ollama services/models. The upgrade suite includes 13 scenarios, including access-probe failure, empty inventory and gateway/backend inventory mismatch.
+For the real NTFS permissions regression, run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\model_permissions_checks.ps1` from an **elevated** terminal. It creates isolated C-drive user-profile fixtures and short-lived LocalService tasks, reproduces the old root-only permission failure, then verifies repair, file preservation and ACL restoration. It does not change production Ollama services/models. The upgrade suite includes 18 scenarios, including access-probe failure, empty inventory and gateway/backend inventory mismatch.
 
 These checks do not prove successful installation on every Windows host or real GPU/public FRP performance. Deployment acceptance must still verify origins and the ordering of a running remote request, a queued remote request, and a queued local request.
 
@@ -65,4 +67,13 @@ These checks do not prove successful installation on every Windows host or real 
 - Python, Markdown and JSON: UTF-8.
 - Do not commit installed `config.json`, request databases, logs, credentials, local build output or private source documents.
 - The original client/development Word documents **and their matching Markdown files** are excluded from both repository and release packages.
+- Use ASCII English filenames for all distributed files. The archive writer rejects non-ASCII paths. Entry points are `Install.exe`, `Uninstall.exe` and `Open-Tray.exe`.
 - Rebuild the file manifest and ZIP checksum after changing any packaged file.
+
+Version 1.6.1 adds `runtime\python.exe tests\download_network_checks.py`, seven gateway admission checks in `tests\ollama_update_guard.py`, and 21 tray/release/hidden-worker checks via `tests\ollama_update_ui_checks.ps1`. TLS tests require an existing OpenSSL executable. `tests\real_ollama_download.py --ollama <official-exe>` is an opt-in Internet smoke test: it starts isolated processes and downloads a small real model into a temporary directory through /manage. No production models or services are changed.
+
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\tray_worker_checks.ps1` checks all five compiled GUI worker entry points with harmless replacement scripts and verifies that no PowerShell console is attached.
+
+## Complete README editions
+
+Before packaging, run `python scripts/Build-Readmes.py --check` and `python tests/readme_checks.py`. The package builder enforces the first check using the verified bundled Python. Edit the shared translation blocks and regenerate all eight editions; see [README translation maintenance](README-TRANSLATIONS.md).

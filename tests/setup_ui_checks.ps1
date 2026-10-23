@@ -1,6 +1,7 @@
 ﻿# Runs the real GUI, worker and package verifier; no service/firewall mutations or UAC.
 param([string]$Root=(Split-Path -Parent $PSScriptRoot))
 $ErrorActionPreference='Stop'
+$env:OSS_UI_LANGUAGE='zh-CN'
 $evidence=Join-Path ([IO.Path]::GetTempPath()) ('OllamaStatusUI-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $evidence | Out-Null
 Add-Type -TypeDefinition @'
@@ -62,25 +63,27 @@ function Invoke-GuiCheck([string]$Directory,[string]$Name,[string]$Mode,[string]
     }
     Write-Output ("PASS {0}: one visible GUI, no console, same window; {1} external samples." -f $Label,$samples)
 }
-Invoke-GuiCheck $Root '安装.exe' '--test-selection' 'install-selection' 0
+Invoke-GuiCheck $Root 'Install.exe' '--test-selection' 'install-selection' 0
 $selection=Get-Content -LiteralPath (Join-Path $evidence 'install-selection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $hasInstall=(Test-Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\OllamaStatusGateway') -or (Test-Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\OllamaStatusBackend')
 if ($selection.upgrade_mode -ne $hasInstall) { throw 'Existing installation detection failed' }
-if ($hasInstall -and ($selection.primary_text -ne '升级到 1.4.0' -or -not $selection.primary_enabled)) { throw 'Upgrade action unavailable for existing installation' }
+if ($hasInstall -and ($selection.primary_text -ne '升级到 1.6.1' -or -not $selection.primary_enabled)) { throw 'Upgrade action unavailable for existing installation' }
 if ($hasInstall) {
     [xml]$installedXml=Get-Content -LiteralPath (Join-Path $env:ProgramFiles 'OllamaStatusService\OllamaStatusBackend.xml') -Encoding UTF8 -Raw
     $expectedModels=($installedXml.service.env | Where-Object name -eq 'OLLAMA_MODELS').value
     if ($selection.model_path -ne $expectedModels -or $selection.model_source -notlike '*现有服务配置*') { throw 'GUI did not show the active model path and its source' }
 }
-Invoke-GuiCheck $Root '卸载.exe' '--test-selection' 'uninstall-selection' 0
-Invoke-GuiCheck $Root '安装.exe' '--test-verify' 'verify-success' 0
+Invoke-GuiCheck $Root 'Uninstall.exe' '--test-selection' 'uninstall-selection' 0
+$uninstall=Get-Content -LiteralPath (Join-Path $evidence 'uninstall-selection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+if ($uninstall.primary_text -ne '开始卸载') { throw 'English Uninstall.exe did not select uninstall mode' }
+Invoke-GuiCheck $Root 'Install.exe' '--test-verify' 'verify-success' 0
 # A separate incomplete copy exercises the real error path without changing the package.
 $bad=Join-Path $evidence '损坏包 & 空格'
 New-Item -ItemType Directory -Path $bad,(Join-Path $bad 'scripts') -Force | Out-Null
-Copy-Item -LiteralPath (Join-Path $Root '安装.exe') -Destination $bad
-foreach ($name in @('Common.ps1','SetupWorker.ps1')) { Copy-Item -LiteralPath (Join-Path $Root ('scripts\'+$name)) -Destination (Join-Path $bad 'scripts') }
+Copy-Item -LiteralPath (Join-Path $Root 'Install.exe') -Destination $bad
+foreach ($name in @('Common.ps1','ModelPermissions.ps1','Localization.ps1','SetupWorker.ps1')) { Copy-Item -LiteralPath (Join-Path $Root ('scripts\'+$name)) -Destination (Join-Path $bad 'scripts') }
 [IO.File]::WriteAllText((Join-Path $bad 'manifest.sha256.json'),'[{"path":"缺失文件.cmd","sha256":"'+('0'*64)+'"}]',[Text.UTF8Encoding]::new($true))
-Invoke-GuiCheck $bad '安装.exe' '--test-verify' 'verify-failure' 1
+Invoke-GuiCheck $bad 'Install.exe' '--test-verify' 'verify-failure' 1
 $failure=Get-Content -LiteralPath (Join-Path $evidence 'verify-failure.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($failure.message -notlike '*缺失文件.cmd*') { throw 'Chinese error text was not preserved' }
 Write-Output ('Evidence and rendered GUI images: ' + $evidence)

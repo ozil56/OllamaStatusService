@@ -1,6 +1,6 @@
 ﻿param([switch]$AsUpgrade)
 # Confirmation belongs to the graphical host; this engine never opens windows.
-if (-not (Get-Variable context -ErrorAction SilentlyContinue)) { throw '请双击卸载.exe。' }
+if (-not (Get-Variable context -ErrorAction SilentlyContinue)) { throw '请双击 Uninstall.exe。' }
 Set-Progress '正在卸载服务并恢复原始启动项…'
 try {
     $registration=$null

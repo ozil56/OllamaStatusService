@@ -168,6 +168,8 @@ class ModelJobs:
             detail = str(exc)[:400] if isinstance(exc, JobError) else (
                 "Ollama 返回 HTTP " + str(exc.response.status_code) if isinstance(exc, httpx.HTTPStatusError)
                 else "无法完成操作，请检查 Ollama 连接及模型名称。")
+            if "redirect target not allowed" in detail and "non-public" in detail:
+                detail += "。检测到下载地址保护与代理 DNS 冲突：请在目标服务器通过 OSS 托盘将 Ollama 升级到 0.40.9 或更新稳定版，并安装带自动下载网络支持的 OSS。无需关闭虚拟网卡。"
             job.update(state="failed", phase="操作未完成", error=detail, speed=0)
         finally:
             self.transfers.pop(job["id"], None)

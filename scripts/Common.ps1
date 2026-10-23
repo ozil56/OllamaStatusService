@@ -10,10 +10,34 @@ $script:FirewallName = 'OllamaStatusService-11434'
 $script:TaskName = 'OllamaStatusServiceWatchdog'
 $script:RegistrationPath = Join-Path $script:StateRoot 'installation.json'
 . (Join-Path $PSScriptRoot 'ModelPermissions.ps1')
+. (Join-Path $PSScriptRoot 'Localization.ps1')
 
 function Test-Administrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
     return (New-Object Security.Principal.WindowsPrincipal($identity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Initialize-OllamaUpdateDirectory {
+    # ProgramData's default ACL permits Users to create children. Update control
+    # files and elevated executable downloads need an explicitly protected root.
+    $directory=Join-Path $script:StateRoot 'updater'
+    $existed=Test-Path -LiteralPath $directory
+    if (-not $existed) { New-Item -ItemType Directory -Path $directory | Out-Null }
+    $item=Get-Item -LiteralPath $directory -Force
+    if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw '更新控制目录不能是符号链接或目录联接。' }
+    if ($existed) {
+        $owner=(Get-Acl -LiteralPath $directory).GetOwner([Security.Principal.SecurityIdentifier]).Value
+        if ($owner -notin @('S-1-5-32-544','S-1-5-18')) { throw '更新控制目录的所有者不是管理员或 SYSTEM，请管理员检查该目录后重试。' }
+    }
+    $acl=New-Object Security.AccessControl.DirectorySecurity
+    $acl.SetAccessRuleProtection($true,$false)
+    $acl.SetOwner((New-Object Security.Principal.SecurityIdentifier('S-1-5-32-544')))
+    foreach($sid in @('S-1-5-32-544','S-1-5-18','S-1-5-19','S-1-5-32-545')) {
+        $rights=if($sid -in @('S-1-5-32-544','S-1-5-18')){'FullControl'}else{'ReadAndExecute'}
+        $rule=New-Object Security.AccessControl.FileSystemAccessRule((New-Object Security.Principal.SecurityIdentifier($sid)),$rights,'ContainerInherit,ObjectInherit','None','Allow')
+        $acl.AddAccessRule($rule)
+    }
+    Set-Acl -LiteralPath $directory -AclObject $acl
 }
 
 function Save-Json($Value, [string]$Path) {
@@ -145,8 +169,11 @@ function Remove-Registrations {
     foreach ($ruleName in @($script:FirewallName, 'OllamaStatusService-11435')) { Get-NetFirewallRule -Name $ruleName -ErrorAction SilentlyContinue | Remove-NetFirewallRule }
     foreach ($folder in @([Environment]::GetFolderPath('CommonStartup'), [Environment]::GetFolderPath('CommonPrograms'))) {
         if (-not $folder) { continue }
-        $shortcut = Join-Path $folder 'Ollama 状态服务.lnk'
-        if (Test-Path -LiteralPath $shortcut) { Remove-Item -LiteralPath $shortcut -Force }
+        # Remove both the current shortcut and the pre-1.5 localized shortcut.
+        foreach ($name in @('Ollama Status Service.lnk', 'Ollama 状态服务.lnk')) {
+            $shortcut = Join-Path $folder $name
+            if (Test-Path -LiteralPath $shortcut) { Remove-Item -LiteralPath $shortcut -Force }
+        }
     }
 }
 
@@ -183,6 +210,7 @@ function Restore-OriginalSettings($Registration) {
 }
 
 function Show-Message([string]$Text, [string]$Title = 'Ollama 状态服务') {
+    $Text=Get-UiText $Text; $Title=Get-UiText $Title
     Add-Type -AssemblyName System.Windows.Forms
     [Windows.Forms.MessageBox]::Show($Text, $Title, 'OK', 'Information') | Out-Null
 }

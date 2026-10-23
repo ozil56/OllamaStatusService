@@ -13,6 +13,7 @@ $logs=[Security.SecurityElement]::Escape((Join-Path $testRoot 'logs'))
 $tempXml=[Security.SecurityElement]::Escape((Join-Path $testRoot 'temp'))
 $profileXml=[Security.SecurityElement]::Escape((Join-Path $testRoot 'profile'))
 $configXml=[Security.SecurityElement]::Escape((Join-Path $testRoot '配置 & config.json'))
+$downloadConfigXml=[Security.SecurityElement]::Escape((Join-Path $testRoot 'download-network.json'))
 $tokens=$null; $errors=$null
 $ast=[System.Management.Automation.Language.Parser]::ParseFile((Join-Path $Root 'scripts\Setup.ps1'),[ref]$tokens,[ref]$errors)
 foreach($name in @('commonXml','backendXml','gatewayXml')) {

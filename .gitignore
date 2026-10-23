@@ -36,3 +36,6 @@ build/
 *.docx
 Ollama Status Service 开发过程说明.md
 Ollama Status Service 客户端使用文档.md
+
+# Installed proxy settings may contain credentials
+download-network.json

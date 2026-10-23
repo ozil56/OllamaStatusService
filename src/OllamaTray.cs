@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
+[assembly: System.Reflection.AssemblyFileVersion("1.6.1.0")]
+[assembly: System.Reflection.AssemblyInformationalVersion("1.6.1")]
+
 namespace OllamaStatusTray
 {
     static class Program
@@ -19,6 +22,21 @@ namespace OllamaStatusTray
         [STAThread]
         static int Main(string[] args)
         {
+            args = L.Arguments(args);
+            if (args.Length == 2 && (args[0] == "--manage-worker" || args[0] == "--update-worker"))
+                return TrayWorker.Run(args[0], args[1]);
+            if (args.Length == 2 && args[0] == "--render-update-preview")
+            {
+                Application.EnableVisualStyles();
+                using (var form = new OllamaUpdateForm()) form.RenderPreview(args[1]);
+                return 0;
+            }
+            if (args.Length == 1 && args[0] == "--updates")
+            {
+                Application.EnableVisualStyles();
+                Application.Run(new OllamaUpdateForm());
+                return 0;
+            }
             if (args.Length == 2 && args[0] == "--render-icons")
             {
                 Directory.CreateDirectory(args[1]);
@@ -46,12 +64,23 @@ namespace OllamaStatusTray
         readonly System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
         readonly HttpClient http = new HttpClient(new HttpClientHandler { UseProxy = false });
         readonly Dictionary<string, Icon> icons = new Dictionary<string, Icon>();
-        readonly ToolStripMenuItem headline = new ToolStripMenuItem("正在连接…");
+        readonly ToolStripMenuItem headline = new ToolStripMenuItem(L.T("正在连接…"));
         readonly string root = AppDomain.CurrentDomain.BaseDirectory;
         readonly string stateDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "OllamaStatusService");
         bool refreshing;
         bool closing;
         string lastState = "";
+        readonly ToolStripMenuItem updateMenu = new ToolStripMenuItem(L.T("检查 Ollama 更新…"));
+        OllamaUpdateForm updateForm;
+        DateTime nextUpdateCheck = DateTime.UtcNow.AddSeconds(15);
+        bool checkingUpdate;
+        bool updateBalloon;
+        readonly OllamaUpdateMenuState updateState = new OllamaUpdateMenuState();
+        DateTime nextLocalVersionCheck = DateTime.MinValue;
+        DateTime lastUpdateCompletion = DateTime.MinValue;
+        bool readingVersion;
+        int versionGeneration;
+        Action languageChanged;
 
         public TrayContext()
         {
@@ -65,24 +94,45 @@ namespace OllamaStatusTray
                     DestroyIcon(handle);
                 }
             }
+            OllamaUpdates.ReleaseChecked += ApplyRelease;
+            OllamaUpdates.InstallationChanged += InstallationChanged;
             ContextMenuStrip menu = new ContextMenuStrip();
+            menu.Opening += async delegate { ObserveUpdateCompletion(); await RefreshInstalledVersion(true); };
             headline.Enabled = false; menu.Items.Add(headline); menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add("打开状态面板", null, delegate { Open("http://127.0.0.1:11434/dashboard"); });
-            menu.Items.Add("打开日志目录", null, delegate { Open(Path.Combine(stateDir,"logs")); });
-            menu.Items.Add("查看部署说明", null, delegate { Open(Path.Combine(root,"部署说明.html")); });
+            menu.Items.Add(L.T("打开状态面板"), null, delegate { Open("http://127.0.0.1:11434/dashboard"); });
+            menu.Items.Add(L.T("打开日志目录"), null, delegate { Open(Path.Combine(stateDir,"logs")); });
+            menu.Items.Add(L.T("查看部署说明"), null, delegate { Open(Path.Combine(root,"locales","guide." + L.Language + ".html")); });
+            updateMenu.Click += delegate { OpenUpdates(); }; menu.Items.Add(updateMenu);
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add("启动后台服务", null, delegate { Manage("Start"); });
-            menu.Items.Add("停止后台服务…", null, delegate { Manage("Stop"); });
-            menu.Items.Add("恢复服务（中止当前任务）…", null, delegate { Manage("Recover"); });
+            menu.Items.Add(L.T("启动后台服务"), null, delegate { Manage("Start"); });
+            menu.Items.Add(L.T("停止后台服务…"), null, delegate { Manage("Stop"); });
+            menu.Items.Add(L.T("恢复服务（中止当前任务）…"), null, delegate { Manage("Recover"); });
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add("退出图标（后台服务继续运行）", null, delegate { ExitThread(); });
+            menu.Items.Add(L.T("退出图标（后台服务继续运行）"), null, delegate { ExitThread(); });
+            var languages = new ToolStripMenuItem("🌐 Language");
+            for (int i=0; i<L.Codes.Length; i++) {
+                string code = L.Codes[i];
+                var item = new ToolStripMenuItem(i == 0 ? L.T("自动（跟随系统）") : L.Names[i]) { Checked = code == L.Choice, Tag = code };
+                item.Click += delegate { L.Select(code, true); }; languages.DropDownItems.Add(item);
+            }
+            menu.Items.Insert(menu.Items.Count-1, languages);
+            string previousLanguage = L.Language;
+            languageChanged = delegate {
+                foreach (ToolStripItem item in menu.Items) if (item != languages) item.Text = L.FromLanguage(item.Text, previousLanguage);
+                foreach (ToolStripMenuItem item in languages.DropDownItems) item.Checked = (string)item.Tag == L.Choice;
+                languages.DropDownItems[0].Text = L.T("自动（跟随系统）");
+                previousLanguage = L.Language; updateMenu.Text = updateState.Text;
+                nextLocalVersionCheck = DateTime.MinValue;
+            };
+            L.Changed += languageChanged;
             tray.ContextMenuStrip = menu;
             tray.Icon = icons["offline"];
-            tray.Text = "Ollama：正在连接状态服务";
+            tray.Text = L.T("Ollama：正在连接状态服务");
             tray.DoubleClick += delegate { Open("http://127.0.0.1:11434/dashboard"); };
+            tray.BalloonTipClicked += delegate { if (updateBalloon) OpenUpdates(); };
             tray.Visible = true;
             timer.Interval = 3000;
-            timer.Tick += async delegate { await RefreshState(); };
+            timer.Tick += async delegate { await RefreshState(); ObserveUpdateCompletion(); await RefreshInstalledVersion(false); await CheckUpdates(); };
             timer.Start();
         }
 
@@ -120,56 +170,128 @@ namespace OllamaStatusTray
             if (refreshing || closing) return;
             refreshing = true;
             string state = "offline";
-            string text = "状态服务离线";
+            string text = L.T("状态服务离线");
             try
             {
                 string json = await http.GetStringAsync("http://127.0.0.1:11434/status");
                 var data = new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(json);
                 state = Convert.ToString(data["state"]);
                 bool backend = Convert.ToBoolean(data["ollama_online"]);
-                if (state == "idle") text = "空闲，可接收任务";
+                if (state == "idle") text = L.T("空闲，可接收任务");
                 else if (state == "busy") text = data.ContainsKey("queued_local_requests")
-                    ? "处理中；本机排队 " + Convert.ToString(data["queued_local_requests"]) + "，远端 " + Convert.ToString(data["queued_remote_requests"])
-                    : "处理中，排队 " + Convert.ToString(data["queued_requests"]) + " 个";
-                else if (state == "unknown") text = "状态未知，请恢复服务";
-                else if (!backend) text = "Ollama 后端离线";
-                else text = "后台服务正在停止";
+                    ? L.F("处理中；本机排队 {0}，远端 {1}", data["queued_local_requests"], data["queued_remote_requests"])
+                    : L.T("处理中，排队 ") + Convert.ToString(data["queued_requests"]) + L.T(" 个");
+                else if (state == "unknown") text = L.T("状态未知，请恢复服务");
+                else if (state == "maintenance") text = L.T("Ollama 升级维护中");
+                else if (!backend) text = L.T("Ollama 后端离线");
+                else text = L.T("后台服务正在停止");
             }
-            catch (Exception) { state = "offline"; text = "状态服务离线"; }
+            catch (Exception) { state = "offline"; text = L.T("状态服务离线"); }
             finally { refreshing = false; }
             if (closing) return;
+            if (File.Exists(OllamaUpdates.Marker)) { text = L.T("Ollama 升级维护中；右键查看进度"); state = "unknown"; }
             if (!icons.ContainsKey(state)) state = "offline";
-            tray.Icon = icons[state]; tray.Text = "Ollama：" + text; headline.Text = text;
-            if (state != lastState && (state == "unknown" || (state == "offline" && lastState != "")))
+            tray.Icon = icons[state]; string tip = "Ollama: " + text; tray.Text = tip.Length > 63 ? tip.Substring(0, 63) : tip; headline.Text = text;
+            if (!File.Exists(OllamaUpdates.Marker) && state != lastState && (state == "unknown" || (state == "offline" && lastState != "")))
             {
-                tray.BalloonTipTitle = "Ollama 状态服务";
-                tray.BalloonTipText = text + "。右键图标可查看日志或恢复。";
+                updateBalloon = false;
+                tray.BalloonTipTitle = L.T("Ollama 状态服务");
+                tray.BalloonTipText = text + L.T("。右键图标可查看日志或恢复。");
                 tray.BalloonTipIcon = ToolTipIcon.Warning;
                 tray.ShowBalloonTip(5000);
             }
             lastState = state;
         }
 
+        void OpenUpdates()
+        {
+            if (updateForm == null || updateForm.IsDisposed) updateForm = new OllamaUpdateForm();
+            updateForm.Show(); updateForm.Activate();
+        }
+
+        void ApplyRelease(OllamaRelease release)
+        {
+            if (closing) return;
+            versionGeneration++;
+            updateState.SetRelease(release); updateMenu.Text = updateState.Text;
+            if (!release.Available) updateBalloon = false;
+        }
+
+        void InstallationChanged()
+        {
+            if (closing) return;
+            versionGeneration++;
+            updateState.Invalidate(); updateMenu.Text = updateState.Text; updateBalloon = false;
+            nextLocalVersionCheck = nextUpdateCheck = DateTime.MinValue;
+        }
+
+        void ObserveUpdateCompletion()
+        {
+            try {
+                if (!File.Exists(OllamaUpdates.StatusFile)) return;
+                var status = OllamaUpdates.Read(OllamaUpdates.StatusFile);
+                DateTime updated = DateTime.Parse(Convert.ToString(status["updated"])).ToUniversalTime();
+                if (updated > lastUpdateCompletion && !Convert.ToBoolean(status["active"]) && Convert.ToBoolean(status["success"])) {
+                    lastUpdateCompletion = updated; InstallationChanged();
+                }
+            } catch (IOException) { } catch (UnauthorizedAccessException) { } catch (ArgumentException) { }
+        }
+
+        async Task RefreshInstalledVersion(bool force)
+        {
+            if (closing || readingVersion || (!force && DateTime.UtcNow < nextLocalVersionCheck)) return;
+            readingVersion = true; int generation = versionGeneration;
+            nextLocalVersionCheck = DateTime.UtcNow.AddSeconds(15);
+            try {
+                string current = await OllamaUpdates.CurrentVersion();
+                if (!closing && generation == versionGeneration) {
+                    updateState.ObserveVersion(current);
+                    updateMenu.Text = File.Exists(OllamaUpdates.Marker) ? L.T("Ollama 升级进度／恢复…") : updateState.Text;
+                }
+            } catch {
+                if (!closing && generation == versionGeneration) { updateState.Invalidate(); updateMenu.Text = updateState.Text; }
+            } finally { readingVersion = false; }
+        }
+
+        async Task CheckUpdates()
+        {
+            if (closing || checkingUpdate || DateTime.UtcNow < nextUpdateCheck) return;
+            checkingUpdate = true;
+            nextUpdateCheck = DateTime.UtcNow.AddHours(6);
+            try {
+                if (File.Exists(OllamaUpdates.Marker)) { updateMenu.Text = L.T("Ollama 升级进度／恢复…"); return; }
+                var release = await OllamaUpdates.Check();
+                if (closing) return;
+                ApplyRelease(release);
+                if (release.Available && OllamaUpdates.ShouldNotify(release.Latest)) {
+                    updateBalloon = true;
+                    tray.BalloonTipTitle = L.T("Ollama 有新版本 ") + release.Latest;
+                    tray.BalloonTipText = L.T("当前版本 ") + release.Current + L.T("。点击查看并升级；有运行中的任务时不会停服。");
+                    tray.BalloonTipIcon = ToolTipIcon.Info; tray.ShowBalloonTip(8000);
+                    OllamaUpdates.RememberNotice(release.Latest);
+                }
+            } catch { nextUpdateCheck = DateTime.UtcNow.AddMinutes(30); }
+            finally { checkingUpdate = false; }
+        }
+
         void Open(string target)
         {
             try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true }); }
-            catch (Exception e) { MessageBox.Show(e.Message, "Ollama 状态服务"); }
+            catch (Exception e) { MessageBox.Show(e.Message, L.T("Ollama 状态服务")); }
         }
 
         void Manage(string action)
         {
-            string powershell = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), @"System32\WindowsPowerShell\v1.0\powershell.exe");
-            string script = Path.Combine(root, @"scripts\Manage.ps1");
-            try
-            {
-                Process.Start(new ProcessStartInfo(powershell, "-NoProfile -STA -ExecutionPolicy Bypass -File \"" + script + "\" -Action " + action)
-                { UseShellExecute = true, Verb = "runas", WindowStyle = ProcessWindowStyle.Normal });
-            }
-            catch (System.ComponentModel.Win32Exception e) { if (e.NativeErrorCode != 1223) MessageBox.Show(e.Message, "Ollama 状态服务"); }
+            try { TrayWorker.Start("--manage-worker", action); }
+            catch (System.ComponentModel.Win32Exception e) { if (e.NativeErrorCode != 1223) MessageBox.Show(e.Message, L.T("Ollama 状态服务")); }
         }
 
         protected override void ExitThreadCore()
         {
+            L.Changed -= languageChanged;
+            OllamaUpdates.ReleaseChecked -= ApplyRelease;
+            OllamaUpdates.InstallationChanged -= InstallationChanged;
+            if (updateForm != null && !updateForm.IsDisposed) updateForm.Close();
             closing = true; timer.Stop(); timer.Dispose(); tray.Visible = false; tray.Dispose(); http.Dispose();
             foreach (Icon icon in icons.Values) icon.Dispose();
             base.ExitThreadCore();

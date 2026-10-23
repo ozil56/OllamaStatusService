@@ -1,5 +1,9 @@
-Ollama 状态服务 1.4.0 · Windows x64 部署说明
-更新时间：2026-10-16
+1.6.1 语言设置：安装器与托盘默认跟随 Windows；/manage 和 /dashboard 默认跟随浏览器。均支持八种语言及保存手动选择。托盘中的部署说明会打开对应语言的离线指南。/status 和 /help 可用 ?lang=en 等参数选择显示语言，原协议字段不变。
+
+Ollama 状态服务 1.6.1 · Windows x64 部署说明
+更新时间：2026-10-23
+1.6.1：自动识别已有代理，缺少可用入口时使用 OSS 自带的本机转发，兼容 TUN/Fake-IP 模型下载；保持 HTTPS 证书校验，网络设置变化不重启服务。修复 Ollama 升级完成后的托盘旧提示与 PowerShell 闪窗。
+安装使用 Install.exe，卸载使用 Uninstall.exe，启动托盘使用 Open-Tray.exe；发行包全部采用英文文件名。
 1.2.5：修复 LocalService 无权访问原模型目录导致模型列表为空的问题，默认 C 盘用户目录同样适用。
 首次安装和升级都会核实整个模型目录（含禁用继承的子目录和文件），按需补齐 LocalService 的修改权限。
 随后用 LocalService 身份验证模型访问和创建/写入/重命名/删除，再核对后端与网关模型列表；失败时显示路径，不能误报安装成功。
@@ -8,7 +12,7 @@ Ollama 状态服务 1.4.0 · Windows x64 部署说明
 保留 1.2.4：修复并发 pull/push 被推理队列阻塞的问题，保留流式进度，不应用推理排队/读取/执行时限。
 模型传输连接单独显示；下载期间仍可推理。升级时须先停止提交并等待全部任务与传输完成。
 
-1.4.0 内置网页管理：安装完成后打开现有 OSS 地址的 /manage。支持多服务器列表、模型下载删除、下载暂停继续；沿用现有 Nginx Basic Auth，不新增账号、密码、端口或独立管理进程。
+保留 1.4.0 内置网页管理：安装完成后打开现有 OSS 地址的 /manage。支持多服务器列表、模型下载删除、下载暂停继续；沿用现有 Nginx Basic Auth，不新增账号、密码、端口或独立管理进程。
 网页自动包含“本服务器”。其他节点可手动添加，或在“导入服务器”中选择旧管理器导出的私有 JSON 文件。已有 Nginx 凭据仅用于访问其他节点；私有导入文件不要放入公开安装包。
 任务在目标 OSS 执行，关闭网页或管理电脑关机不会中断远端任务；目标服务器本身关机则暂停执行，服务恢复后可恢复未完成下载。升级前等待当前任务完成或先暂停。
 完整说明见 docs/MANAGE.md。新增节点列表保存在配置 data_dir/manage/manager.sqlite3，模型任务保存在 data_dir/model-jobs.sqlite3，升级保留。
@@ -20,7 +24,7 @@ Ollama 状态服务 1.4.0 · Windows x64 部署说明
 保留 1.2.2 的 IPv4/IPv6 双栈与 11434 防火墙策略。代理来源迁移步骤及验收见第十一节。
 保留 1.2.1 的模型目录自动识别和路径来源显示。
 新增：本机等待请求优先；本机、远端各自先来先服务；正在执行的请求不被抢占。
-升级方式：仍然只用“安装.exe”，检测到已有服务后提示“自动卸载旧版，再安装新版”。
+升级方式：仍然只用“Install.exe”，检测到已有服务后提示“自动卸载旧版，再安装新版”。
 安装、升级、卸载均使用同一个图形窗口显示进度和结果，不创建 CMD/PowerShell 控制台；管理员权限通过 Windows UAC 确认。
 
 一、最终结构
@@ -43,13 +47,13 @@ Ollama 状态服务 1.4.0 · Windows x64 部署说明
 无需另装 Python、Node、pip、NSSM。安装包中的 Python、WinSW 和依赖已准备好，安装时不联网下载。
 
 1. 将 ZIP 复制到 A，完整解压到一个新的空文件夹，避免旧包文件残留。不要在压缩软件预览窗口里直接运行安装程序。
-2. 结束正在执行的 Ollama 任务，然后双击“安装.exe”。
+2. 结束正在执行的 Ollama 任务，然后双击“Install.exe”。
 3. 安装窗口自动查找现有 ollama.exe 和模型目录；核对后点击“开始安装”，在系统 UAC 提示中允许管理员权限。模型目录通常包含 blobs 和 manifests。
 4. 进度和结果显示在同一个窗口内。安装器停止现有 Ollama、备份原有启动项，注册两个开机后台服务；实际 Ollama 改在本机 11435，网关接管 11434 并新增代理专用入口 11436。
 5. 成功后启动托盘图标。Windows 可能把新图标收进右下角 ^，可以把图标拖到常显区。图标在用户登录后显示；无人登录时后台服务仍运行。
 6. 双击图标打开 http://127.0.0.1:11434/dashboard。B / D 访问 http://A的IP:11434/status 检查状态。
 
-安装只需双击“安装.exe”；卸载只需双击“卸载.exe”。
+安装只需双击“Install.exe”；卸载只需双击“Uninstall.exe”。
 
 模型目录识别：
   已安装服务：优先读取后端服务 XML 的 OLLAMA_MODELS，其次读取 installation.json；不会被当前用户的默认路径覆盖。
@@ -61,9 +65,9 @@ Ollama 状态服务 1.4.0 · Windows x64 部署说明
 
 已经安装 1.1.x 或 1.2.0 至 1.2.4 如何升级：
 1. 暂停本机和远端客户端继续提交，等待 /status 显示 idle。
-2. 将新 ZIP 完整解压到新的文件夹，双击其中的“安装.exe”，无需手动运行卸载程序。
-3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.4.0”，确认一次管理员权限提示。
-4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.4.0，queue_policy.ordering 为 local_first_fifo_per_origin。
+2. 将新 ZIP 完整解压到新的文件夹，双击其中的“Install.exe”，无需手动运行卸载程序。
+3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.6.1”，确认一次管理员权限提示。
+4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.6.1，queue_policy.ordering 为 local_first_fifo_per_origin。
 5. 把该机 FRP 等代理的回源从 11434 改为 11436，按第十一节重新加载代理并验证来源。保持暂停提交，直到升级和代理迁移都完成。
 6. 验证通过后恢复客户端提交。每台服务器单独重复；可先升级一台验证，再处理其他机器。
 
@@ -75,7 +79,7 @@ Ollama 状态服务 1.4.0 · Windows x64 部署说明
 本产品 TCP 11434 防火墙规则会统一更新为：所有来源、所有本地地址、所有网络配置文件、已启用；不再沿用旧版 LocalSubnet 或自定义地址限制。旧规则仍在升级备份中。
 不会复制 Ollama 程序、GPU 库或模型。服务注册、托盘启动项和 11434 防火墙规则由新版重新建立；11435 仍只监听本机。
 升级前将配置、安装记录、后端 XML 和访问范围备份到 %ProgramData%\OllamaStatusService\backup\upgrade-日期-编号。只备份设置，不复制整个旧程序。
-安装包校验失败时不会卸载；卸载失败时不会继续安装。若旧版卸载后新版安装失败，界面会明确报错，不自动回装旧版。查看窗口中的日志，修复原因后重新运行安装.exe；需要时从上述目录恢复 config.json 和访问范围。原模型和日志不受影响。
+安装包校验失败时不会卸载；卸载失败时不会继续安装。若旧版卸载后新版安装失败，界面会明确报错，不自动回装旧版。查看窗口中的日志，修复原因后重新运行Install.exe；需要时从上述目录恢复 config.json 和访问范围。原模型和日志不受影响。
 不要将新包解压到 %ProgramFiles%\OllamaStatusService 内；卸载会清理这个程序目录。不要同时运行多个安装程序。
 默认只使用 LocalService 账户和本机磁盘模型目录。不要选择网络共享路径，也不要把模型放进本产品的 Program Files 目录。
 安装会改变原 Ollama 的启动方式及运行账户；不是零停机切换。原程序和模型不会被删除，但云端模型登录凭据不会迁移；本版主要针对本地模型。
@@ -134,7 +138,7 @@ GET http://A:11434/.well-known/ollama-status-service
 与 /help 相同，便于通用服务发现。
 GET http://A:11434/openapi.json
 OpenAPI 3.1 的状态/帮助/推理扩展说明。模型相关参数仍按 A 当前安装的 Ollama API；它不是 Ollama 所有功能的完整规范。
-所有响应带 X-Ollama-Status-Service: 1.4.0 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
+所有响应带 X-Ollama-Status-Service: 1.6.1 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
 
 给其他 AI agent 的最简提示：
 “服务器地址为 http://A的IP:11434。先读取 GET /help 和 GET /status，根据返回的能力和限额设置 X-Ollama-Queue-Timeout；有多台服务器时按需要选择立即切换或限时等待。仅在收到明确 forwarded=false 的拒绝时自动换机，不要重放完成情况不确定的请求。”
@@ -211,7 +215,7 @@ IPv6/DDNS 排查：
   系统禁用/不支持 IPv6 时记录警告并保留 IPv4；IPv6 端口冲突或权限失败会报错停止，不会假装双栈成功。
 请保持直连 11434 和后端 11435 默认值，服务 XML、托盘和防火墙依赖它们。代理端口可单独调整；本说明使用默认 11436。
 
-卸载：双击“卸载.exe”，点击“开始卸载”，允许管理员权限。移除本产品服务、托盘快捷方式、健康任务和防火墙规则，恢复原启动项及为 LocalService 添加的目录权限。
+卸载：双击“Uninstall.exe”，点击“开始卸载”，允许管理员权限。移除本产品服务、托盘快捷方式、健康任务和防火墙规则，恢复原启动项及为 LocalService 添加的目录权限。
 保留原 Ollama 程序、GPU 库、模型、日志、任务记录和安装备份。原启动项下次登录生效；也可立即从开始菜单启动原 Ollama，恢复原有 11434 使用方式。
 停止/卸载会中止正在执行的工作，请安排在维护时段。
 
@@ -225,7 +229,7 @@ IPv6/DDNS 排查：
 重新打包：powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\Package.ps1
 CMD 使用 GB2312/CRLF，PowerShell 使用 UTF-8 BOM/CRLF，以兼容中文 Windows PowerShell 5.1。
 
-1.2.3 的构建、双栈 HTTP、调度、隔离升级脚本及安装包验证结果见“验证报告.txt”。本轮构建测试不执行生产卸载/重装、真实 GPU 推理或 Windows 重启登录；安装器部署时会检查后端、直连状态和代理入口就绪。
+1.2.3 的构建、双栈 HTTP、调度、隔离升级脚本及安装包验证结果见“Verification-Report.txt”。本轮构建测试不执行生产卸载/重装、真实 GPU 推理或 Windows 重启登录；安装器部署时会检查后端、直连状态和代理入口就绪。
 公开发行的安装与接入入口见 README.md、docs 中的多语言 README、部署说明及 AI 接入说明。
 部署后建议验证：本地原客户端一次真实请求、B/D 请求、排队策略、Windows 重启后的服务恢复和登录后的托盘显示。
 
@@ -239,14 +243,14 @@ https://github.com/winsw/winsw/releases/tag/v2.12.0
 
 十、构建与安装界面验证
 
-安装.exe 和卸载.exe 的完整源码为 src\SetupHost.cs；用 scripts\Build-Setup.ps1 编译，无需安装 .NET SDK。
+Install.exe 和Uninstall.exe 的完整源码为 src\SetupHost.cs；用 scripts\Build-Setup.ps1 编译，无需安装 .NET SDK。
 图形前端保留在原用户会话中；需要管理员权限的辅助进程调用 scripts\SetupWorker.ps1，然后执行 Setup.ps1 / Uninstall.ps1；升级通过 Upgrade.ps1 顺序复用卸载和安装脚本。
 安装/卸载期间的 PowerShell、WinSW 和维护命令显式使用 CreateNoWindow，并并行读取标准输出和错误输出，避免窗口闪烁及输出管道堵塞。
 成功后由原用户前端启动托盘，安装引擎不另弹成功或失败消息框。失败原因及“查看日志”链接保留在当前窗口。
 窗口工作期间不可关闭；UAC 取消后可以重新开始。关闭未开始的安装窗口不会影响现有服务。
 启动日志目录：%LOCALAPPDATA%\OllamaStatusService\setup-logs\本次操作目录。
 目录内包含 setup.log、engine-output.log、progress.json、result.json；安装过程中另外保留 ProgramData 下 install.log。
-只校验安装包：在终端执行 .\安装.exe --verify，不需要提权、不安装服务。
+只校验安装包：在终端执行 .\Install.exe --verify，不需要提权、不安装服务。
 tests\setup_ui_checks.ps1 实际启动图形 EXE，检查选择页、校验成功及校验失败界面、同一窗口及无控制台；测试不会安装或卸载真实服务。
 重新构建顺序：Build-Setup.ps1 → Build-Tray.ps1（修改托盘时）→ Finalize-Package.py → Package.ps1。生成清单后不能再修改包内文件。
 
@@ -289,7 +293,7 @@ FRP 旧版 INI 格式（即使文件扩展名叫 .toml，也应按文件实际�
   curl.exe --noproxy "*" http://127.0.0.1:11434/help
   curl.exe --noproxy "*" http://127.0.0.1:11436/help
   从外部客户端访问原来的 FRP URL 加 /help。
-三者 version 均应为 1.4.0；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
+三者 version 均应为 1.6.1；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
 /help、/healthz 的 request_origin 仅代表本次探测请求；实际推理和队列来源以 /status 的 active_origin、requests[].origin 和 queued_local_requests/queued_remote_requests 为准。
 两个入口查询 /status 应看到同一组活动任务；空闲时 active_origin 为 null，不能用空闲状态验证推理来源。
 
@@ -310,3 +314,20 @@ https://gofrp.org/zh-cn/docs/reference/proxy/
 https://gofrp.org/zh-cn/docs/features/common/realip/
 
 公开发行说明：原开发过程说明、客户端使用文档（Word 与 Markdown）均不包含在公开仓库或发行包中。示例使用保留域名和文档地址，部署前请替换。
+
+
+升级 Ollama 官方程序（OSS 1.6.1）
+
+托盘新增“检查更新／升级 Ollama”。启动后检查一次，此后每 6 小时检查官方稳定版本；同一新版只自动提示一次，失败后 30 分钟重试，手动检查不受提示次数限制。仅检查不会下载或安装。
+
+点击升级后需确认 Windows UAC。安装包先下载到 ProgramData\OllamaStatusService\updater\downloads，验证官方 SHA256 和 Ollama Inc. 数字签名后，才进入维护。维护先阻止新任务，再核实正在推理、排队、上传、下载、后台模型任务及未知任务均为零；忙碌时直接退出本次升级，服务继续运行，稍后可手动重试。不会强行中断已有任务。
+
+空闲时自动停服、禁用升级期间的服务自动启动，使用原 Windows 账户和原路径运行官方安装器；随后退出安装器启动的官方后台、移除官方自启动、恢复 OSS 接管，核对实际 Ollama 版本、模型名称与摘要以及 OSS 配置原始哈希。模型不移动、不删除、不重新下载，OSS 配置和后端环境变量保持不变。
+
+窗口关闭不取消已经启动的流程。失败会尝试恢复可用服务；未通过验证则保持维护入口关闭，并在托盘提供“恢复上次升级”。若安装器要求重启，重启 Windows 后再恢复。升级日志及配置备份位于 ProgramData\OllamaStatusService\updater\backups\ollama-update-*。
+
+本功能需要后台已经运行 OSS 1.6.1。更换托盘 EXE 不会使旧后台获得接单保护；检测到旧后台时拒绝停服。仅通过 OSS 入口受理的任务可被跟踪；如发现其他 Ollama 实例，则拒绝升级。
+
+自动模型下载网络（1.6.1）
+在实际下载模型的服务器安装本包，/manage 无需新增代理开关。OSS 读取原安装用户与系统现有代理；没有可达代理时，本机入口使用现有 TUN 转发已知模型域名的 198.18.0.0/15 Fake-IP。需要支持该代理流程的 Ollama（已验证 0.40.9）；旧版本通过托盘在空闲时升级。不会修改系统代理、DNS 或网络模式，不安装证书，不使用 insecure。代理认证失败、证书错误或网络本身不可达会报告失败。
+新连接自动识别设置变化，已有连接继续；不会为切换代理而重启服务。有任务、上传或下载连接时，自动升级拒绝停服。/status.download_network 提供不含代理凭据的状态。完整限制和测试方法见 docs/DOWNLOAD-NETWORK.md。

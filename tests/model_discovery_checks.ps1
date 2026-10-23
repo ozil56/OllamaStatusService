@@ -5,7 +5,7 @@ New-Item -ItemType Directory -Path $testDir | Out-Null
 try {
     $compiler=Join-Path $env:SystemRoot 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
     $exe=Join-Path $testDir 'checks.exe'
-    & $compiler /nologo /target:exe /platform:x64 /reference:System.Web.Extensions.dll ('/out:'+$exe) (Join-Path $Root 'src\ModelDiscovery.cs') (Join-Path $Root 'tests\ModelDiscoveryTests.cs')
+    & $compiler /nologo /target:exe /platform:x64 /reference:System.Web.Extensions.dll ('/out:'+$exe) (Join-Path $Root 'src\ModelDiscovery.cs') (Join-Path $Root 'tests\ModelDiscoveryTests.cs') (Join-Path $Root 'src\Localization.cs') ('/resource:'+(Join-Path $Root 'locales\messages.json')+',OSS.Translations')
     if ($LASTEXITCODE -ne 0) { throw 'Discovery test compilation failed' }
     . (Join-Path $Root 'scripts\Common.ps1')
     Invoke-Native $exe @()

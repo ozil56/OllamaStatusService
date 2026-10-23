@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.6.1 — 2026-10-23
+
+- Publish complete README editions in all eight languages, including Traditional Chinese. Preserve every section, table, architecture diagram and code example, and reject incomplete or stale documentation during packaging.
+
+- Fix mixed languages in the Ollama updater: version summaries and timestamped history are rendered from retained message data when the UI language changes.
+- Translate older saved update records, including the restored OSS management message, without changing version numbers, timestamps or backup paths.
+- Keep the original source message in updater and setup progress files so completion history can switch languages after the operation finishes.
+- Add regressions for live language changes, asynchronous update checks, completed installations and all eight supported languages.
+
+## 1.6.0 — 2026-10-23
+
+- Localize installation, uninstall, tray menus, confirmations, update progress, /manage, /dashboard, /status and /help in eight languages: Simplified/Traditional Chinese, English, Japanese, Korean, German, French and Spanish.
+- Match the Windows UI language or browser preference by default; save explicit choices per desktop user or browser and propagate the chosen language to elevated workers. Ship all translations and short localized guides offline.
+- Preserve API keys, states, model names, user paths and original diagnostic details. Changing display language does not restart services or cancel tasks.
+- Include the 1.5.1 download-network and tray fixes below, with English executable/package filenames.
+
+## 1.5.1 — 2026-10-23
+
+- Discover existing Windows/user proxies and forward Ollama HTTPS model transfers through a loopback CONNECT relay, with a limited Fake-IP fallback for known model domains. Preserve certificate validation and existing download connections.
+- Include active relay connections and in-progress uploads in upgrade safety checks; gate admission when upgrading OSS 1.5.0 or newer. Preserve network settings across OSS and Ollama upgrades.
+- Refresh tray upgrade offers from the installed version after checks and completed upgrades, so the current release is not offered again.
+- Launch tray administration and Ollama update scripts through a GUI worker with no console. Replace the command-file tray launcher with Open-Tray.exe.
+
+## 1.5.0 — 2026-10-23
+
+- Standardize distributed filenames: `Install.exe`, `Uninstall.exe`, `Open-Tray.cmd`, `Deployment-Guide.txt/html`, `Integration-Guide.txt` and `Verification-Report.txt`. Update all translated instructions and use an English Windows shortcut name while cleaning up legacy localized shortcuts.
+- Add tray checks for official stable Ollama releases, six-hour polling, per-version notifications and an upgrade progress window.
+- Verify the official installer URL, size, SHA256 and Ollama Inc. signature before stopping anything.
+- Close admission before the final idle check; refuse busy, queued, transferring, uploading or uncertain work without interrupting it.
+- Preserve the original models, configuration and service environment; coordinate service shutdown, official installation, desktop-process cleanup, startup restoration and backend/gateway/model verification.
+- Retain recovery records and backups after failures or crashes; keep admission closed when recovery cannot be verified. Never upgrade Ollama merely because a new release was detected.
+
 ## 1.4.0 — 2026-10-17
 
 - Embed the multi-server manager at `/manage` with a persistent local node, peer CRUD/import, model inventory, downloads/deletions and durable pull pause/resume.

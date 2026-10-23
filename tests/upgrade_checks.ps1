@@ -71,7 +71,13 @@ function Invoke-RestMethod([string]$Uri) {
     $models=@([pscustomobject]@{name='fixture:latest'})
     if ($script:Scenario -eq 'inventory-empty') { $models=@() }
     if ($script:Scenario -eq 'inventory-mismatch' -and $Uri -like '*:11434/api/tags') { $models=@([pscustomobject]@{name='wrong:latest'}) }
-    [pscustomobject]@{ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.4.0';models=$models;scheduling_policy='local_first_fifo_per_origin'} }
+    $gated=Microsoft.PowerShell.Management\Test-Path -LiteralPath (Join-Path $script:StateRoot 'updater\maintenance.lock')
+    $httpBusy=$script:Scenario -eq 'http-busy' -or ($script:Scenario -eq 'racing-upload' -and $gated)
+    $relayBusy=$script:Scenario -eq 'relay-busy'
+    [pscustomobject]@{inflight_requests=0;queued_requests=0;uncertain_requests=0;inflight_model_transfers=0;model_jobs=@{active=0};
+        accepting_requests=(-not $gated);download_network=@{active_tunnels=([int]$relayBusy)};
+        ollama_update=@{protocol=1;inflight_http_operations=([int]$httpBusy);unknown_model_jobs=0;model_workers=0;maintenance=$gated;safe_to_stop=($gated -and -not $httpBusy -and -not $relayBusy)};
+        ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.6.1';models=$models;scheduling_policy='local_first_fifo_per_origin'} }
 function Start-Transcript { }
 function Stop-Transcript { }
 function Test-Path([string]$LiteralPath,[string]$PathType) {
@@ -94,8 +100,8 @@ function New-Object([string]$TypeName,[string]$ComObject) {
     Microsoft.PowerShell.Utility\New-Object -TypeName $TypeName
 }
 try {
-    $successfulCases=@('success','legacy-local-subnet','service-model-overrides-record','custom-proxy')
-    foreach ($case in @('success','legacy-local-subnet','service-model-overrides-record','busy','bad-package','uninstall-failure','install-failure','proxy-port-conflict','proxy-health-failure','custom-proxy','permission-failure','inventory-empty','inventory-mismatch')) {
+    $successfulCases=@('success','legacy-local-subnet','service-model-overrides-record','custom-proxy','preserve-proxy','preserve-network')
+    foreach ($case in @('success','legacy-local-subnet','service-model-overrides-record','preserve-proxy','preserve-network','busy','http-busy','racing-upload','relay-busy','bad-package','uninstall-failure','install-failure','proxy-port-conflict','proxy-health-failure','custom-proxy','permission-failure','inventory-empty','inventory-mismatch')) {
         $script:Scenario=$case
         $script:ProbeUrls=[Collections.Generic.List[string]]::new()
         $caseRoot=Join-Path $fixture $case
@@ -103,7 +109,8 @@ try {
         $env:ProgramData=Join-Path $caseRoot 'Program Data'
         # Load the real common routines, then replace only OS-specific operations.
         . (Join-Path $Root 'scripts\Common.ps1')
-        function Grant-Directory { }
+        function Initialize-OllamaUpdateDirectory { New-Item -ItemType Directory -Path (Join-Path $script:StateRoot 'updater') -Force | Out-Null }
+function Grant-Directory { }
         function Grant-ModelPermissions { $script:Events.Add('model-permissions') }
         function Test-ModelServiceAccess {
             $script:Events.Add('model-access-probe')
@@ -134,16 +141,23 @@ try {
         $sourceFolder=Join-Path $caseRoot '原 Ollama'
         $models=Join-Path $caseRoot '模型'
         New-Item -ItemType Directory -Path $script:InstallRoot,$script:StateRoot,$sourceFolder,$models,(Join-Path $script:StateRoot 'data'),(Join-Path $packageRoot 'scripts') -Force | Out-Null
-        foreach ($name in @('Setup.ps1','Uninstall.ps1','Upgrade.ps1')) { Copy-Item -LiteralPath (Join-Path $Root ('scripts\'+$name)) -Destination (Join-Path $packageRoot 'scripts') }
-        foreach ($entry in @('app','runtime','vendor','src','licenses','bin','examples')) {
+        foreach ($name in @('Setup.ps1','Uninstall.ps1','Upgrade.ps1','DownloadNetwork.ps1')) { Copy-Item -LiteralPath (Join-Path $Root ('scripts\'+$name)) -Destination (Join-Path $packageRoot 'scripts') }
+        foreach ($entry in @('app','locales','runtime','vendor','src','licenses','bin','examples')) {
             New-Item -ItemType Directory -Path (Join-Path $packageRoot $entry) -Force | Out-Null
             [IO.File]::WriteAllText((Join-Path $packageRoot ($entry+'\new.txt')),'new')
         }
-        foreach ($file in @('OllamaTray.exe','部署说明.html','部署说明.txt','AI接入说明.txt','config.example.json','requirements.lock.txt','bin\WinSW.exe','runtime\python.exe')) {
+        foreach ($file in @('OllamaTray.exe','Deployment-Guide.html','Deployment-Guide.txt','Integration-Guide.txt','config.example.json','requirements.lock.txt','bin\WinSW.exe','runtime\python.exe')) {
             [IO.File]::WriteAllText((Join-Path $packageRoot $file),'new')
         }
         foreach ($name in @($script:BackendName,$script:GatewayName)) { [IO.File]::WriteAllText((Join-Path $script:InstallRoot ($name+'.exe')),'old') }
         [IO.File]::WriteAllText((Join-Path $script:InstallRoot ($script:BackendName+'.xml')),'<service><env name="OLLAMA_CONTEXT_LENGTH" value="32768"/><env name="CUDA_VISIBLE_DEVICES" value="0"/><env name="OLLAMA_HOST" value="127.0.0.1:11435"/></service>')
+        if ($case -eq 'preserve-proxy') {
+            $xmlPath=Join-Path $script:InstallRoot ($script:BackendName+'.xml')
+            [IO.File]::WriteAllText($xmlPath,[IO.File]::ReadAllText($xmlPath).Replace('</service>','<env name="HTTPS_PROXY" value="http://127.0.0.1:7890"/></service>'))
+        }
+        if ($case -eq 'preserve-network') {
+            Save-Json @{schema=1;port=11437;caller_sid='S-1-0-0';preserved_proxies=@('socks5://127.0.0.1:1080')} (Join-Path $script:InstallRoot 'download-network.json')
+        }
         $sourceExe=Join-Path $sourceFolder 'ollama.exe'
         [IO.File]::WriteAllText($sourceExe,'original-ollama')
         [IO.File]::WriteAllText((Join-Path $models 'model.bin'),'original-model')
@@ -192,16 +206,28 @@ try {
             [xml]$backend=Get-Content -LiteralPath (Join-Path $script:InstallRoot ($script:BackendName+'.xml')) -Raw
             Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_CONTEXT_LENGTH').value -eq '32768') 'Context tuning lost'
             Assert (($backend.service.env | Where-Object name -eq 'CUDA_VISIBLE_DEVICES').value -eq '0') 'GPU tuning lost'
-            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.4.0') 'Wrong installed version'
+            $network=Get-Content -LiteralPath (Join-Path $script:InstallRoot 'download-network.json') -Raw | ConvertFrom-Json
+            if ($case -eq 'preserve-proxy') { Assert ($network.preserved_proxies.Count -eq 1 -and $network.preserved_proxies[0] -eq 'http://127.0.0.1:7890') 'Old backend proxy lost' }
+            if ($case -eq 'preserve-network') { Assert ($network.preserved_proxies.Count -eq 1 -and $network.preserved_proxies[0] -eq 'socks5://127.0.0.1:1080') 'Existing upstream proxy lost' }
+            Assert ($network.port -gt 0 -and $network.port -notin @(11434,11435,11436,19136)) 'Relay port collision'
+            Assert (($backend.service.env | Where-Object name -eq 'HTTPS_PROXY').value -eq ('http://127.0.0.1:'+$network.port)) 'Backend relay not wired'
+            [xml]$fixtureGatewayXml=Get-Content -LiteralPath (Join-Path $script:InstallRoot ($script:GatewayName+'.xml')) -Raw
+            Assert (($fixtureGatewayXml.service.env | Where-Object name -eq 'OSS_DOWNLOAD_NETWORK').value -eq (Join-Path $script:InstallRoot 'download-network.json')) 'Gateway relay not wired'
+            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.6.1') 'Wrong installed version'
             if ($case -eq 'service-model-overrides-record') {
                 Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).models -eq $activeModels) 'Reinstall used stale model path'
                 Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_MODELS').value -eq $activeModels) 'Backend model path was not preserved'
             }
-        } elseif ($case -in @('busy','bad-package','uninstall-failure','proxy-port-conflict')) {
+        } elseif ($case -in @('busy','http-busy','racing-upload','relay-busy','bad-package','uninstall-failure','proxy-port-conflict')) {
             Assert (@($script:Events | Where-Object { $_ -like 'install:*' }).Count -eq 0) 'Installation ran after preflight/uninstall failure'
         } elseif ($case -in @('install-failure','proxy-health-failure','permission-failure','inventory-empty','inventory-mismatch')) {
             Assert ($script:Results.Count -eq 0) 'Failed upgrade was reported successful'
             Assert ($errorMessage -like '*不会自动回装*') 'Missing honest failure guidance'
+        }
+        Assert (-not (Test-Path -LiteralPath (Join-Path $script:StateRoot 'updater\maintenance.lock'))) 'Upgrade left admission blocked'
+        if ($case -in @('busy','http-busy','racing-upload','relay-busy')) {
+            Assert (@($script:Events | Where-Object { $_ -like 'uninstall:*' }).Count -eq 0) 'Busy upgrade stopped services'
+            Assert ($script:Services['OllamaStatusGateway'] -eq 'Running') 'Busy gateway stopped'
         }
         if ($case -eq 'permission-failure') { Assert (@($script:Events | Where-Object { $_ -like 'install:*' }).Count -eq 0) 'Installed despite inaccessible models' }
         if ($case -eq 'proxy-port-conflict') { Assert (@($script:Events | Where-Object { $_ -like 'uninstall:*' }).Count -eq 0) 'Uninstalled before checking proxy port conflict' }

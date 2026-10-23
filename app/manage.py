@@ -11,7 +11,8 @@ import httpx
 from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
-from manage_core import ApiError, Manager
+from manage_core import ApiError, Manager, SELF_ID
+from localization import render_asset, request_language, display, headers as language_headers
 
 WEB = Path(__file__).with_name("manage_web")
 HEADERS = {
@@ -96,12 +97,24 @@ def install_routes(app, version):
                           "style.css": ("style.css", "text/css"), "favicon.svg": ("favicon.svg", "image/svg+xml")}
                 if path in assets:
                     filename, mime = assets[path]
-                    return Response((WEB / filename).read_bytes(), media_type=mime, headers=HEADERS)
+                    return Response(render_asset(WEB / filename, request) if filename.endswith((".html", ".js")) else (WEB / filename).read_bytes(), media_type=mime, headers={**HEADERS, **language_headers(request)})
                 if path == "api/session":
                     return JSONResponse({"token": manager.token, "name": "OSS 管理", "version": version,
                         "authentication": "reverse_proxy", "embedded": True}, headers=HEADERS)
                 if path == "api/overview":
-                    return JSONResponse(await service.call(manager.overview), headers=HEADERS)
+                    value = await service.call(manager.overview)
+                    language = request_language(request)
+                    for node in value.get("servers", []):
+                        node["display_error"] = display(node.get("error", ""), language)
+                        node["display_warnings"] = [display(warning, language) for warning in node.get("warnings", [])]
+                        if node.get("is_self"):
+                            node["display_name"] = display(node["name"], language)
+                    for job in value.get("jobs", []):
+                        job["display_error"] = display(job.get("error", ""), language)
+                        job["display_phase"] = display(job.get("phase", ""), language)
+                        if job.get("server_id") == SELF_ID:
+                            job["display_server_name"] = display(job.get("server_name", ""), language)
+                    return JSONResponse(value, headers={**HEADERS, **language_headers(request)})
                 raise ApiError("管理接口不存在。", 404)
             if request.method == "OPTIONS":
                 raise ApiError("不支持跨站管理请求。", 405)
@@ -136,6 +149,6 @@ def install_routes(app, version):
                     return JSONResponse({"ok": True}, status_code=202, headers=HEADERS)
             raise ApiError("管理接口不存在。", 404)
         except ApiError as exc:
-            return JSONResponse({"error": str(exc)}, status_code=exc.status, headers=HEADERS)
+            return JSONResponse({"error": str(exc), "display_error": display(str(exc), request_language(request)), "language": request_language(request)}, status_code=exc.status, headers={**HEADERS, **language_headers(request)})
         except Exception:
-            return JSONResponse({"error": "暂时无法完成请求，请刷新状态后重试。"}, status_code=500, headers=HEADERS)
+            return JSONResponse({"error": "暂时无法完成请求，请刷新状态后重试。", "display_error": display("暂时无法完成请求，请刷新状态后重试。", request_language(request))}, status_code=500, headers={**HEADERS, **language_headers(request)})

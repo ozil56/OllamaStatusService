@@ -21,9 +21,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
 from model_jobs import ModelJobs, JobError
 from manage import ManageService, install_routes
+from update_guard import UpdateGuard, UpdateAdmission
+from download_network import DownloadNetwork
+from localization import render_asset, request_language, text as localized_text, headers as language_headers, display as localized_display, metadata as localized_metadata
 
 LOG = logging.getLogger("ollama_status")
-VERSION = "1.4.0"
+VERSION = "1.6.1"
 INFERENCE = {"/api/chat", "/api/generate", "/api/embed", "/api/embeddings",
              "/v1/chat/completions", "/v1/completions", "/v1/embeddings",
              "/v1/responses", "/v1/messages"}
@@ -288,7 +291,7 @@ class TerminalDetector:
             self.line(self.buffer)
 
 
-def create_app(settings: Settings):
+def create_app(settings: Settings, update_marker=None, download_network=None):
     settings.validate()
     settings.backend_url = settings.backend_url.rstrip("/")
     pending = deque()
@@ -296,6 +299,8 @@ def create_app(settings: Settings):
     wake = asyncio.Event()
     health = {"online": False, "checked_at": None, "last_success": 0.0}
     runtime = {"closing": False, "journal_ok": True, "queued_bytes": 0, "active": None}
+    update_guard = UpdateGuard(update_marker)
+    network = download_network if download_network is not None else DownloadNetwork.from_environment()
 
     async def probe():
         try:
@@ -304,6 +309,8 @@ def create_app(settings: Settings):
             health["online"] = r.status_code == 200 and isinstance(value, dict) and isinstance(value.get("version"), str)
             if health["online"]:
                 health["last_success"] = time.monotonic()
+                if network:
+                    network.backend_version = value["version"]
         except (httpx.HTTPError, ValueError):
             health["online"] = False
         health["checked_at"] = utc()
@@ -336,6 +343,14 @@ def create_app(settings: Settings):
                     return await local.request("DELETE", "/api/delete", json={"model": model},
                         headers={"X-Ollama-Queue-Timeout": str(settings.max_queue_timeout_seconds)})
             app.state.model_jobs = ModelJobs(settings.data_dir, client, delete_model, transfers)
+            if network:
+                try:
+                    await network.start()
+                except BaseException:
+                    await app.state.model_jobs.close()
+                    journal.close()
+                    lock.close()
+                    raise
             await probe()
             checking = asyncio.create_task(health_loop())
             dispatcher = asyncio.create_task(dispatch())
@@ -357,11 +372,14 @@ def create_app(settings: Settings):
                 except asyncio.TimeoutError:
                     dispatcher.cancel()
                 await asyncio.gather(dispatcher, return_exceptions=True)
+                if network:
+                    await network.close()
                 journal.close()
                 lock.close()
 
     app = FastAPI(title="Ollama Status Service", version=VERSION, lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
+    app.add_middleware(UpdateAdmission, guard=update_guard)
     app.add_middleware(DiscoveryHeaders)
 
     def online():
@@ -376,10 +394,11 @@ def create_app(settings: Settings):
     @app.get("/help")
     @app.get("/.well-known/ollama-status-service")
     async def help_info(request: Request):
-        return JSONResponse({
+        return JSONResponse(localized_metadata({
             "service": "OllamaStatusService", "version": VERSION, "help_schema_version": "1.2",
             "request_origin": client_origin(request, settings.proxy_listen_port),
-            "description": "Ollama 兼容代理、状态查询和客户端可选限时排队。所有 URL 均相对于本次响应的服务器地址。",
+            "language": request_language(request),
+            "description": localized_text("Ollama 兼容代理、状态查询和客户端可选限时排队。所有 URL 均相对于本次响应的服务器地址。", request_language(request)),
             "urls": {"ollama_base": "/", "status": "/status", "dashboard": "/dashboard",
                      "manage": "/manage", "manage_api": "/manage/api", "model_jobs": "/oss/model-jobs",
                      "health": "/healthz", "help": "/help", "openapi": "/openapi.json",
@@ -462,7 +481,7 @@ def create_app(settings: Settings):
                          {"method": "POST", "path": "/api/generate",
                           "headers": {"Content-Type": "application/json", "X-Ollama-Queue-Timeout": "0"},
                           "json": {"model": "REPLACE_WITH_INSTALLED_MODEL", "prompt": "你好", "stream": False}}]
-        }, headers={"Cache-Control": "no-store"})
+        }, request_language(request)), headers=language_headers(request))
 
     @app.get("/openapi.json")
     async def api_schema():
@@ -503,7 +522,7 @@ def create_app(settings: Settings):
                 "servers": [{"url": "/"}], "paths": paths}
 
     @app.get("/status")
-    async def status():
+    async def status(request: Request):
         try:
             rows = app.state.journal.snapshot()
         except sqlite3.Error:
@@ -520,14 +539,31 @@ def create_app(settings: Settings):
         backend_online = online()
         model_jobs = app.state.model_jobs.jobs()
         active_model_jobs = sum(j["state"] in {"queued", "running"} for j in model_jobs)
+        unknown_model_jobs = sum(j["state"] == "unknown" for j in model_jobs)
+        pending_model_workers = sum(not t.done() for t in app.state.model_jobs.tasks.values())
+        maintenance = update_guard.active
+        safe_to_stop = (maintenance and backend_online and runtime["journal_ok"]
+                       and not runtime["closing"] and not rows and not transfers and not active_model_jobs
+                       and not unknown_model_jobs and not pending_model_workers and not update_guard.inflight
+                       and not (network and network.tasks))
         state = ("unknown" if uncertain or not runtime["journal_ok"] else
                  "offline" if not backend_online else "busy" if inflight or queued or transfers or active_model_jobs else
-                 "stopping" if runtime["closing"] else "idle")
+                 "stopping" if runtime["closing"] else "maintenance" if maintenance else "idle")
         return JSONResponse({"service": "OllamaStatusService", "version": VERSION,
-                             "state": state, "ollama_online": backend_online,
+                             "state": state, "language": request_language(request),
+                             "labels": {key: localized_text(value, request_language(request)) for key, value in {
+                                 "state":"状态", "ollama_online":"Ollama 后端", "can_start_now":"就绪", "accepting_requests":"接收任务",
+                                 "inflight_requests":"正在执行", "queued_local_requests":"本机等待", "queued_remote_requests":"远端等待",
+                                 "inflight_model_transfers":"模型传输", "uncertain_requests":"状态未知", "requests":"任务记录", "checked_at":"更新时间："}.items()},
+                             "state_text": localized_text({"idle":"空闲", "busy":"忙碌", "unknown":"状态未知", "offline":"离线", "stopping":"正在停止", "maintenance":"维护中"}[state], request_language(request)),
+                             "ollama_online": backend_online,
                              "accepting_requests": state in {"idle", "busy"} and queued < settings.max_queue_size
-                             and runtime["queued_bytes"] < settings.max_queue_bytes and not runtime["closing"], "inflight_requests": inflight,
-                             "can_start_now": state in {"idle", "busy"} and not inflight and not queued and not runtime["closing"],
+                             and runtime["queued_bytes"] < settings.max_queue_bytes and not runtime["closing"] and not maintenance, "inflight_requests": inflight,
+                             "can_start_now": state in {"idle", "busy"} and not inflight and not queued and not runtime["closing"] and not maintenance,
+                             "download_network": network.status() if network else {"enabled": False},
+                             "ollama_update": {"protocol": 1, "maintenance": maintenance, "safe_to_stop": safe_to_stop,
+                                               "inflight_http_operations": update_guard.inflight,
+                                               "unknown_model_jobs": unknown_model_jobs, "model_workers": pending_model_workers},
                              "inflight_model_transfers": len(transfers), "model_transfers": list(transfers.values()),
                              "model_jobs": {"schema": 1, "endpoint": "/oss/model-jobs", "execution": "server_owned", "active": active_model_jobs, "controls": ["pause", "resume"]},
                              "uncertain_requests": uncertain, "queued_requests": queued,
@@ -542,11 +578,19 @@ def create_app(settings: Settings):
                              "max_queue_timeout_seconds": settings.max_queue_timeout_seconds,
                              "max_concurrency": 1, "requests": rows,
                              "backend_checked_at": health["checked_at"], "checked_at": utc()},
-                            headers={"Cache-Control": "no-store"})
+                            headers=language_headers(request))
 
     @app.get("/dashboard", response_class=HTMLResponse)
-    async def home():
-        return Path(__file__).with_name("dashboard.html").read_text(encoding="utf-8")
+    async def home(request: Request):
+        return HTMLResponse(render_asset(Path(__file__).with_name("dashboard.html"), request), headers=language_headers(request))
+
+    @app.get("/oss/ui/{asset}")
+    async def ui_asset(asset: str, request: Request):
+        files = {"language.js": "ui-language.js", "dashboard.js": "dashboard.js"}
+        if asset not in files:
+            return JSONResponse({"error": "not_found"}, status_code=404)
+        path = Path(__file__).with_name(files[asset])
+        return Response(path.read_text(encoding="utf-8") if asset == "language.js" else render_asset(path, request), media_type="text/javascript", headers=language_headers(request))
 
     async def read_body(request):
         body = bytearray()

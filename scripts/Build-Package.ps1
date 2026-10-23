@@ -22,8 +22,10 @@ $wrapperHash = (Get-FileHash -LiteralPath (Join-Path $bundleRoot 'bin\WinSW.exe'
 if ($wrapperHash -ne 'B5066B7BBDFBA1293E5D15CDA3CAAEA88FBEAB35BD5B38C41C913D492AADFC4F') { throw 'Unexpected WinSW dependency.' }
 $pythonVersion = & (Join-Path $bundleRoot 'runtime\python.exe') --version
 if ($LASTEXITCODE -ne 0 -or $pythonVersion -ne 'Python 3.13.12') { throw 'Expected the Python 3.13.12 x64 embedded runtime.' }
+& (Join-Path $bundleRoot 'runtime\python.exe') (Join-Path $sourceRoot 'scripts\Build-Readmes.py') --check
+if ($LASTEXITCODE -ne 0) { throw 'README translations are incomplete or stale.' }
 New-Item -ItemType Directory -Path $packageRoot -Force | Out-Null
-foreach ($name in @('app','src','scripts','tests','examples','licenses','docs','README.md','CHANGELOG.md','config.example.json','requirements.lock.txt','部署说明.txt','AI接入说明.txt','验证报告.txt')) {
+foreach ($name in @('app','locales','src','scripts','tests','examples','licenses','docs','README.md','CHANGELOG.md','config.example.json','requirements.lock.txt','Deployment-Guide.txt','Integration-Guide.txt','Verification-Report.txt')) {
     Copy-Item -LiteralPath (Join-Path $sourceRoot $name) -Destination $packageRoot -Recurse
 }
 if (Test-Path -LiteralPath (Join-Path $sourceRoot 'LICENSE')) { Copy-Item -LiteralPath (Join-Path $sourceRoot 'LICENSE') -Destination $packageRoot }
@@ -34,5 +36,5 @@ foreach ($name in @('runtime','vendor','bin')) {
 & (Join-Path $packageRoot 'scripts\Build-Tray.ps1') -Root $packageRoot
 & (Join-Path $packageRoot 'runtime\python.exe') (Join-Path $packageRoot 'scripts\Finalize-Package.py')
 if ($LASTEXITCODE -ne 0) { throw 'Package finalization failed.' }
-& (Join-Path $packageRoot 'scripts\Package.ps1') -Root $packageRoot -ZipPath (Join-Path $outputRoot 'OllamaStatusService-Windows-x64-v1.4.0.zip')
+& (Join-Path $packageRoot 'scripts\Package.ps1') -Root $packageRoot -ZipPath (Join-Path $outputRoot 'OllamaStatusService-Windows-x64-v1.6.1.zip')
 Write-Output ('Built source at '+$sourceRoot+' with verified dependencies. No services were installed.')

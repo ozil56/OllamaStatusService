@@ -8,7 +8,7 @@
 
 1. 等待现有旧版 `pull`、推理和排队任务结束。旧版长连接不会自动转成新任务。
 2. 将完整的 `OllamaStatusService-Windows-x64-v1.4.0.zip` 复制到对应服务器，解压到新的目录。
-3. 双击 **安装.exe**，选择升级并批准本机管理员提示。已有 Ollama、模型目录和配置由原升级流程保留。
+3. 双击 **Install.exe**，选择升级并批准本机管理员提示。已有 Ollama、模型目录和配置由原升级流程保留。
 4. 通过该服务器现有地址读取 `/help`，确认 `version` 为 `1.4.0`，且 `model_job_policy.execution` 为 `server_owned`。
 5. 在 `/manage` 网页中刷新服务器。此时新下载会使用远端任务接口。
 

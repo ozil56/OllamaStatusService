@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>OSS · 服务器与模型管理</title>
+  <script src="/oss/ui/language.js" defer></script><title>OSS · 服务器与模型管理</title>
   <link rel="icon" href="/manage/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/manage/style.css"><script src="/manage/app.js" defer></script>
 </head>
@@ -15,10 +15,10 @@
       <button class="nav-item" id="nav-tasks"><span class="nav-icon">⇣</span>任务中心<span class="nav-count" id="task-count">0</span></button>
     </nav>
     <div class="sidebar-note"><div class="note-icon">↗</div><strong>一个入口，管理所有节点</strong><p>管理当前 OSS，也可添加其他服务器，集中查看模型和任务。</p><button id="import-side" class="text-link">导入服务器 <span>→</span></button></div>
-    <div class="sidebar-bottom"><span class="local-dot"></span><div><span id="access-title">服务器管理器</span><small id="access-detail">正在读取访问设置</small></div><span class="version">v1.4.0</span></div>
+    <div class="sidebar-bottom"><span class="local-dot"></span><div><span id="access-title">服务器管理器</span><small id="access-detail">正在读取访问设置</small></div><span class="version">v1.6.1</span></div>
   </aside>
   <main>
-    <header class="topbar"><span class="breadcrumb">工作空间 <span>/</span> <b id="crumb">服务器与模型</b></span><div class="connection"><span id="connection-dot" class="local-dot"></span><span id="connection-text">正在连接管理器</span></div></header>
+    <header class="topbar"><select data-language-picker aria-label="Language"></select><span class="breadcrumb">工作空间 <span>/</span> <b id="crumb">服务器与模型</b></span><div class="connection"><span id="connection-dot" class="local-dot"></span><span id="connection-text">正在连接管理器</span></div></header>
     <div class="page">
       <section class="page-heading"><div><div class="eyebrow">INFRASTRUCTURE</div><h1 id="page-title">服务器与模型<span class="title-dot">.</span></h1><p id="page-desc">查看节点状态，让模型在需要的服务器上就绪。</p></div><div class="heading-actions"><button class="btn secondary" id="refresh-all"><span>↻</span> 刷新状态</button><button class="btn primary" id="add-server"><span>＋</span> 添加服务器</button></div></section>
       <div id="notice" class="banner" role="status" hidden></div>

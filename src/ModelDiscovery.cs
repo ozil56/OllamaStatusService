@@ -140,32 +140,32 @@ internal static class ModelDiscovery
         if (input.Installed) {
             string service = ServiceModelPath(System.IO.Path.Combine(input.InstallRoot, "OllamaStatusBackend.xml"));
             if (!String.IsNullOrWhiteSpace(service)) {
-                found = Candidate(service, "现有服务配置", input.Profile);
+                found = Candidate(service, L.T("现有服务配置"), input.Profile);
                 // Do not silently switch an installed service to a different model store.
-                return found ?? new ModelLocation { Path = Normalize(service, input.Profile), Source = "现有服务配置",
-                    Warning = "现有服务指定的目录无法访问，或缺少 blobs/manifests；请核对路径和权限。" };
+                return found ?? new ModelLocation { Path = Normalize(service, input.Profile), Source = L.T("现有服务配置"),
+                    Warning = L.T("现有服务指定的目录无法访问，或缺少 blobs/manifests；请核对路径和权限。") };
             }
-            found = Candidate(recorded, "已有安装记录", input.Profile);
+            found = Candidate(recorded, L.T("已有安装记录"), input.Profile);
             if (found != null) return found;
         }
         string[] values = { input.UserModels, input.MachineModels, input.ProcessModels };
-        string[] sources = { "用户环境变量（注册表）", "系统环境变量（注册表）", "启动进程环境变量" };
+        string[] sources = { L.T("用户环境变量（注册表）"), L.T("系统环境变量（注册表）"), L.T("启动进程环境变量") };
         for (int i = 0; i < values.Length; i++) {
             found = Candidate(values[i], sources[i], input.Profile);
             if (found != null) return found;
         }
         foreach (string logged in LogCandidates(input.LocalAppData)) {
-            found = Candidate(logged, "Ollama 启动日志", input.Profile);
+            found = Candidate(logged, L.T("Ollama 启动日志"), input.Profile);
             if (found != null) {
-                found.Warning = "路径来自启动日志，已确认目录结构；请核对是否仍为当前使用的模型库。";
+                found.Warning = L.T("路径来自启动日志，已确认目录结构；请核对是否仍为当前使用的模型库。");
                 return found;
             }
         }
-        found = Candidate(recorded, "上次安装记录", input.Profile);
+        found = Candidate(recorded, L.T("上次安装记录"), input.Profile);
         if (found != null) return found;
         string defaultPath = System.IO.Path.Combine(input.Profile, @".ollama\models");
-        found = Candidate(defaultPath, "Ollama 默认目录", input.Profile);
-        return found ?? new ModelLocation { Path = "", Source = "未找到",
-            Warning = "未找到包含 blobs 和 manifests 的模型目录。请通过“浏览”选择；不会把不存在的默认路径当成已识别。" };
+        found = Candidate(defaultPath, L.T("Ollama 默认目录"), input.Profile);
+        return found ?? new ModelLocation { Path = "", Source = L.T("未找到"),
+            Warning = L.T("未找到包含 blobs 和 manifests 的模型目录。请通过“浏览”选择；不会把不存在的默认路径当成已识别。") };
     }
 }

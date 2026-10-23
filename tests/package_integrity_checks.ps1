@@ -11,9 +11,9 @@ try {
         [IO.File]::WriteAllText($manifestFile,($entry | ConvertTo-Json),[Text.UTF8Encoding]::new($bom))
         if ((Test-PackageIntegrity $fixture) -ne 1) { throw 'UTF-8 Chinese file validation failed' }
     }
-    $second=Join-Path $fixture '部署说明.txt'
+    $second=Join-Path $fixture 'Deployment-Guide.txt'
     [IO.File]::WriteAllText($second,'UTF-8 测试',[Text.UTF8Encoding]::new($false))
-    $entry+=@([ordered]@{path='部署说明.txt';sha256=(Get-FileHash -LiteralPath $second -Algorithm SHA256).Hash})
+    $entry+=@([ordered]@{path='Deployment-Guide.txt';sha256=(Get-FileHash -LiteralPath $second -Algorithm SHA256).Hash})
     foreach ($bom in @($false,$true)) {
         [IO.File]::WriteAllText($manifestFile,($entry | ConvertTo-Json),[Text.UTF8Encoding]::new($bom))
         if ((Test-PackageIntegrity $fixture) -ne 2) { throw 'JSON array unwrapping failed' }

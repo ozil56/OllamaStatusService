@@ -1,6 +1,6 @@
-# OSS 1.4.0 网页管理
+# OSS 网页管理（1.4.0 起提供）
 
-将完整的 `OllamaStatusService-Windows-x64-v1.4.0.zip` 复制到每台服务器，解压到新的目录，双击 `安装.exe`，选择升级。升级前等待正在执行的任务完成，或先暂停新版 OSS 托管的下载。安装器会保留原配置、模型目录、任务记录和管理节点列表。
+将完整的 `OllamaStatusService-Windows-x64-v1.6.1.zip` 复制到每台服务器，解压到新的目录，双击 `Install.exe`，选择升级。升级前等待正在执行的任务完成，或先暂停新版 OSS 托管的下载。安装器会保留原配置、模型目录、任务记录和管理节点列表。
 
 升级后访问 **现有 OSS 域名 + `/manage`**。本机也可访问 `http://127.0.0.1:11434/manage`。
 
@@ -13,7 +13,7 @@
 - 选择节点后可以查看模型和大小、输入模型名下载，或者选择已安装模型删除。删除前必须输入完整模型名确认。
 - 任务页支持查看进度、速度、状态，暂停正在下载的任务，继续暂停的任务，或重试失败任务。暂停通过关闭该任务的上游下载连接实现；继续向同一 Ollama 重新发起 pull，复用其保留的下载分片。
 
-操作中的目标节点至少需要 OSS 1.3.0；暂停和继续需要 1.3.1。建议各节点统一升级到 1.4.0。无需同时升级全部节点；未升级节点仍可查看状态和模型列表。
+操作中的目标节点至少需要 OSS 1.3.0；暂停和继续需要 1.3.1。建议各节点统一升级到 1.6.1。无需同时升级全部节点；未升级节点仍可查看状态和模型列表。
 
 ## 从原独立管理器导入
 
@@ -41,6 +41,10 @@ python app\export_manager.py --source 'C:\Tools\OSS-Manager\data\manager.sqlite3
 
 节点列表及管理记录：`config.json` 中 `data_dir` 下的 `manage\manager.sqlite3`。目标模型任务：同目录下的 `model-jobs.sqlite3`。默认均位于 `%ProgramData%\OllamaStatusService\data`，升级保留。
 
-访问 `/help` 应显示版本 `1.4.0`、`urls.manage=/manage`、`manage_policy.authentication=existing_reverse_proxy`。打开 `/manage` 应看到当前节点、模型列表和任务页。
+访问 `/help` 应显示版本 `1.6.1`、`urls.manage=/manage`、`manage_policy.authentication=existing_reverse_proxy`。打开 `/manage` 应看到当前节点、模型列表和任务页。
 
 `tests\manage_http.py ManageTests` 使用临时端口和模拟模型，覆盖现有 Basic Auth 代理保护、节点导入和凭据加密、模型下载删除、暂停继续、重启持久化，以及管理端退出后目标下载继续。所有测试均不访问实际模型服务器。
+
+## TUN / Fake-IP 下载
+
+1.6.1 在目标 OSS 服务器自动识别代理，并提供本机转发回退；网页不需要开启代理，也不需要调整网络模式。HTTPS 校验保留，已有下载不因设置变化而重启。目标 Ollama 需要支持该流程（验证基线 0.40.9）。详见 [下载网络与限制](DOWNLOAD-NETWORK.md)。

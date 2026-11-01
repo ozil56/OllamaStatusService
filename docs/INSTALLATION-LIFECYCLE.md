@@ -60,8 +60,9 @@ Windows Common Item Dialog and follows the operating system's appearance.
 ## Verification
 
 `tests\working_directory_checks.ps1` uses real compiled worker processes and
-Windows directory deletion. An optional 1.6.2 baseline reproduces the empty-folder
-lock; the fixed worker releases the extraction directory while remaining alive.
+Windows directory deletion. An optional, already retained 1.6.2 baseline reproduces
+the empty-folder lock; that Release is withdrawn and is not needed for normal
+checks. The fixed worker releases the extraction directory while remaining alive.
 It also checks both compiled launchers' working-directory configuration.
 
 `tests\service_lifecycle_checks.ps1` replaces only SCM/process boundaries with

@@ -1,12 +1,14 @@
 # Building and testing on Windows
 
-For 1.6.3, use a verified 1.6.2 dependency bundle and run the added Windows checks
+For 1.6.3, use a verified 1.6.3 dependency bundle (1.6.1 is also compatible) and run the Windows checks
 `tests\service_lifecycle_checks.ps1`, `tests\dialog_checks.ps1`,
 `tests\localization_checks.ps1` and `tests\working_directory_checks.ps1` from
-the built package. The last accepts `-BaselineExe` pointing to a 1.6.2 tray for
-before/after directory-lock verification. See [lifecycle fixes](INSTALLATION-LIFECYCLE.md).
+the built package. The last optionally accepts `-BaselineExe` pointing to an already
+retained 1.6.2 tray for before/after directory-lock verification. Omit this argument
+for normal checks; the withdrawn 1.6.2 release is not required to build or test.
+See [lifecycle fixes](INSTALLATION-LIFECYCLE.md).
 
-For 1.6.2, use the 1.6.1 dependency bundle (dependencies are unchanged). Run
+To verify the unattended recovery included in 1.6.3, run
 `tests\watchdog_checks.ps1` with Windows PowerShell 5.1 and
 `runtime\python.exe tests\ollama_update_guard.py` in the built package to verify
 automatic recovery and admission races. See [automatic recovery](AUTOMATIC-RECOVERY.md).
@@ -17,14 +19,14 @@ The repository contains application source, C# GUI source, PowerShell lifecycle 
 
 Use Windows x64 with Windows PowerShell 5.1 and the .NET Framework 4.8 compiler. No service installation or administrator session is required to compile and package.
 
-1. Download the **1.6.1 Windows release ZIP and checksum** from the project's Releases page. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW.
-2. Obtain the 1.6.1 source checkout. The 1.2.3/1.2.4/1.2.5 dependency bundles are also compatible because dependencies are unchanged.
+1. Download the **[1.6.3 Windows release ZIP and checksum](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.3)**. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW. A verified 1.6.1 bundle is also compatible; dependencies are unchanged.
+2. Obtain the current source checkout, or use tag `v1.6.3` to rebuild that release's source.
 3. Run this from the source root, replacing the example dependency path:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\Build-Package.ps1 `
   -DependencyBundle 'C:\Build\Dependencies\OllamaStatusService' `
-  -OutputDirectory 'C:\Build\Output-1.6.1'
+  -OutputDirectory 'C:\Build\Output-1.6.3'
 ```
 
 `Build-Package.ps1` verifies the dependency bundle's manifest, dependency lock, Python version and WinSW hash. It copies only an explicit public source list, recompiles the installer/uninstaller and tray from C#, regenerates the HTML guide and encoding-sensitive launchers, then creates the ZIP, internal file manifest and external SHA256. It refuses to overwrite an existing output package.
@@ -44,7 +46,7 @@ If recreating dependencies independently, use a Python 3.13 x64 environment to i
 
 ## Run isolated checks
 
-The 1.6.1 source uses the same verified dependencies as 1.4.0. Its new checks are `runtime\python.exe tests\ollama_update_guard.py` and `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\ollama_update_checks.ps1`. Neither runs an official installer or changes production services.
+Ollama update checks are `runtime\python.exe tests\ollama_update_guard.py` and `powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests\ollama_update_checks.ps1`. Neither runs an official installer or changes production services.
 
 Run these commands **from the newly built package directory**, which contains `runtime` and `vendor`:
 

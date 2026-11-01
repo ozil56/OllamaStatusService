@@ -18,7 +18,7 @@ A Windows gateway, background service and system tray application for an existin
 
 <!-- readme:b04 -->
 
-Version 1.6.3 fixes mixed languages in live version summaries, saved update history and installer completion messages. It includes eight UI languages with automatic matching and saved selection, automatic proxy discovery and a built-in loopback download relay for TUN/Fake-IP networks, fixes stale Ollama upgrade offers and removes command-window flashes from tray actions. See [download networking][link1]. It also includes official Ollama update checks and upgrades to the system tray. It checks stable releases every six hours, verifies the installer hash and publisher signature, refuses to interrupt active or uncertain work, and restores OSS ownership after validating the original models and configuration. See [Ollama updates][link2]. The downloadable Windows package is linked below.
+Version 1.6.3 includes unattended recovery, fixes extracted-package directory locks and service-stop failures, and unifies desktop dialogs. It includes eight UI languages with automatic matching and saved selection, automatic proxy discovery and a built-in loopback download relay for TUN/Fake-IP networks, fixes stale Ollama upgrade offers and removes command-window flashes from tray actions. See [download networking][link1]. It also includes official Ollama update checks and upgrades to the system tray. It checks stable releases every six hours, verifies the installer hash and publisher signature, refuses to interrupt active or uncertain work, and restores OSS ownership after validating the original models and configuration. See [Ollama updates][link2]. The downloadable Windows package is linked below.
 
 <!-- readme:b05 -->
 
@@ -33,6 +33,8 @@ Version 1.2.5 fixes empty model lists caused by missing LocalService permissions
 [Release 1.6.3][link4] · [Windows ZIP][link5] · [SHA256][link6] · [Release notes][link7] · [Build from source][link8]
 
 <!-- readme:b08 -->
+
+> Release 1.6.2 has been withdrawn. Use 1.6.3, which includes all its recovery changes and subsequent fixes. Existing 1.6.1 and 1.6.2 installations can upgrade directly; no intermediate release is needed.
 
 > Download `OllamaStatusService-Windows-x64-v1.6.3.zip` and its checksum from the release above, or build it from source. GitHub's automatic “Source code” archives are not installable packages. The installer, tray, /manage and /dashboard support Simplified Chinese, Traditional Chinese, English, Japanese, Korean, German, French and Spanish. Automatic language matching and saved manual selection are available; /status and /help localize display text while preserving protocol keys. See [languages][link9].
 

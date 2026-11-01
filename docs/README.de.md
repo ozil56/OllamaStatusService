@@ -18,7 +18,7 @@ Ein Windows-Gateway mit Hintergrunddiensten und einer Tray-Anwendung für eine v
 
 <!-- readme:b04 -->
 
-Version 1.6.3 behebt gemischte Sprachen in Versionsanzeigen, gespeicherten Update-Verläufen und Abschlussmeldungen des Installers. Enthalten sind acht UI-Sprachen mit automatischer Zuordnung und gespeicherter Auswahl, automatische Proxy-Erkennung und eine integrierte lokale Download-Weiterleitung für TUN/Fake-IP-Netze. Veraltete Ollama-Update-Angebote und kurz aufblitzende Konsolenfenster bei Tray-Aktionen wurden behoben. Siehe [Download-Netzwerk][link1]. Das Tray kann außerdem offizielle Ollama-Updates prüfen und installieren: Alle sechs Stunden wird nach stabilen Versionen gesucht, Hash und Herausgebersignatur des Installers werden geprüft, laufende oder unklare Arbeit wird nicht unterbrochen, und nach Prüfung der ursprünglichen Modelle und Konfiguration übernimmt OSS wieder die Verwaltung. Siehe [Ollama-Updates][link2]. Das Windows-Paket ist unten verlinkt.
+Version 1.6.3 enthält die automatische Wiederherstellung, behebt gesperrte Paketordner und Fehler beim Dienststopp und vereinheitlicht die Desktopdialoge. Enthalten sind acht UI-Sprachen mit automatischer Zuordnung und gespeicherter Auswahl, automatische Proxy-Erkennung und eine integrierte lokale Download-Weiterleitung für TUN/Fake-IP-Netze. Veraltete Ollama-Update-Angebote und kurz aufblitzende Konsolenfenster bei Tray-Aktionen wurden behoben. Siehe [Download-Netzwerk][link1]. Das Tray kann außerdem offizielle Ollama-Updates prüfen und installieren: Alle sechs Stunden wird nach stabilen Versionen gesucht, Hash und Herausgebersignatur des Installers werden geprüft, laufende oder unklare Arbeit wird nicht unterbrochen, und nach Prüfung der ursprünglichen Modelle und Konfiguration übernimmt OSS wieder die Verwaltung. Siehe [Ollama-Updates][link2]. Das Windows-Paket ist unten verlinkt.
 
 <!-- readme:b05 -->
 
@@ -33,6 +33,8 @@ Version 1.2.5 behebt leere Modelllisten durch fehlende LocalService-Berechtigung
 [Release 1.6.3][link4] · [Windows-ZIP][link5] · [SHA256][link6] · [Änderungen][link7] · [Aus Quellcode bauen][link8]
 
 <!-- readme:b08 -->
+
+> Release 1.6.2 wurde zurückgezogen. Verwenden Sie 1.6.3 mit allen Wiederherstellungsfunktionen und nachfolgenden Korrekturen. Bestehende Installationen von 1.6.1 oder 1.6.2 können direkt aktualisiert werden; keine Zwischenversion ist erforderlich.
 
 > Laden Sie `OllamaStatusService-Windows-x64-v1.6.3.zip` und die Prüfsumme aus dem oben verlinkten Release herunter oder bauen Sie das Paket selbst. GitHubs automatisch erzeugte „Source code“-Archive sind keine Installationspakete. Installer, Tray, /manage und /dashboard unterstützen vereinfachtes und traditionelles Chinesisch, Englisch, Japanisch, Koreanisch, Deutsch, Französisch und Spanisch. Automatische Spracherkennung und gespeicherte manuelle Auswahl sind verfügbar; /status und /help übersetzen Anzeigetexte und behalten die Protokollfelder bei. Siehe [Sprachen][link9].
 

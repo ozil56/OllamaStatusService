@@ -18,7 +18,7 @@ Une passerelle Windows, des services en arrière-plan et une application de zone
 
 <!-- readme:b04 -->
 
-La version 1.6.3 corrige les mélanges de langues dans les résumés de version, l’historique des mises à jour et les messages de fin d’installation. Elle comprend huit langues d’interface avec sélection automatique et choix mémorisé, la détection automatique des proxys et un relais local de téléchargement intégré pour les réseaux TUN/Fake-IP. Les propositions de mise à jour Ollama périmées et les fenêtres de console fugitives lors des actions de notification sont corrigées. Voir [le réseau de téléchargement][link1]. La zone de notification permet aussi de vérifier et d’installer les mises à jour officielles d’Ollama : recherche des versions stables toutes les six heures, vérification du hachage et de la signature de l’éditeur, refus d’interrompre les tâches actives ou incertaines, puis reprise de la gestion par OSS après vérification des modèles et de la configuration d’origine. Voir [les mises à jour d’Ollama][link2]. Le paquet Windows est proposé ci-dessous.
+La version 1.6.3 inclut la récupération automatique, corrige le verrouillage du dossier extrait et les échecs d’arrêt des services, et harmonise les fenêtres. Elle comprend huit langues d’interface avec sélection automatique et choix mémorisé, la détection automatique des proxys et un relais local de téléchargement intégré pour les réseaux TUN/Fake-IP. Les propositions de mise à jour Ollama périmées et les fenêtres de console fugitives lors des actions de notification sont corrigées. Voir [le réseau de téléchargement][link1]. La zone de notification permet aussi de vérifier et d’installer les mises à jour officielles d’Ollama : recherche des versions stables toutes les six heures, vérification du hachage et de la signature de l’éditeur, refus d’interrompre les tâches actives ou incertaines, puis reprise de la gestion par OSS après vérification des modèles et de la configuration d’origine. Voir [les mises à jour d’Ollama][link2]. Le paquet Windows est proposé ci-dessous.
 
 <!-- readme:b05 -->
 
@@ -33,6 +33,8 @@ La version 1.2.5 corrige les listes de modèles vides dues à des droits LocalSe
 [Version 1.6.3][link4] · [ZIP Windows][link5] · [SHA256][link6] · [Historique][link7] · [Compiler les sources][link8]
 
 <!-- readme:b08 -->
+
+> La publication 1.6.2 a été retirée. Utilisez 1.6.3, qui inclut toutes ses fonctions de récupération et les corrections suivantes. Les installations 1.6.1 et 1.6.2 peuvent être mises à niveau directement, sans version intermédiaire.
 
 > Téléchargez `OllamaStatusService-Windows-x64-v1.6.3.zip` et sa somme de contrôle depuis la version ci-dessus, ou compilez les sources. Les archives « Source code » automatiques de GitHub ne sont pas des paquets installables. L’installateur, la zone de notification, /manage et /dashboard prennent en charge le chinois simplifié et traditionnel, l’anglais, le japonais, le coréen, l’allemand, le français et l’espagnol. La langue est détectée automatiquement ou choisie et mémorisée ; /status et /help traduisent les textes d’affichage tout en préservant les clés du protocole. Voir [les langues][link9].
 

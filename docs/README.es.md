@@ -18,7 +18,7 @@ Una pasarela de Windows, servicios en segundo plano y una aplicación de bandeja
 
 <!-- readme:b04 -->
 
-La versión 1.6.3 corrige la mezcla de idiomas en los resúmenes de versión, el historial de actualizaciones y los mensajes de instalación finalizada. Incluye ocho idiomas de interfaz con detección automática y selección guardada, detección automática de proxies y un relé local de descarga integrado para redes TUN/Fake-IP. Corrige avisos obsoletos de actualización de Ollama y ventanas de consola que aparecían brevemente al usar la bandeja. Consulte [la red de descarga][link1]. La bandeja también comprueba e instala actualizaciones oficiales de Ollama: busca versiones estables cada seis horas, verifica el hash y la firma del editor del instalador, rechaza interrumpir trabajos activos o inciertos y devuelve el control a OSS después de validar los modelos y la configuración originales. Consulte [las actualizaciones de Ollama][link2]. El paquete de Windows está enlazado abajo.
+La versión 1.6.3 incluye recuperación automática, corrige el bloqueo de la carpeta extraída y los fallos al detener servicios, y unifica las ventanas. Incluye ocho idiomas de interfaz con detección automática y selección guardada, detección automática de proxies y un relé local de descarga integrado para redes TUN/Fake-IP. Corrige avisos obsoletos de actualización de Ollama y ventanas de consola que aparecían brevemente al usar la bandeja. Consulte [la red de descarga][link1]. La bandeja también comprueba e instala actualizaciones oficiales de Ollama: busca versiones estables cada seis horas, verifica el hash y la firma del editor del instalador, rechaza interrumpir trabajos activos o inciertos y devuelve el control a OSS después de validar los modelos y la configuración originales. Consulte [las actualizaciones de Ollama][link2]. El paquete de Windows está enlazado abajo.
 
 <!-- readme:b05 -->
 
@@ -33,6 +33,8 @@ La versión 1.2.5 corrige listas vacías de modelos debidas a permisos insuficie
 [Versión 1.6.3][link4] · [ZIP de Windows][link5] · [SHA256][link6] · [Cambios][link7] · [Compilar desde el código][link8]
 
 <!-- readme:b08 -->
+
+> La publicación 1.6.2 se ha retirado. Use 1.6.3, que incluye todas sus funciones de recuperación y las correcciones posteriores. Las instalaciones 1.6.1 y 1.6.2 pueden actualizarse directamente, sin versiones intermedias.
 
 > Descargue `OllamaStatusService-Windows-x64-v1.6.3.zip` y su suma de comprobación desde la publicación anterior, o compílelo desde el código fuente. Los archivos «Source code» generados automáticamente por GitHub no son instaladores. El instalador, la bandeja, /manage y /dashboard admiten chino simplificado y tradicional, inglés, japonés, coreano, alemán, francés y español. Puede detectar el idioma automáticamente o guardar una selección manual; /status y /help traducen el texto visible y mantienen las claves del protocolo. Consulte [los idiomas][link9].
 

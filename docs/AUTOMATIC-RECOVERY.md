@@ -1,4 +1,6 @@
-# Automatic recovery in 1.6.2
+# Automatic recovery
+
+These recovery features are included in the current [1.6.3 release](https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.3). The earlier 1.6.2 Release has been withdrawn; install 1.6.3 directly.
 
 The Windows SYSTEM task `OllamaStatusServiceWatchdog` runs once a minute. It uses
 the configured direct listener and checks `/status`, service state, real inference

@@ -60,7 +60,7 @@ class ReadmeTests(unittest.TestCase):
             for target in links:
                 if target.startswith("https://"):
                     self.assertIn("/releases/", target)
-                    self.assertIn("v1.6.1", target)
+                    self.assertIn("v1.6.2", target)
                 else:
                     self.assertTrue((path.parent / target).is_file(), (path, target))
 

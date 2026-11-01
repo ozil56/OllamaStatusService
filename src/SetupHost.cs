@@ -11,8 +11,8 @@ using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-[assembly: System.Reflection.AssemblyFileVersion("1.6.1")]
-[assembly: System.Reflection.AssemblyInformationalVersion("1.6.1")]
+[assembly: System.Reflection.AssemblyFileVersion("1.6.2")]
+[assembly: System.Reflection.AssemblyInformationalVersion("1.6.2")]
 
 // A Windows-subsystem executable owns the only UI. The elevated copy has no UI;
 // it starts the existing PowerShell installation engine with CREATE_NO_WINDOW.
@@ -139,7 +139,7 @@ internal sealed class SetupForm : Form
         FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         Icon = SystemIcons.Application;
-        AddLabel(L.T("Ollama 状态服务 · 1.6.1"), 22, 18, 690, 30).Font = new Font(Font.FontFamily, 16F, FontStyle.Bold);
+        AddLabel(L.T("Ollama 状态服务 · 1.6.2"), 22, 18, 690, 30).Font = new Font(Font.FontFamily, 16F, FontStyle.Bold);
         AddLabel(L.T("直连 11434 · 代理入口 11436 · 共享队列与本机优先"), 22, 58, 690, 28);
         AddLabel(L.T("Ollama 主程序"), 22, 99, 680, 24);
         exeBox.SetBounds(22, 126, 589, 28); Controls.Add(exeBox);
@@ -184,14 +184,14 @@ internal sealed class SetupForm : Form
         }
         EnableInputs(!uninstall && !verify);
         if (!uninstall && !verify && hasInstall) {
-            upgrade = true; primary.Text = L.T("升级到 1.6.1"); state.Text = L.T("检测到已有服务，可直接升级");
+            upgrade = true; primary.Text = L.T("升级到 1.6.2"); state.Text = L.T("检测到已有服务，可直接升级");
             Text = L.T("升级 Ollama 状态服务"); EnableInputs(false);
             note.Text = L.T("升级将自动卸载旧版，再安装新版，期间 Ollama 会短暂停服。\r\n请先暂停本机和远端提交，等待当前任务完成，再点击升级。");
-            details.Text = L.T("无需手动卸载。保留原 Ollama、模型和服务配置。1.6.1 自动识别代理并支持 TUN 模型下载，保留 HTTPS 校验；修复升级后托盘提示与命令窗口闪烁。有任务时不停止服务。保留 /manage 网页管理与现有反代认证。安装 OSS 本身请安排在空闲时段。");
+            details.Text = L.T("无需手动卸载。保留原 Ollama、模型和服务配置。1.6.2 自动识别代理并支持 TUN 模型下载，保留 HTTPS 校验；修复升级后托盘提示与命令窗口闪烁。有任务时不停止服务。保留 /manage 网页管理与现有反代认证。安装 OSS 本身请安排在空闲时段。");
             try {
                 var installed = SetupHost.Read(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OllamaStatusService\installation.json"));
                 exeBox.Text = (string)installed["source_exe"];
-                state.Text = L.T("当前版本 ") + installed["version"] + " → 1.6.1";
+                state.Text = L.T("当前版本 ") + installed["version"] + " → 1.6.2";
                 if (!models.Found) { primary.Enabled = false; details.Text = models.Warning; }
             } catch (Exception ex) { primary.Enabled = false; details.Text = L.T("无法读取旧安装记录，未修改系统：") + ex.Message; }
         }

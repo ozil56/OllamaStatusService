@@ -14,11 +14,11 @@
 
 <!-- readme:b03 -->
 
-**現在のバージョン：1.6.1 · Windows x64 · オフラインインストーラー**
+**現在のバージョン：1.6.2 · Windows x64 · オフラインインストーラー**
 
 <!-- readme:b04 -->
 
-1.6.1 では、バージョン表示、保存済み更新履歴、インストール完了メッセージで言語が混在する問題を修正しました。8 言語の自動選択と手動設定の保存、プロキシの自動検出、TUN/Fake-IP ネットワーク向けのローカルダウンロード中継を備えています。更新済み Ollama に古い更新案内が残る問題と、トレイ操作時にコンソールが一瞬表示される問題も修正しました。[ダウンロードネットワーク][link1]を参照してください。トレイから公式 Ollama の更新確認とアップグレードも行えます。6 時間ごとに安定版を確認し、インストーラーのハッシュと発行元署名を検証します。実行中または完了不明の処理は中断せず、既存モデルと設定を検証してから OSS の管理を復元します。[Ollama の更新][link2]を参照してください。Windows パッケージは以下から取得できます。
+1.6.2 では、バージョン表示、保存済み更新履歴、インストール完了メッセージで言語が混在する問題を修正しました。8 言語の自動選択と手動設定の保存、プロキシの自動検出、TUN/Fake-IP ネットワーク向けのローカルダウンロード中継を備えています。更新済み Ollama に古い更新案内が残る問題と、トレイ操作時にコンソールが一瞬表示される問題も修正しました。[ダウンロードネットワーク][link1]を参照してください。トレイから公式 Ollama の更新確認とアップグレードも行えます。6 時間ごとに安定版を確認し、インストーラーのハッシュと発行元署名を検証します。実行中または完了不明の処理は中断せず、既存モデルと設定を検証してから OSS の管理を復元します。[Ollama の更新][link2]を参照してください。Windows パッケージは以下から取得できます。
 
 <!-- readme:b05 -->
 
@@ -30,11 +30,11 @@
 
 <!-- readme:b07 -->
 
-[1.6.1 リリース][link4] · [Windows ZIP][link5] · [SHA256][link6] · [変更履歴][link7] · [ソースからビルド][link8]
+[1.6.2 リリース][link4] · [Windows ZIP][link5] · [SHA256][link6] · [変更履歴][link7] · [ソースからビルド][link8]
 
 <!-- readme:b08 -->
 
-> 上のリリースから `OllamaStatusService-Windows-x64-v1.6.1.zip` とチェックサムを取得するか、ソースからビルドしてください。GitHub が自動生成する「Source code」アーカイブはインストール用パッケージではありません。インストーラー、トレイ、/manage、/dashboard は簡体字中国語、繁体字中国語、英語、日本語、韓国語、ドイツ語、フランス語、スペイン語に対応します。言語の自動選択と手動選択の保存が可能です。/status と /help はプロトコルのキーを保持し、表示テキストを翻訳します。[言語設定][link9]を参照してください。
+> 上のリリースから `OllamaStatusService-Windows-x64-v1.6.2.zip` とチェックサムを取得するか、ソースからビルドしてください。GitHub が自動生成する「Source code」アーカイブはインストール用パッケージではありません。インストーラー、トレイ、/manage、/dashboard は簡体字中国語、繁体字中国語、英語、日本語、韓国語、ドイツ語、フランス語、スペイン語に対応します。言語の自動選択と手動選択の保存が可能です。/status と /help はプロトコルのキーを保持し、表示テキストを翻訳します。[言語設定][link9]を参照してください。
 
 <!-- readme:b09 -->
 
@@ -167,7 +167,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11436/help
 
 <!-- readme:b32 -->
 
-`version=1.6.1` と、各入口でそれぞれ `request_origin=local` / `remote` になることを確認し、既存の公開プロキシ URL 経由でも `/help` を確認します。推論中は `/status.active_origin` と `requests[].origin` を確認してください。プロキシが依然として `11434` を向いていると、ループバック転送をローカル処理と誤判定する場合があります。
+`version=1.6.2` と、各入口でそれぞれ `request_origin=local` / `remote` になることを確認し、既存の公開プロキシ URL 経由でも `/help` を確認します。推論中は `/status.active_origin` と `requests[].origin` を確認してください。プロキシが依然として `11434` を向いていると、ループバック転送をローカル処理と誤判定する場合があります。
 
 <!-- readme:b33 -->
 
@@ -224,7 +224,7 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/generate' `
 
 <!-- readme:b43 -->
 
-リクエストの完了を確認できない場合、`unknown` が新規受け付けを止めます。未完了処理を終了してよい場合にのみトレイの復旧を使ってください。復旧はバックエンドを停止・確認してから不確定な記録を消去します。Ollama が動作している可能性がある間は DB を削除しないでください。キューのペイロードはメモリに保持し、再起動後には再実行しません。
+要求の完了を確認できない場合、`unknown` は新しい処理を拒否します。1.6.2 以降、SYSTEM ウォッチドッグが毎分、受付可能かを確認します。実行中の処理がなく異常が五分間続くと自動復旧し（通常 5–6 分以内）、失敗時は五分ごとに再試行します。完了不明、バックエンドのオフライン、ゲートウェイ無応答、サービスの予期しない停止、スケジューラー停止が対象です。推論、ダウンロード、アップロードの実行中は保護し、トレイでの明示的な停止と更新保守中は復旧を停止します。受付を閉じ、バックエンド停止を確認して不確定記録を処理し、再起動後の準備完了を検証します。未確認の処理は中断される場合があります。ゲートウェイが無応答の場合、推論の継続は確認できません。トレイから即時復旧も可能です。Ollama が動作している可能性がある間はデータベースを削除しないでください。待機要求は再起動後に再実行しません。診断ログは `%ProgramData%\OllamaStatusService\logs\watchdog.jsonl` です。
 
 <!-- readme:b44 -->
 
@@ -257,9 +257,9 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/generate' `
 [link1]: ../docs/DOWNLOAD-NETWORK.md
 [link2]: ../docs/OLLAMA-UPDATES.md
 [link3]: ../docs/MANAGE.md
-[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.1
-[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.1/OllamaStatusService-Windows-x64-v1.6.1.zip
-[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.1/OllamaStatusService-Windows-x64-v1.6.1.zip.sha256.txt
+[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.2
+[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip
+[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip.sha256.txt
 [link7]: ../CHANGELOG.md
 [link8]: ../docs/BUILD.md
 [link9]: ../docs/LANGUAGES.md

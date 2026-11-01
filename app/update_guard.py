@@ -18,8 +18,19 @@ class UpdateGuard:
         self.inflight = 0
 
     @property
+    def recovering(self):
+        try:
+            return self.marker.with_name("watchdog-recovery.lock").stat() is not None
+        except FileNotFoundError:
+            return False
+        except OSError:
+            return True
+
+    @property
     def active(self):
         try:
+            if self.recovering:
+                return True
             return self.marker.stat() is not None
         except FileNotFoundError:
             return False

@@ -149,7 +149,7 @@ namespace OllamaStatusTray
             string json;
             using (var client = new HttpClient()) {
                 client.Timeout = TimeSpan.FromSeconds(30);
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("OllamaStatusService-Updater/1.6.1");
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("OllamaStatusService-Updater/1.6.2");
                 json = await client.GetStringAsync("https://api.github.com/repos/ollama/ollama/releases/latest");
             }
             // Read the installed version AFTER the potentially slow Internet request.

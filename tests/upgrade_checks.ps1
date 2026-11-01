@@ -77,7 +77,7 @@ function Invoke-RestMethod([string]$Uri) {
     [pscustomobject]@{inflight_requests=0;queued_requests=0;uncertain_requests=0;inflight_model_transfers=0;model_jobs=@{active=0};
         accepting_requests=(-not $gated);download_network=@{active_tunnels=([int]$relayBusy)};
         ollama_update=@{protocol=1;inflight_http_operations=([int]$httpBusy);unknown_model_jobs=0;model_workers=0;maintenance=$gated;safe_to_stop=($gated -and -not $httpBusy -and -not $relayBusy)};
-        ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.6.1';models=$models;scheduling_policy='local_first_fifo_per_origin'} }
+        ok=$true;request_origin='remote';service='OllamaStatusService';state=$(if ($script:Scenario -eq 'busy') {'busy'} else {'idle'});ollama_online=$true;version='1.6.2';models=$models;scheduling_policy='local_first_fifo_per_origin'} }
 function Start-Transcript { }
 function Stop-Transcript { }
 function Test-Path([string]$LiteralPath,[string]$PathType) {
@@ -213,7 +213,7 @@ function Grant-Directory { }
             Assert (($backend.service.env | Where-Object name -eq 'HTTPS_PROXY').value -eq ('http://127.0.0.1:'+$network.port)) 'Backend relay not wired'
             [xml]$fixtureGatewayXml=Get-Content -LiteralPath (Join-Path $script:InstallRoot ($script:GatewayName+'.xml')) -Raw
             Assert (($fixtureGatewayXml.service.env | Where-Object name -eq 'OSS_DOWNLOAD_NETWORK').value -eq (Join-Path $script:InstallRoot 'download-network.json')) 'Gateway relay not wired'
-            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.6.1') 'Wrong installed version'
+            Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).version -eq '1.6.2') 'Wrong installed version'
             if ($case -eq 'service-model-overrides-record') {
                 Assert ((Get-Content -LiteralPath $script:RegistrationPath -Raw | ConvertFrom-Json).models -eq $activeModels) 'Reinstall used stale model path'
                 Assert (($backend.service.env | Where-Object name -eq 'OLLAMA_MODELS').value -eq $activeModels) 'Backend model path was not preserved'

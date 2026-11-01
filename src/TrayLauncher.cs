@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
-[assembly: System.Reflection.AssemblyFileVersion("1.6.1.0")]
+[assembly: System.Reflection.AssemblyFileVersion("1.6.2.0")]
 internal static class TrayLauncher
 {
     [STAThread]

@@ -1,4 +1,4 @@
-﻿// .NET Framework 4.8 / Windows Forms. No Python or extra runtime is needed for the tray.
+// .NET Framework 4.8 / Windows Forms. No Python or extra runtime is needed for the tray.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,8 +12,8 @@ using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-[assembly: System.Reflection.AssemblyFileVersion("1.6.1.0")]
-[assembly: System.Reflection.AssemblyInformationalVersion("1.6.1")]
+[assembly: System.Reflection.AssemblyFileVersion("1.6.2.0")]
+[assembly: System.Reflection.AssemblyInformationalVersion("1.6.2")]
 
 namespace OllamaStatusTray
 {
@@ -181,7 +181,7 @@ namespace OllamaStatusTray
                 else if (state == "busy") text = data.ContainsKey("queued_local_requests")
                     ? L.F("处理中；本机排队 {0}，远端 {1}", data["queued_local_requests"], data["queued_remote_requests"])
                     : L.T("处理中，排队 ") + Convert.ToString(data["queued_requests"]) + L.T(" 个");
-                else if (state == "unknown") text = L.T("状态未知，请恢复服务");
+                else if (state == "unknown") text = L.T("状态未知，等待自动恢复");
                 else if (state == "maintenance") text = L.T("Ollama 升级维护中");
                 else if (!backend) text = L.T("Ollama 后端离线");
                 else text = L.T("后台服务正在停止");

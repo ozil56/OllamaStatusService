@@ -1,8 +1,8 @@
-1.6.1 语言设置：安装器与托盘默认跟随 Windows；/manage 和 /dashboard 默认跟随浏览器。均支持八种语言及保存手动选择。托盘中的部署说明会打开对应语言的离线指南。/status 和 /help 可用 ?lang=en 等参数选择显示语言，原协议字段不变。
+1.6.2 语言设置：安装器与托盘默认跟随 Windows；/manage 和 /dashboard 默认跟随浏览器。均支持八种语言及保存手动选择。托盘中的部署说明会打开对应语言的离线指南。/status 和 /help 可用 ?lang=en 等参数选择显示语言，原协议字段不变。
 
-Ollama 状态服务 1.6.1 · Windows x64 部署说明
+Ollama 状态服务 1.6.2 · Windows x64 部署说明
 更新时间：2026-10-23
-1.6.1：自动识别已有代理，缺少可用入口时使用 OSS 自带的本机转发，兼容 TUN/Fake-IP 模型下载；保持 HTTPS 证书校验，网络设置变化不重启服务。修复 Ollama 升级完成后的托盘旧提示与 PowerShell 闪窗。
+1.6.2：增加无人值守自动恢复。每分钟检查实际接单能力，无任务异常持续五分钟自动恢复，失败后每五分钟重试；保留正常任务、人工停止及升级维护，记录触发原因和恢复结果。
 安装使用 Install.exe，卸载使用 Uninstall.exe，启动托盘使用 Open-Tray.exe；发行包全部采用英文文件名。
 1.2.5：修复 LocalService 无权访问原模型目录导致模型列表为空的问题，默认 C 盘用户目录同样适用。
 首次安装和升级都会核实整个模型目录（含禁用继承的子目录和文件），按需补齐 LocalService 的修改权限。
@@ -66,8 +66,8 @@ Ollama 状态服务 1.6.1 · Windows x64 部署说明
 已经安装 1.1.x 或 1.2.0 至 1.2.4 如何升级：
 1. 暂停本机和远端客户端继续提交，等待 /status 显示 idle。
 2. 将新 ZIP 完整解压到新的文件夹，双击其中的“Install.exe”，无需手动运行卸载程序。
-3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.6.1”，确认一次管理员权限提示。
-4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.6.1，queue_policy.ordering 为 local_first_fifo_per_origin。
+3. 窗口自动识别现有服务和原路径，并提示将卸载旧版、再安装新版。点击“升级到 1.6.2”，确认一次管理员权限提示。
+4. 等待同一窗口显示“升级完成”，检查右下角托盘。访问 /help，确认 version 为 1.6.2，queue_policy.ordering 为 local_first_fifo_per_origin。
 5. 把该机 FRP 等代理的回源从 11434 改为 11436，按第十一节重新加载代理并验证来源。保持暂停提交，直到升级和代理迁移都完成。
 6. 验证通过后恢复客户端提交。每台服务器单独重复；可先升级一台验证，再处理其他机器。
 
@@ -138,7 +138,7 @@ GET http://A:11434/.well-known/ollama-status-service
 与 /help 相同，便于通用服务发现。
 GET http://A:11434/openapi.json
 OpenAPI 3.1 的状态/帮助/推理扩展说明。模型相关参数仍按 A 当前安装的 Ollama API；它不是 Ollama 所有功能的完整规范。
-所有响应带 X-Ollama-Status-Service: 1.6.1 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
+所有响应带 X-Ollama-Status-Service: 1.6.2 和指向 /help 的 Link 响应头。根路径 / 保留 Ollama 原响应，兼容原客户端探活。
 
 给其他 AI agent 的最简提示：
 “服务器地址为 http://A的IP:11434。先读取 GET /help 和 GET /status，根据返回的能力和限额设置 X-Ollama-Queue-Timeout；有多台服务器时按需要选择立即切换或限时等待。仅在收到明确 forwarded=false 的拒绝时自动换机，不要重放完成情况不确定的请求。”
@@ -160,7 +160,7 @@ GET /status 主要字段：
 GET /api/tags：已安装模型；GET /api/ps：已加载模型。已加载不表示忙碌。
 GET /healthz：只证明代理活着；Ollama 在线请看 /status 的 ollama_online。
 
-托盘：绿色=空闲，橙色=处理中并显示排队数，红色=离线，紫色=需要恢复。
+托盘：绿色=空闲，橙色=处理中并显示排队数，红色=离线，紫色=状态未知，等待自动恢复。
 菜单支持状态面板、日志、部署说明、启动/停止/恢复服务。退出图标不会停止后台服务。
 默认后台服务为自动延迟启动，失败后由 WinSW 重启；额外健康检查每分钟检查代理，连续失败时重启。后台服务与用户桌面的托盘进程分开，避免 Windows Session 0 无法显示图标。
 
@@ -174,7 +174,8 @@ GET/HEAD/OPTIONS、模型详情和 blob 上传透传；POST /api/pull 与 /api/p
 已开始执行后客户端断开：继续读取 Ollama 的完成结果，直到完成才释放执行名额；不会立即宣称空闲。
 上游超时、截断流、代理崩溃：不能确认完成的运行中任务保存在 SQLite 为 unknown，阻止继续接收；队列中的请求不会自动重放。
 尚未执行的队列内容只在内存中；日志记录其状态，重启时将遗留排队记录标为 aborted。它不是可跨重启自动恢复的作业系统。
-恢复方式：托盘选择“恢复服务”，确认中止未完成任务；脚本停止代理和后端，检查后端端口和进程确已消失，再清除 unknown 并重新启动。
+1.6.2 自动恢复：SYSTEM 看门狗每分钟检查实际接单能力。unknown、后端离线、网关无响应、服务意外停止、调度停滞或无任务却不接单持续五分钟后，自动关闭入口并再次确认没有活动任务，然后停止代理和后端，核实端口和进程退出，清理不确定记录并重新启动、验证就绪；通常在 5–6 分钟内启动恢复。失败每五分钟重试，进程中断或重启后继续恢复。正常推理、下载、上传、托盘明确停止及升级维护受保护。网关持续无响应时无法证明后端是否仍在推理，恢复可能中止未确认任务。不会重放推理，也不删除模型。
+仍可从托盘立即“恢复服务”。日志位于 %ProgramData%\OllamaStatusService\logs\watchdog.jsonl，保留触发原因、恢复步骤及失败详情。详见 docs\AUTOMATIC-RECOVERY.md。
 不要在 Ollama 仍运行时手工删除 SQLite 数据库或强制清状态，这会造成假空闲。
 
 八、防火墙、配置、日志和卸载
@@ -293,7 +294,7 @@ FRP 旧版 INI 格式（即使文件扩展名叫 .toml，也应按文件实际�
   curl.exe --noproxy "*" http://127.0.0.1:11434/help
   curl.exe --noproxy "*" http://127.0.0.1:11436/help
   从外部客户端访问原来的 FRP URL 加 /help。
-三者 version 均应为 1.6.1；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
+三者 version 均应为 1.6.2；本机直连的 request_origin 为 local；11436 和外部 FRP URL 的 request_origin 为 remote。
 /help、/healthz 的 request_origin 仅代表本次探测请求；实际推理和队列来源以 /status 的 active_origin、requests[].origin 和 queued_local_requests/queued_remote_requests 为准。
 两个入口查询 /status 应看到同一组活动任务；空闲时 active_origin 为 null，不能用空闲状态验证推理来源。
 
@@ -316,7 +317,7 @@ https://gofrp.org/zh-cn/docs/features/common/realip/
 公开发行说明：原开发过程说明、客户端使用文档（Word 与 Markdown）均不包含在公开仓库或发行包中。示例使用保留域名和文档地址，部署前请替换。
 
 
-升级 Ollama 官方程序（OSS 1.6.1）
+升级 Ollama 官方程序（OSS 1.6.2）
 
 托盘新增“检查更新／升级 Ollama”。启动后检查一次，此后每 6 小时检查官方稳定版本；同一新版只自动提示一次，失败后 30 分钟重试，手动检查不受提示次数限制。仅检查不会下载或安装。
 
@@ -326,8 +327,8 @@ https://gofrp.org/zh-cn/docs/features/common/realip/
 
 窗口关闭不取消已经启动的流程。失败会尝试恢复可用服务；未通过验证则保持维护入口关闭，并在托盘提供“恢复上次升级”。若安装器要求重启，重启 Windows 后再恢复。升级日志及配置备份位于 ProgramData\OllamaStatusService\updater\backups\ollama-update-*。
 
-本功能需要后台已经运行 OSS 1.6.1。更换托盘 EXE 不会使旧后台获得接单保护；检测到旧后台时拒绝停服。仅通过 OSS 入口受理的任务可被跟踪；如发现其他 Ollama 实例，则拒绝升级。
+本功能需要后台已经运行 OSS 1.6.2。更换托盘 EXE 不会使旧后台获得接单保护；检测到旧后台时拒绝停服。仅通过 OSS 入口受理的任务可被跟踪；如发现其他 Ollama 实例，则拒绝升级。
 
-自动模型下载网络（1.6.1）
+自动模型下载网络（1.6.2）
 在实际下载模型的服务器安装本包，/manage 无需新增代理开关。OSS 读取原安装用户与系统现有代理；没有可达代理时，本机入口使用现有 TUN 转发已知模型域名的 198.18.0.0/15 Fake-IP。需要支持该代理流程的 Ollama（已验证 0.40.9）；旧版本通过托盘在空闲时升级。不会修改系统代理、DNS 或网络模式，不安装证书，不使用 insecure。代理认证失败、证书错误或网络本身不可达会报告失败。
 新连接自动识别设置变化，已有连接继续；不会为切换代理而重启服务。有任务、上传或下载连接时，自动升级拒绝停服。/status.download_network 提供不含代理凭据的状态。完整限制和测试方法见 docs/DOWNLOAD-NETWORK.md。

@@ -139,12 +139,14 @@ function Start-ManagedServices {
     Wait-ServiceState $script:GatewayName 'Running'
 }
 
-function Clear-ConfirmedTasks {
+function Clear-ConfirmedTasks([switch]$Automatic) {
     Assert-BackendStopped
     $python = Join-Path $script:InstallRoot 'runtime\python.exe'
     if (Test-Path -LiteralPath $python) {
-        Invoke-Native $python @((Join-Path $script:InstallRoot 'app\maintenance.py'), '--config', (Join-Path $script:StateRoot 'config.json'), '--backend-stopped')
-    }
+        $arguments=@((Join-Path $script:InstallRoot 'app\maintenance.py'), '--config', (Join-Path $script:StateRoot 'config.json'), '--backend-stopped')
+        if ($Automatic) { $arguments += '--automatic' }
+        Invoke-Native $python $arguments
+    } else { throw ('Cannot clear uncertain requests: Python runtime missing: '+$python) }
 }
 
 function Stop-ProductTray {

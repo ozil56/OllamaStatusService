@@ -1,12 +1,17 @@
 # Building and testing on Windows
 
+For 1.6.2, use the 1.6.1 dependency bundle (dependencies are unchanged). Run
+`tests\watchdog_checks.ps1` with Windows PowerShell 5.1 and
+`runtime\python.exe tests\ollama_update_guard.py` in the built package to verify
+automatic recovery and admission races. See [automatic recovery](AUTOMATIC-RECOVERY.md).
+
 The repository contains application source, C# GUI source, PowerShell lifecycle scripts, tests, public documentation and images. Compiled executables and vendored dependencies belong in release assets, not Git history.
 
 ## Build a complete offline package
 
 Use Windows x64 with Windows PowerShell 5.1 and the .NET Framework 4.8 compiler. No service installation or administrator session is required to compile and package.
 
-1. Download the **1.4.0 Windows release ZIP and checksum** from the project's Releases page. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW.
+1. Download the **1.6.1 Windows release ZIP and checksum** from the project's Releases page. Verify its SHA256 and extract it completely. This supplies the pinned Python runtime, Python wheels already installed under `vendor`, and WinSW.
 2. Obtain the 1.6.1 source checkout. The 1.2.3/1.2.4/1.2.5 dependency bundles are also compatible because dependencies are unchanged.
 3. Run this from the source root, replacing the example dependency path:
 

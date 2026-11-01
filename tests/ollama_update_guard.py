@@ -88,6 +88,54 @@ class UpdateGuardTests(unittest.TestCase):
 
     def tearDown(self):
         self.marker.unlink(missing_ok=True)
+        self.marker.with_name('watchdog-recovery.lock').unlink(missing_ok=True)
+
+    def test_watchdog_gate_blocks_new_work_on_both_listeners(self):
+        gate = self.marker.with_name('watchdog-recovery.lock')
+        gate.write_text('')
+        self.assertFalse(self.status()['accepting_requests'])
+        for base in (self.direct, self.proxy):
+            self.assertEqual(self.client.get(base+'/healthz').status_code, 200)
+            for path in ('/api/generate', '/api/pull', '/oss/model-jobs'):
+                response = self.client.post(base+path, json={'model':'fast'})
+                self.assertEqual(response.status_code, 503)
+                self.assertEqual(response.headers['X-Ollama-Forwarded'], 'false')
+        gate.unlink()
+        self.assertTrue(self.status()['can_start_now'])
+
+    def test_watchdog_gate_preserves_existing_inference(self):
+        model = 'held-watchdog-inference'
+        request = self.pool.submit(self.client.post, self.direct+'/api/generate', json={'model':model,'stream':False})
+        self.wait(lambda: self.status()['execution']['inference_active'])
+        try:
+            self.marker.with_name('watchdog-recovery.lock').write_text('')
+            self.assertTrue(self.status()['execution']['inference_active'])
+            self.assertTrue(self.status()['execution']['dispatcher_running'])
+            self.assertFalse(request.done())
+        finally:
+            self.client.post(self.backend+'/__release/'+model)
+        self.assertEqual(request.result(10).status_code, 200)
+        self.wait(lambda: not self.status()['execution']['inference_active'])
+
+    def test_watchdog_gate_pauses_queued_dispatch_until_reopened(self):
+        model = 'held-watchdog-queue'
+        first = self.pool.submit(self.client.post, self.direct+'/api/generate', json={'model':model,'stream':False})
+        self.wait(lambda: self.status()['execution']['inference_active'])
+        second = self.pool.submit(self.client.post, self.proxy+'/api/generate', json={'model':'fast','stream':False})
+        self.wait(lambda: self.status()['queued_requests'] == 1)
+        gate = self.marker.with_name('watchdog-recovery.lock')
+        try:
+            gate.write_text('')
+            self.client.post(self.backend+'/__release/'+model)
+            self.assertEqual(first.result(10).status_code, 200)
+            self.wait(lambda: not self.status()['execution']['inference_active'])
+            time.sleep(.3)
+            self.assertFalse(second.done())
+            self.assertEqual(self.status()['queued_requests'], 1)
+        finally:
+            gate.unlink(missing_ok=True)
+            self.client.post(self.backend+'/__release/'+model)
+        self.assertEqual(second.result(10).status_code, 200)
 
     def test_gate_rejects_both_ingresses_and_all_mutation_paths(self):
         self.marker.write_text('{}')

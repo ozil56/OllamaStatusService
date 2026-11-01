@@ -26,7 +26,7 @@ from download_network import DownloadNetwork
 from localization import render_asset, request_language, text as localized_text, headers as language_headers, display as localized_display, metadata as localized_metadata
 
 LOG = logging.getLogger("ollama_status")
-VERSION = "1.6.1"
+VERSION = "1.6.2"
 INFERENCE = {"/api/chat", "/api/generate", "/api/embed", "/api/embeddings",
              "/v1/chat/completions", "/v1/completions", "/v1/embeddings",
              "/v1/responses", "/v1/messages"}
@@ -354,6 +354,7 @@ def create_app(settings: Settings, update_marker=None, download_network=None):
             await probe()
             checking = asyncio.create_task(health_loop())
             dispatcher = asyncio.create_task(dispatch())
+            app.state.dispatcher = dispatcher
             app.state.model_jobs.start()
             app.state.manage = ManageService(app, settings)
             try:
@@ -550,6 +551,9 @@ def create_app(settings: Settings, update_marker=None, download_network=None):
                  "offline" if not backend_online else "busy" if inflight or queued or transfers or active_model_jobs else
                  "stopping" if runtime["closing"] else "maintenance" if maintenance else "idle")
         return JSONResponse({"service": "OllamaStatusService", "version": VERSION,
+                             "execution": {"inference_active": active is not None,
+                                           "model_workers": pending_model_workers,
+                                           "dispatcher_running": not app.state.dispatcher.done()},
                              "state": state, "language": request_language(request),
                              "labels": {key: localized_text(value, request_language(request)) for key, value in {
                                  "state":"状态", "ollama_online":"Ollama 后端", "can_start_now":"就绪", "accepting_requests":"接收任务",
@@ -777,8 +781,8 @@ def create_app(settings: Settings, update_marker=None, download_network=None):
                 reason = "gateway_shutdown_before_completion"
             raise
         except Exception as exc:
-            LOG.warning("request_uncertain id=%s error=%s", ident, type(exc).__name__)
-            reason = type(exc).__name__
+            LOG.warning("request_uncertain id=%s error=%s detail=%s", ident, type(exc).__name__, str(exc)[:500])
+            reason = type(exc).__name__ + (": " + str(exc)[:500] if str(exc) else "")
             if acknowledged:
                 final_state, reason = "done", "completion_received"
             if not channel.headers.done():
@@ -818,6 +822,12 @@ def create_app(settings: Settings, update_marker=None, download_network=None):
             await wake.wait()
             wake.clear()
             while pending and not runtime["closing"]:
+                # Freeze dispatch only for automatic recovery. The ordinary
+                # upgrade gate still drains work already admitted. This closes
+                # the final status-snapshot/stop race without cancelling work.
+                if update_guard.recovering:
+                    await asyncio.sleep(0.1)
+                    continue
                 # At each execution boundary choose the oldest waiting local job.
                 # Never reserve a future slot or interrupt the active producer.
                 job = next((item for item in pending if item["origin"] == "local"), pending[0])

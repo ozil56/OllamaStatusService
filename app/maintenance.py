@@ -46,7 +46,7 @@ def listening_ports():
     return ports
 
 
-def clear_after_backend_stop(config):
+def clear_after_backend_stop(config, automatic=False):
     values = json.loads(Path(config).read_text(encoding="utf-8-sig"))
     url = urlparse(values["backend_url"])
     if (url.port or 11434) in listening_ports():
@@ -56,9 +56,14 @@ def clear_after_backend_stop(config):
     lock = InstanceLock(directory)
     try:
         journal = Journal(directory)
-        journal.db.execute("UPDATE requests SET state='aborted', ended_at=?, reason='backend_stopped_by_administrator' WHERE state IN ('running','unknown','queued')", (utc(),))
-        journal.db.commit()
-        journal.close()
+        try:
+            actor = "watchdog" if automatic else "administrator"
+            journal.db.execute("""UPDATE requests SET state='aborted', ended_at=?,
+                reason=? || '; previous_reason=' || COALESCE(reason, '')
+                WHERE state IN ('running','unknown','queued')""", (utc(), 'backend_stopped_by_' + actor))
+            journal.db.commit()
+        finally:
+            journal.close()
     finally:
         lock.close()
 
@@ -67,4 +72,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--backend-stopped", action="store_true", required=True)
-    clear_after_backend_stop(parser.parse_args().config)
+    parser.add_argument("--automatic", action="store_true")
+    args = parser.parse_args()
+    clear_after_backend_stop(args.config, args.automatic)

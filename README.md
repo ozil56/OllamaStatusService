@@ -14,11 +14,11 @@ A Windows gateway, background service and system tray application for an existin
 
 <!-- readme:b03 -->
 
-**Current build: 1.6.1 · Windows x64 · Offline installer**
+**Current build: 1.6.2 · Windows x64 · Offline installer**
 
 <!-- readme:b04 -->
 
-Version 1.6.1 fixes mixed languages in live version summaries, saved update history and installer completion messages. It includes eight UI languages with automatic matching and saved selection, automatic proxy discovery and a built-in loopback download relay for TUN/Fake-IP networks, fixes stale Ollama upgrade offers and removes command-window flashes from tray actions. See [download networking][link1]. It also includes official Ollama update checks and upgrades to the system tray. It checks stable releases every six hours, verifies the installer hash and publisher signature, refuses to interrupt active or uncertain work, and restores OSS ownership after validating the original models and configuration. See [Ollama updates][link2]. The downloadable Windows package is linked below.
+Version 1.6.2 fixes mixed languages in live version summaries, saved update history and installer completion messages. It includes eight UI languages with automatic matching and saved selection, automatic proxy discovery and a built-in loopback download relay for TUN/Fake-IP networks, fixes stale Ollama upgrade offers and removes command-window flashes from tray actions. See [download networking][link1]. It also includes official Ollama update checks and upgrades to the system tray. It checks stable releases every six hours, verifies the installer hash and publisher signature, refuses to interrupt active or uncertain work, and restores OSS ownership after validating the original models and configuration. See [Ollama updates][link2]. The downloadable Windows package is linked below.
 
 <!-- readme:b05 -->
 
@@ -30,11 +30,11 @@ Version 1.2.5 fixes empty model lists caused by missing LocalService permissions
 
 <!-- readme:b07 -->
 
-[Release 1.6.1][link4] · [Windows ZIP][link5] · [SHA256][link6] · [Release notes][link7] · [Build from source][link8]
+[Release 1.6.2][link4] · [Windows ZIP][link5] · [SHA256][link6] · [Release notes][link7] · [Build from source][link8]
 
 <!-- readme:b08 -->
 
-> Download `OllamaStatusService-Windows-x64-v1.6.1.zip` and its checksum from the release above, or build it from source. GitHub's automatic “Source code” archives are not installable packages. The installer, tray, /manage and /dashboard support Simplified Chinese, Traditional Chinese, English, Japanese, Korean, German, French and Spanish. Automatic language matching and saved manual selection are available; /status and /help localize display text while preserving protocol keys. See [languages][link9].
+> Download `OllamaStatusService-Windows-x64-v1.6.2.zip` and its checksum from the release above, or build it from source. GitHub's automatic “Source code” archives are not installable packages. The installer, tray, /manage and /dashboard support Simplified Chinese, Traditional Chinese, English, Japanese, Korean, German, French and Spanish. Automatic language matching and saved manual selection are available; /status and /help localize display text while preserving protocol keys. See [languages][link9].
 
 <!-- readme:b09 -->
 
@@ -167,7 +167,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11436/help
 
 <!-- readme:b32 -->
 
-Check `version=1.6.1` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.
+Check `version=1.6.2` and `request_origin=local` / `remote` respectively, then check `/help` through the existing public proxy URL. During inference, inspect `/status.active_origin` and `requests[].origin`. If the proxy still targets `11434`, loopback forwarding can still be mistaken for local work.
 
 <!-- readme:b33 -->
 
@@ -224,7 +224,7 @@ Persistent configuration and history live under `%ProgramData%\OllamaStatusServi
 
 <!-- readme:b43 -->
 
-If a request's completion cannot be verified, `unknown` blocks further admissions. Use the tray's recovery action only when terminating unfinished work is acceptable. Recovery stops and checks the backend before clearing uncertain records. Do not delete the database while Ollama may still be running. Queued payloads are in memory and are not replayed after restart.
+If a request's completion cannot be verified, `unknown` blocks new work. Since 1.6.2, the SYSTEM watchdog checks actual service readiness every minute. Unavailable states with no active work lasting five minutes trigger automatic recovery (normally within 5–6 minutes); failures retry every five minutes. This covers uncertain completion, offline backends, unreachable gateways, stopped services and stalled scheduling. Active inference, downloads and uploads are protected; explicit tray Stop and upgrade maintenance suspend recovery. Recovery closes admission, stops and verifies the backend, clears uncertain records, restarts services and verifies readiness. It may abort unconfirmed work; an unreachable gateway cannot prove whether inference is still running. The tray can still recover immediately. Do not delete the database while Ollama may still be running. Queued payloads are not replayed after restart. Diagnostics are in `%ProgramData%\OllamaStatusService\logs\watchdog.jsonl`.
 
 <!-- readme:b44 -->
 
@@ -257,9 +257,9 @@ Third-party components retain their own licenses; see [`licenses/THIRD-PARTY-NOT
 [link1]: docs/DOWNLOAD-NETWORK.md
 [link2]: docs/OLLAMA-UPDATES.md
 [link3]: docs/MANAGE.md
-[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.1
-[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.1/OllamaStatusService-Windows-x64-v1.6.1.zip
-[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.1/OllamaStatusService-Windows-x64-v1.6.1.zip.sha256.txt
+[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.2
+[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip
+[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip.sha256.txt
 [link7]: CHANGELOG.md
 [link8]: docs/BUILD.md
 [link9]: docs/LANGUAGES.md

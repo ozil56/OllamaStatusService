@@ -14,11 +14,11 @@ Ein Windows-Gateway mit Hintergrunddiensten und einer Tray-Anwendung für eine v
 
 <!-- readme:b03 -->
 
-**Aktuelle Version: 1.6.1 · Windows x64 · Offline-Installer**
+**Aktuelle Version: 1.6.2 · Windows x64 · Offline-Installer**
 
 <!-- readme:b04 -->
 
-Version 1.6.1 behebt gemischte Sprachen in Versionsanzeigen, gespeicherten Update-Verläufen und Abschlussmeldungen des Installers. Enthalten sind acht UI-Sprachen mit automatischer Zuordnung und gespeicherter Auswahl, automatische Proxy-Erkennung und eine integrierte lokale Download-Weiterleitung für TUN/Fake-IP-Netze. Veraltete Ollama-Update-Angebote und kurz aufblitzende Konsolenfenster bei Tray-Aktionen wurden behoben. Siehe [Download-Netzwerk][link1]. Das Tray kann außerdem offizielle Ollama-Updates prüfen und installieren: Alle sechs Stunden wird nach stabilen Versionen gesucht, Hash und Herausgebersignatur des Installers werden geprüft, laufende oder unklare Arbeit wird nicht unterbrochen, und nach Prüfung der ursprünglichen Modelle und Konfiguration übernimmt OSS wieder die Verwaltung. Siehe [Ollama-Updates][link2]. Das Windows-Paket ist unten verlinkt.
+Version 1.6.2 behebt gemischte Sprachen in Versionsanzeigen, gespeicherten Update-Verläufen und Abschlussmeldungen des Installers. Enthalten sind acht UI-Sprachen mit automatischer Zuordnung und gespeicherter Auswahl, automatische Proxy-Erkennung und eine integrierte lokale Download-Weiterleitung für TUN/Fake-IP-Netze. Veraltete Ollama-Update-Angebote und kurz aufblitzende Konsolenfenster bei Tray-Aktionen wurden behoben. Siehe [Download-Netzwerk][link1]. Das Tray kann außerdem offizielle Ollama-Updates prüfen und installieren: Alle sechs Stunden wird nach stabilen Versionen gesucht, Hash und Herausgebersignatur des Installers werden geprüft, laufende oder unklare Arbeit wird nicht unterbrochen, und nach Prüfung der ursprünglichen Modelle und Konfiguration übernimmt OSS wieder die Verwaltung. Siehe [Ollama-Updates][link2]. Das Windows-Paket ist unten verlinkt.
 
 <!-- readme:b05 -->
 
@@ -30,11 +30,11 @@ Version 1.2.5 behebt leere Modelllisten durch fehlende LocalService-Berechtigung
 
 <!-- readme:b07 -->
 
-[Release 1.6.1][link4] · [Windows-ZIP][link5] · [SHA256][link6] · [Änderungen][link7] · [Aus Quellcode bauen][link8]
+[Release 1.6.2][link4] · [Windows-ZIP][link5] · [SHA256][link6] · [Änderungen][link7] · [Aus Quellcode bauen][link8]
 
 <!-- readme:b08 -->
 
-> Laden Sie `OllamaStatusService-Windows-x64-v1.6.1.zip` und die Prüfsumme aus dem oben verlinkten Release herunter oder bauen Sie das Paket selbst. GitHubs automatisch erzeugte „Source code“-Archive sind keine Installationspakete. Installer, Tray, /manage und /dashboard unterstützen vereinfachtes und traditionelles Chinesisch, Englisch, Japanisch, Koreanisch, Deutsch, Französisch und Spanisch. Automatische Spracherkennung und gespeicherte manuelle Auswahl sind verfügbar; /status und /help übersetzen Anzeigetexte und behalten die Protokollfelder bei. Siehe [Sprachen][link9].
+> Laden Sie `OllamaStatusService-Windows-x64-v1.6.2.zip` und die Prüfsumme aus dem oben verlinkten Release herunter oder bauen Sie das Paket selbst. GitHubs automatisch erzeugte „Source code“-Archive sind keine Installationspakete. Installer, Tray, /manage und /dashboard unterstützen vereinfachtes und traditionelles Chinesisch, Englisch, Japanisch, Koreanisch, Deutsch, Französisch und Spanisch. Automatische Spracherkennung und gespeicherte manuelle Auswahl sind verfügbar; /status und /help übersetzen Anzeigetexte und behalten die Protokollfelder bei. Siehe [Sprachen][link9].
 
 <!-- readme:b09 -->
 
@@ -167,7 +167,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11436/help
 
 <!-- readme:b32 -->
 
-Prüfen Sie `version=1.6.1` und jeweils `request_origin=local` / `remote`, anschließend `/help` über die vorhandene öffentliche Proxy-URL. Während der Inferenz prüfen Sie `/status.active_origin` und `requests[].origin`. Zeigt der Proxy weiterhin auf `11434`, kann Loopback-Weiterleitung weiterhin irrtümlich als lokale Arbeit gelten.
+Prüfen Sie `version=1.6.2` und jeweils `request_origin=local` / `remote`, anschließend `/help` über die vorhandene öffentliche Proxy-URL. Während der Inferenz prüfen Sie `/status.active_origin` und `requests[].origin`. Zeigt der Proxy weiterhin auf `11434`, kann Loopback-Weiterleitung weiterhin irrtümlich als lokale Arbeit gelten.
 
 <!-- readme:b33 -->
 
@@ -224,7 +224,7 @@ Persistente Konfiguration und Verlauf liegen unter `%ProgramData%\OllamaStatusSe
 
 <!-- readme:b43 -->
 
-Ist der Abschluss einer Anfrage nicht verifizierbar, blockiert `unknown` weitere Annahmen. Verwenden Sie die Tray-Wiederherstellung nur, wenn das Beenden unfertiger Arbeit akzeptabel ist. Sie stoppt und prüft das Backend, bevor unklare Datensätze gelöscht werden. Löschen Sie die Datenbank nicht, während Ollama möglicherweise noch läuft. Wartende Nutzdaten liegen im Arbeitsspeicher und werden nach einem Neustart nicht wiederholt.
+Kann der Abschluss einer Anfrage nicht bestätigt werden, blockiert `unknown` neue Arbeit. Seit 1.6.2 prüft der SYSTEM-Watchdog jede Minute die tatsächliche Betriebsbereitschaft. Nicht verfügbare Zustände ohne aktive Arbeit lösen nach fünf Minuten eine Wiederherstellung aus (üblicherweise innerhalb von 5–6 Minuten); Fehler werden alle fünf Minuten erneut versucht. Dies umfasst unbestätigte Abschlüsse, Offline-Backends, nicht erreichbare Gateways, gestoppte Dienste und blockierte Planung. Laufende Inferenz, Downloads und Uploads bleiben geschützt; ein ausdrücklicher Stopp im Tray und Update-Wartung setzen die Wiederherstellung aus. Neue Anfragen werden gesperrt, das Backend wird gestoppt und geprüft, ungewisse Einträge werden bereinigt und die Dienste werden neu gestartet und geprüft. Unbestätigte Arbeit kann abgebrochen werden; bei einem nicht erreichbaren Gateway lässt sich laufende Inferenz nicht nachweisen. Eine sofortige Wiederherstellung im Tray bleibt möglich. Löschen Sie die Datenbank nicht, solange Ollama laufen könnte. Wartende Nutzdaten werden nach Neustarts nicht wiederholt. Diagnoseprotokoll: `%ProgramData%\OllamaStatusService\logs\watchdog.jsonl`.
 
 <!-- readme:b44 -->
 
@@ -257,9 +257,9 @@ Drittanbieter-Komponenten behalten ihre jeweiligen Lizenzen; siehe [`licenses/TH
 [link1]: ../docs/DOWNLOAD-NETWORK.md
 [link2]: ../docs/OLLAMA-UPDATES.md
 [link3]: ../docs/MANAGE.md
-[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.1
-[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.1/OllamaStatusService-Windows-x64-v1.6.1.zip
-[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.1/OllamaStatusService-Windows-x64-v1.6.1.zip.sha256.txt
+[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.2
+[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip
+[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip.sha256.txt
 [link7]: ../CHANGELOG.md
 [link8]: ../docs/BUILD.md
 [link9]: ../docs/LANGUAGES.md

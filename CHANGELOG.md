@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.2 — 2026-10-31
+
+- Recover unattended servers after five minutes of unavailability instead of treating a successful liveness response as proof that the service can accept work. Cover unknown completion, offline backends, unresponsive gateways, stopped services and stalled scheduling.
+- Check real worker activity, gate admission and pause queued dispatch before the final safety check. Preserve active inference, downloads, uploads, deliberate tray stops and upgrade maintenance.
+- Persist recovery attempts, verify backend termination before clearing uncertain requests, verify readiness after restart, and retry failed/interrupted attempts every five minutes. Preserve previous request failure reasons and add rotating watchdog diagnostics.
+- Refresh tray/dashboard recovery messages and all eight README editions. Ship isolated watchdog and real HTTP recovery-gate regressions.
+
 ## 1.6.1 — 2026-10-23
 
 - Publish complete README editions in all eight languages, including Traditional Chinese. Preserve every section, table, architecture diagram and code example, and reject incomplete or stale documentation during packaging.

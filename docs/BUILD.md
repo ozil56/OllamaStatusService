@@ -1,5 +1,11 @@
 # Building and testing on Windows
 
+For 1.6.3, use a verified 1.6.2 dependency bundle and run the added Windows checks
+`tests\service_lifecycle_checks.ps1`, `tests\dialog_checks.ps1`,
+`tests\localization_checks.ps1` and `tests\working_directory_checks.ps1` from
+the built package. The last accepts `-BaselineExe` pointing to a 1.6.2 tray for
+before/after directory-lock verification. See [lifecycle fixes](INSTALLATION-LIFECYCLE.md).
+
 For 1.6.2, use the 1.6.1 dependency bundle (dependencies are unchanged). Run
 `tests\watchdog_checks.ps1` with Windows PowerShell 5.1 and
 `runtime\python.exe tests\ollama_update_guard.py` in the built package to verify

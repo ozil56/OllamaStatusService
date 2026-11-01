@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.3 — 2026-11-01
+
+- Unify desktop confirmation/error dialogs, installer/uninstaller and updater colors, typography and buttons. Initialize visual styles before hidden worker paths, share the same dialog with PowerShell, retain Cancel as the destructive default, and use the modern Windows folder picker. Check all eight languages, keyboard behavior and long diagnostics.
+- Stop installed tray processes from inheriting an installer's extracted-package directory. Set explicit installed working directories in both launchers and normalize the tray/worker directory at startup. An extracted package can be removed after the installer exits.
+- Replace one-shot service stopping with state polling, transient control retries and bounded waiting. Recheck the service after errors so a completed stop is not reported as a failure.
+- After the graceful deadline, permit elevated termination only of a verified dedicated OSS service process tree. Temporarily suppress SCM restarts, durably preserve startup settings, and restore them on managed startup. Refuse mismatched/shared/replaced processes and verify Stopped before uninstall or recovery continues.
+- Retain Windows error details and stop-state diagnostics in rotating service-control logs. Add actual Windows directory-lock reproduction/regressions and isolated service lifecycle tests.
+
 ## 1.6.2 — 2026-10-31
 
 - Recover unattended servers after five minutes of unavailability instead of treating a successful liveness response as proof that the service can accept work. Cover unknown completion, offline backends, unresponsive gateways, stopped services and stalled scheduling.

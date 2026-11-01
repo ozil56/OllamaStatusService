@@ -14,11 +14,11 @@
 
 <!-- readme:b03 -->
 
-**현재 버전: 1.6.2 · Windows x64 · 오프라인 설치 프로그램**
+**현재 버전: 1.6.3 · Windows x64 · 오프라인 설치 프로그램**
 
 <!-- readme:b04 -->
 
-1.6.2은 버전 요약, 저장된 업데이트 기록, 설치 완료 메시지에서 언어가 섞이는 문제를 수정합니다. 자동 언어 선택과 수동 선택 저장을 지원하는 8개 UI 언어, 자동 프록시 검색, TUN/Fake-IP 네트워크용 내장 로컬 다운로드 중계 기능을 포함합니다. 이미 업데이트한 Ollama에 오래된 업그레이드 안내가 남는 문제와 트레이 작업 중 콘솔 창이 잠깐 나타나는 문제도 수정했습니다. [다운로드 네트워크][link1]를 참조하세요. 트레이에서 공식 Ollama 업데이트 확인과 업그레이드도 제공합니다. 6시간마다 안정 버전을 확인하고 설치 파일의 해시와 게시자 서명을 검증합니다. 실행 중이거나 완료 여부가 불확실한 작업은 중단하지 않으며, 기존 모델과 설정을 확인한 뒤 OSS 관리를 복원합니다. [Ollama 업데이트][link2]를 참조하세요. Windows 패키지는 아래 링크에서 받을 수 있습니다.
+1.6.3은 버전 요약, 저장된 업데이트 기록, 설치 완료 메시지에서 언어가 섞이는 문제를 수정합니다. 자동 언어 선택과 수동 선택 저장을 지원하는 8개 UI 언어, 자동 프록시 검색, TUN/Fake-IP 네트워크용 내장 로컬 다운로드 중계 기능을 포함합니다. 이미 업데이트한 Ollama에 오래된 업그레이드 안내가 남는 문제와 트레이 작업 중 콘솔 창이 잠깐 나타나는 문제도 수정했습니다. [다운로드 네트워크][link1]를 참조하세요. 트레이에서 공식 Ollama 업데이트 확인과 업그레이드도 제공합니다. 6시간마다 안정 버전을 확인하고 설치 파일의 해시와 게시자 서명을 검증합니다. 실행 중이거나 완료 여부가 불확실한 작업은 중단하지 않으며, 기존 모델과 설정을 확인한 뒤 OSS 관리를 복원합니다. [Ollama 업데이트][link2]를 참조하세요. Windows 패키지는 아래 링크에서 받을 수 있습니다.
 
 <!-- readme:b05 -->
 
@@ -30,11 +30,11 @@
 
 <!-- readme:b07 -->
 
-[1.6.2 릴리스][link4] · [Windows ZIP][link5] · [SHA256][link6] · [변경 기록][link7] · [소스 빌드][link8]
+[1.6.3 릴리스][link4] · [Windows ZIP][link5] · [SHA256][link6] · [변경 기록][link7] · [소스 빌드][link8]
 
 <!-- readme:b08 -->
 
-> 위 릴리스에서 `OllamaStatusService-Windows-x64-v1.6.2.zip`과 체크섬을 다운로드하거나 소스에서 빌드하세요. GitHub가 자동 생성하는 “Source code” 압축 파일은 설치 패키지가 아닙니다. 설치 프로그램, 트레이, /manage, /dashboard는 중국어 간체·번체, 영어, 일본어, 한국어, 독일어, 프랑스어, 스페인어를 지원합니다. 언어 자동 선택과 수동 선택 저장이 가능하며, /status와 /help는 프로토콜 키를 유지하면서 표시 문구를 번역합니다. [언어 설정][link9]을 참조하세요.
+> 위 릴리스에서 `OllamaStatusService-Windows-x64-v1.6.3.zip`과 체크섬을 다운로드하거나 소스에서 빌드하세요. GitHub가 자동 생성하는 “Source code” 압축 파일은 설치 패키지가 아닙니다. 설치 프로그램, 트레이, /manage, /dashboard는 중국어 간체·번체, 영어, 일본어, 한국어, 독일어, 프랑스어, 스페인어를 지원합니다. 언어 자동 선택과 수동 선택 저장이 가능하며, /status와 /help는 프로토콜 키를 유지하면서 표시 문구를 번역합니다. [언어 설정][link9]을 참조하세요.
 
 <!-- readme:b09 -->
 
@@ -167,7 +167,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11436/help
 
 <!-- readme:b32 -->
 
-`version=1.6.2`과 각 진입점의 `request_origin=local` / `remote`를 확인한 뒤 기존 공개 프록시 URL로 `/help`를 확인합니다. 추론 중에는 `/status.active_origin`과 `requests[].origin`을 확인하세요. 프록시가 계속 `11434`를 가리키면 루프백 전달이 로컬 작업으로 오인될 수 있습니다.
+`version=1.6.3`과 각 진입점의 `request_origin=local` / `remote`를 확인한 뒤 기존 공개 프록시 URL로 `/help`를 확인합니다. 추론 중에는 `/status.active_origin`과 `requests[].origin`을 확인하세요. 프록시가 계속 `11434`를 가리키면 루프백 전달이 로컬 작업으로 오인될 수 있습니다.
 
 <!-- readme:b33 -->
 
@@ -226,6 +226,8 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/generate' `
 
 요청 완료를 확인할 수 없으면 `unknown` 상태가 새 작업을 차단합니다. 1.6.2부터 SYSTEM 감시 작업이 매분 실제 준비 상태를 확인합니다. 실행 중인 작업 없이 오류가 5분간 지속되면 자동 복구하며(보통 5–6분 이내), 실패 시 5분마다 재시도합니다. 완료 불명, 백엔드 오프라인, 게이트웨이 무응답, 서비스 중지 및 스케줄러 정체를 처리합니다. 실행 중인 추론, 다운로드 및 업로드를 보호하며 트레이의 명시적 중지와 업데이트 유지보수 중에는 복구를 일시 중지합니다. 새 요청을 차단한 뒤 백엔드 종료를 확인하고 불확실한 기록을 정리하며 서비스를 재시작하고 준비 상태를 검증합니다. 미확인 작업은 중단될 수 있으며 게이트웨이가 응답하지 않으면 추론 실행 여부를 확인할 수 없습니다. 트레이에서 즉시 복구할 수도 있습니다. Ollama가 실행 중일 수 있을 때 데이터베이스를 삭제하지 마세요. 대기 요청은 재시작 후 재실행하지 않습니다. 진단 로그: `%ProgramData%\OllamaStatusService\logs\watchdog.jsonl`.
 
+1.6.3에서는 설치된 트레이가 압축 해제 폴더를 점유하는 문제도 수정했습니다. 서비스 중지 시 전환 상태를 기다리고 일시적 오류를 재시도합니다. 시간 초과 시 OSS 소유로 확인된 프로세스 트리만 종료하며 시작 설정을 보존하고 Windows 오류 세부 정보를 기록합니다. 데스크톱 확인, 오류, 설치 및 업데이트 창의 스타일을 통일하고 최신 Windows 폴더 선택 창을 사용합니다.
+
 <!-- readme:b44 -->
 
 ## 개발 및 검증
@@ -257,9 +259,9 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/generate' `
 [link1]: ../docs/DOWNLOAD-NETWORK.md
 [link2]: ../docs/OLLAMA-UPDATES.md
 [link3]: ../docs/MANAGE.md
-[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.2
-[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip
-[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip.sha256.txt
+[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.3
+[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.3/OllamaStatusService-Windows-x64-v1.6.3.zip
+[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.3/OllamaStatusService-Windows-x64-v1.6.3.zip.sha256.txt
 [link7]: ../CHANGELOG.md
 [link8]: ../docs/BUILD.md
 [link9]: ../docs/LANGUAGES.md

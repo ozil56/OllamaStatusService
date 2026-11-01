@@ -2222,14 +2222,14 @@
     "fr": "Mettre à jour Ollama",
     "es": "Actualizar Ollama"
   },
-  "升级到 1.6.2": {
-    "en": "Upgrade to 1.6.2",
-    "zh-TW": "升級到 1.6.2",
-    "ja": "1.6.2へのアップグレード",
-    "ko": "1.6.2으로 업그레이드",
-    "de": "Upgrade auf 1.6.2",
-    "fr": "Mise à niveau vers 1.6.2",
-    "es": "Actualizar a 1.6.2"
+  "升级到 1.6.3": {
+    "en": "Upgrade to 1.6.3",
+    "zh-TW": "升級到 1.6.3",
+    "ja": "1.6.3へのアップグレード",
+    "ko": "1.6.3으로 업그레이드",
+    "de": "Upgrade auf 1.6.3",
+    "fr": "Mise à niveau vers 1.6.3",
+    "es": "Actualizar a 1.6.3"
   },
   "原模型目录不存在。": {
     "en": "The original model directory does not exist.",
@@ -3761,14 +3761,14 @@
     "fr": "Ollama est en cours de mise à niveau et de maintenance ; faites un clic droit pour voir la progression",
     "es": "Ollama se está actualizando y manteniendo; haga clic derecho para ver el progreso"
   },
-  "Ollama 状态服务 · 1.6.2": {
-    "en": "Ollama Status Service · 1.6.2",
-    "zh-TW": "Ollama Status Service · 1.6.2",
-    "ja": "Ollama Status Service · 1.6.2",
-    "ko": "Ollama Status Service · 1.6.2",
-    "de": "Ollama Status Service · 1.6.2",
-    "fr": "Ollama Status Service · 1.6.2",
-    "es": "Ollama Status Service · 1.6.2"
+  "Ollama 状态服务 · 1.6.3": {
+    "en": "Ollama Status Service · 1.6.3",
+    "zh-TW": "Ollama Status Service · 1.6.3",
+    "ja": "Ollama Status Service · 1.6.3",
+    "ko": "Ollama Status Service · 1.6.3",
+    "de": "Ollama Status Service · 1.6.3",
+    "fr": "Ollama Status Service · 1.6.3",
+    "es": "Ollama Status Service · 1.6.3"
   },
   "处理中；本机排队 {0}，远端 {1}": {
     "en": "Processing; local queue {0}, remote {1}",
@@ -5282,23 +5282,23 @@
     "fr": ". Un conflit entre la protection de l'adresse de téléchargement et le DNS proxy est détecté : veuillez mettre à niveau Ollama vers la version 0.40.9 ou une version stable plus récente via la barre d'état OSS sur le serveur cible, et installer OSS avec prise en charge du réseau de téléchargement automatique. Pas besoin d'éteindre la carte réseau virtuelle.",
     "es": ". Se detecta un conflicto entre la protección de la dirección de descarga y el DNS proxy: actualice Ollama a 0.40.9 o una versión estable más reciente a través de la bandeja OSS en el servidor de destino e instale OSS con soporte de red de descarga automática. No es necesario apagar la tarjeta de red virtual."
   },
-  "已升级到 1.6.2：右键托盘可检查更新／升级 Ollama，有新版时自动提示；有任务时不停止服务。\r\n原配置和模型路径已保留，/manage 网页管理与现有认证继续使用。\r\n设置备份：{0}": {
-    "en": "Upgraded to 1.6.2: Right-click the tray to check for updates/upgrades to Ollama. It will automatically prompt you when there is a new version; it will not stop the service when there are tasks.\r\nThe original configuration and model paths have been retained, and the /manage web page management and existing authentication continue to be used.\r\nSettings backup: {0}",
-    "zh-TW": "已升級至 1.6.2:右鍵托盤可檢查更新/升級 Ollama,有新版時自動提示;有任務時不停止服務。 \n 原配置和模型路徑已保留,/manage 網頁管理與現有認證繼續使用。 \n 設定備份:{0}",
-    "ja": "1.6.2 にアップグレード: トレイを右クリックして、Ollama へのアップデート/アップグレードを確認します。新しいバージョンがある場合は、自動的にプロンプ​​トが表示されます。タスクがある場合でもサービスは停止しません。\r\n元の構成とモデル パスは保持され、/manage Web ページ管理と既存の認証が引き続き使用されます。\r\n設定のバックアップ: {0}",
-    "ko": "1.6.2으로 업그레이드됨: 트레이를 마우스 오른쪽 버튼으로 클릭하여 Ollama에 대한 업데이트/업그레이드를 확인합니다. 새 버전이 있으면 자동으로 메시지가 표시됩니다. 작업이 있을 때 서비스를 중지하지 않습니다.\n원래 구성과 모델 경로는 유지되었으며, /manage 웹 관리 및 기존 인증이 계속 사용됩니다.\n설정 백업: {0}",
-    "de": "Auf 1.6.2 aktualisiert: Klicken Sie mit der rechten Maustaste auf die Taskleiste, um nach Updates/Upgrades für Ollama zu suchen. Sie werden automatisch benachrichtigt, wenn eine neue Version verfügbar ist. Der Dienst wird nicht gestoppt, wenn Aufgaben vorhanden sind.\r\nDie ursprüngliche Konfiguration und die Modellpfade wurden beibehalten und die Webseitenverwaltung /manage sowie die vorhandene Authentifizierung werden weiterhin verwendet.\r\nSicherung der Einstellungen: {0}",
-    "fr": "Mise à niveau vers la version 1.6.2 : cliquez avec le bouton droit sur la barre d'état pour rechercher des mises à jour/mises à niveau vers Ollama. Il vous avertira automatiquement lorsqu'il y aura une nouvelle version ; il n'arrêtera pas le service lorsqu'il y a des tâches.\r\nLes chemins de configuration et de modèle d'origine ont été conservés, et la gestion des pages Web /manage et l'authentification existante continuent d'être utilisées.\r\nSauvegarde des paramètres : {0}",
-    "es": "Actualizado a 1.6.2: Haga clic derecho en la bandeja para buscar actualizaciones/actualizaciones de Ollama. Le avisará automáticamente cuando haya una nueva versión; No detendrá el servicio cuando haya tareas.\r\nSe han conservado la configuración original y las rutas del modelo, y se siguen utilizando la administración de la página web /manage y la autenticación existente.\r\nCopia de seguridad de la configuración: {0}"
+  "已升级到 1.6.3：右键托盘可检查更新／升级 Ollama，有新版时自动提示；有任务时不停止服务。\r\n原配置和模型路径已保留，/manage 网页管理与现有认证继续使用。\r\n设置备份：{0}": {
+    "en": "Upgraded to 1.6.3: Right-click the tray to check for updates/upgrades to Ollama. It will automatically prompt you when there is a new version; it will not stop the service when there are tasks.\r\nThe original configuration and model paths have been retained, and the /manage web page management and existing authentication continue to be used.\r\nSettings backup: {0}",
+    "zh-TW": "已升級至 1.6.3:右鍵托盤可檢查更新/升級 Ollama,有新版時自動提示;有任務時不停止服務。 \n 原配置和模型路徑已保留,/manage 網頁管理與現有認證繼續使用。 \n 設定備份:{0}",
+    "ja": "1.6.3 にアップグレード: トレイを右クリックして、Ollama へのアップデート/アップグレードを確認します。新しいバージョンがある場合は、自動的にプロンプ​​トが表示されます。タスクがある場合でもサービスは停止しません。\r\n元の構成とモデル パスは保持され、/manage Web ページ管理と既存の認証が引き続き使用されます。\r\n設定のバックアップ: {0}",
+    "ko": "1.6.3으로 업그레이드됨: 트레이를 마우스 오른쪽 버튼으로 클릭하여 Ollama에 대한 업데이트/업그레이드를 확인합니다. 새 버전이 있으면 자동으로 메시지가 표시됩니다. 작업이 있을 때 서비스를 중지하지 않습니다.\n원래 구성과 모델 경로는 유지되었으며, /manage 웹 관리 및 기존 인증이 계속 사용됩니다.\n설정 백업: {0}",
+    "de": "Auf 1.6.3 aktualisiert: Klicken Sie mit der rechten Maustaste auf die Taskleiste, um nach Updates/Upgrades für Ollama zu suchen. Sie werden automatisch benachrichtigt, wenn eine neue Version verfügbar ist. Der Dienst wird nicht gestoppt, wenn Aufgaben vorhanden sind.\r\nDie ursprüngliche Konfiguration und die Modellpfade wurden beibehalten und die Webseitenverwaltung /manage sowie die vorhandene Authentifizierung werden weiterhin verwendet.\r\nSicherung der Einstellungen: {0}",
+    "fr": "Mise à niveau vers la version 1.6.3 : cliquez avec le bouton droit sur la barre d'état pour rechercher des mises à jour/mises à niveau vers Ollama. Il vous avertira automatiquement lorsqu'il y aura une nouvelle version ; il n'arrêtera pas le service lorsqu'il y a des tâches.\r\nLes chemins de configuration et de modèle d'origine ont été conservés, et la gestion des pages Web /manage et l'authentification existante continuent d'être utilisées.\r\nSauvegarde des paramètres : {0}",
+    "es": "Actualizado a 1.6.3: Haga clic derecho en la bandeja para buscar actualizaciones/actualizaciones de Ollama. Le avisará automáticamente cuando haya una nueva versión; No detendrá el servicio cuando haya tareas.\r\nSe han conservado la configuración original y las rutas del modelo, y se siguen utilizando la administración de la página web /manage y la autenticación existente.\r\nCopia de seguridad de la configuración: {0}"
   },
-  "无需手动卸载。保留原 Ollama、模型和服务配置。1.6.2 自动识别代理并支持 TUN 模型下载，保留 HTTPS 校验；修复升级后托盘提示与命令窗口闪烁。有任务时不停止服务。保留 /manage 网页管理与现有反代认证。安装 OSS 本身请安排在空闲时段。": {
-    "en": "No manual uninstall is needed. Your Ollama installation, models and settings are retained. Version 1.6.2 adds eight UI languages and automatic proxy detection for TUN downloads with HTTPS verification. It fixes stale upgrade offers and flashing console windows. Active tasks prevent service shutdown. Existing /manage authentication is retained. Install OSS during an idle period.",
-    "zh-TW": "無需手動卸載。保留原原 Ollama、模型和服務配置。 1.6.2 自动识别代理并支持 TUN 模型下载,保留 HTTPS 校验;修复升级后托盘提示与命令窗口闪烁。有任務時不停止服務。保留 /manage 网页管理与现有反代认证。安裝 OSS 本身請安排在空閒時段。",
-    "ja": "手動でアンインストールする必要はない。元の Ollama、モデル、サービス構成を保持します。 1.6.2 はプロキシを自動的に認識し、TUN モデルのダウンロードをサポートし、HTTPS 検証を保持します。アップグレード後のトレイ プロンプトとコマンド ウィンドウのちらつきを修正します。タスクがあるときはサービスを停止しないでください。 Web 管理と既存のアンチパス認証を保持/管理します。空き時間に OSS のインストールをスケジュールしてください。",
-    "ko": "수동으로 제거할 필요가 없습니다. 원래 Ollama, 모델 및 서비스 구성을 보존합니다. 1.6.2은 자동으로 프록시를 인식하고 TUN 모델 다운로드를 지원하며 HTTPS 확인을 유지합니다. 업그레이드 후 트레이 프롬프트와 명령 창이 깜박이는 문제를 해결합니다. 작업이 있는 경우 서비스를 중지하지 마십시오. 웹 관리 및 기존 Anti-Pass 인증을 유지/관리합니다. 여유 시간에 OSS 설치 일정을 계획하십시오.",
-    "de": "Keine manuelle Deinstallation nötig. Ollama, Modelle und Einstellungen bleiben erhalten. Version 1.6.2 bietet acht Sprachen und automatische Proxy-Erkennung für Downloads über TUN mit HTTPS-Prüfung. Veraltete Update-Hinweise und kurz aufblinkende Konsolen sind behoben. Laufende Aufgaben verhindern einen Dienststopp. Die bestehende Authentifizierung für /manage bleibt erhalten. Installieren Sie OSS im Leerlauf.",
-    "fr": "Aucune désinstallation manuelle nécessaire. Ollama, les modèles et les paramètres sont conservés. La version 1.6.2 ajoute huit langues et la détection automatique du proxy pour les téléchargements TUN avec vérification HTTPS. Les anciennes offres de mise à jour et les fenêtres de console furtives sont corrigées. Les tâches actives empêchent l’arrêt du service. L’authentification de /manage est conservée. Installez OSS lorsqu’il est inactif.",
-    "es": "No es necesario desinstalar manualmente. Se conservan Ollama, los modelos y la configuración. La versión 1.6.2 añade ocho idiomas y detección automática del proxy para descargas TUN con verificación HTTPS. Corrige avisos de actualización obsoletos y ventanas de consola fugaces. Las tareas activas impiden detener el servicio. Se conserva la autenticación de /manage. Instale OSS cuando esté inactivo."
+  "无需手动卸载，保留原 Ollama、模型和服务配置。1.6.3 修复安装目录占用与停止服务失败，统一桌面窗口样式，并保留无人值守自动恢复。请等待任务完成后升级。": {
+    "en": "No manual uninstall is needed. Existing Ollama, models and service settings are preserved. Version 1.6.3 fixes locked package folders and service-stop failures, unifies desktop dialogs and retains unattended recovery. Wait for tasks to finish before upgrading.",
+    "zh-TW": "無需手動解除安裝，保留原 Ollama、模型與服務設定。1.6.3 修復安裝目錄占用與停止服務失敗，統一桌面視窗樣式，並保留無人值守自動恢復。請等待工作完成後升級。",
+    "ja": "手動アンインストールは不要です。既存の Ollama、モデル、サービス設定を保持します。1.6.3 は展開先フォルダーのロックとサービス停止の失敗を修正し、デスクトップ画面の外観を統一します。無人運用の自動復旧も継続します。タスク完了後に更新してください。",
+    "ko": "수동 제거 없이 기존 Ollama, 모델 및 서비스 설정을 유지합니다. 1.6.3은 압축 해제 폴더 잠금과 서비스 중지 실패를 수정하고 데스크톱 창 스타일을 통일합니다. 무인 자동 복구도 유지됩니다. 작업이 완료된 후 업그레이드하세요.",
+    "de": "Keine manuelle Deinstallation nötig. Ollama, Modelle und Diensteinstellungen bleiben erhalten. 1.6.3 behebt gesperrte Paketordner und Fehler beim Dienststopp, vereinheitlicht Desktopdialoge und behält die automatische Wiederherstellung bei. Vor dem Upgrade alle Aufgaben beenden lassen.",
+    "fr": "Aucune désinstallation manuelle nécessaire. Ollama, les modèles et les paramètres sont conservés. La version 1.6.3 corrige le verrouillage du dossier extrait et les échecs d’arrêt des services, harmonise les fenêtres et conserve la récupération automatique. Attendez la fin des tâches avant la mise à niveau.",
+    "es": "No se necesita desinstalar manualmente. Se conservan Ollama, los modelos y la configuración. La versión 1.6.3 corrige el bloqueo de la carpeta extraída y los fallos al detener servicios, unifica las ventanas y mantiene la recuperación automática. Espere a que terminen las tareas antes de actualizar."
   },
   "删除": {
     "en": "Delete",

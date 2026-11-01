@@ -14,11 +14,11 @@ Une passerelle Windows, des services en arrière-plan et une application de zone
 
 <!-- readme:b03 -->
 
-**Version actuelle : 1.6.2 · Windows x64 · Installation hors ligne**
+**Version actuelle : 1.6.3 · Windows x64 · Installation hors ligne**
 
 <!-- readme:b04 -->
 
-La version 1.6.2 corrige les mélanges de langues dans les résumés de version, l’historique des mises à jour et les messages de fin d’installation. Elle comprend huit langues d’interface avec sélection automatique et choix mémorisé, la détection automatique des proxys et un relais local de téléchargement intégré pour les réseaux TUN/Fake-IP. Les propositions de mise à jour Ollama périmées et les fenêtres de console fugitives lors des actions de notification sont corrigées. Voir [le réseau de téléchargement][link1]. La zone de notification permet aussi de vérifier et d’installer les mises à jour officielles d’Ollama : recherche des versions stables toutes les six heures, vérification du hachage et de la signature de l’éditeur, refus d’interrompre les tâches actives ou incertaines, puis reprise de la gestion par OSS après vérification des modèles et de la configuration d’origine. Voir [les mises à jour d’Ollama][link2]. Le paquet Windows est proposé ci-dessous.
+La version 1.6.3 corrige les mélanges de langues dans les résumés de version, l’historique des mises à jour et les messages de fin d’installation. Elle comprend huit langues d’interface avec sélection automatique et choix mémorisé, la détection automatique des proxys et un relais local de téléchargement intégré pour les réseaux TUN/Fake-IP. Les propositions de mise à jour Ollama périmées et les fenêtres de console fugitives lors des actions de notification sont corrigées. Voir [le réseau de téléchargement][link1]. La zone de notification permet aussi de vérifier et d’installer les mises à jour officielles d’Ollama : recherche des versions stables toutes les six heures, vérification du hachage et de la signature de l’éditeur, refus d’interrompre les tâches actives ou incertaines, puis reprise de la gestion par OSS après vérification des modèles et de la configuration d’origine. Voir [les mises à jour d’Ollama][link2]. Le paquet Windows est proposé ci-dessous.
 
 <!-- readme:b05 -->
 
@@ -30,11 +30,11 @@ La version 1.2.5 corrige les listes de modèles vides dues à des droits LocalSe
 
 <!-- readme:b07 -->
 
-[Version 1.6.2][link4] · [ZIP Windows][link5] · [SHA256][link6] · [Historique][link7] · [Compiler les sources][link8]
+[Version 1.6.3][link4] · [ZIP Windows][link5] · [SHA256][link6] · [Historique][link7] · [Compiler les sources][link8]
 
 <!-- readme:b08 -->
 
-> Téléchargez `OllamaStatusService-Windows-x64-v1.6.2.zip` et sa somme de contrôle depuis la version ci-dessus, ou compilez les sources. Les archives « Source code » automatiques de GitHub ne sont pas des paquets installables. L’installateur, la zone de notification, /manage et /dashboard prennent en charge le chinois simplifié et traditionnel, l’anglais, le japonais, le coréen, l’allemand, le français et l’espagnol. La langue est détectée automatiquement ou choisie et mémorisée ; /status et /help traduisent les textes d’affichage tout en préservant les clés du protocole. Voir [les langues][link9].
+> Téléchargez `OllamaStatusService-Windows-x64-v1.6.3.zip` et sa somme de contrôle depuis la version ci-dessus, ou compilez les sources. Les archives « Source code » automatiques de GitHub ne sont pas des paquets installables. L’installateur, la zone de notification, /manage et /dashboard prennent en charge le chinois simplifié et traditionnel, l’anglais, le japonais, le coréen, l’allemand, le français et l’espagnol. La langue est détectée automatiquement ou choisie et mémorisée ; /status et /help traduisent les textes d’affichage tout en préservant les clés du protocole. Voir [les langues][link9].
 
 <!-- readme:b09 -->
 
@@ -167,7 +167,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11436/help
 
 <!-- readme:b32 -->
 
-Vérifier `version=1.6.2` et respectivement `request_origin=local` / `remote`, puis consulter `/help` via l’URL publique du proxy existant. Pendant l’inférence, examiner `/status.active_origin` et `requests[].origin`. Si le proxy vise toujours `11434`, la transmission par bouclage peut encore être prise à tort pour une requête locale.
+Vérifier `version=1.6.3` et respectivement `request_origin=local` / `remote`, puis consulter `/help` via l’URL publique du proxy existant. Pendant l’inférence, examiner `/status.active_origin` et `requests[].origin`. Si le proxy vise toujours `11434`, la transmission par bouclage peut encore être prise à tort pour une requête locale.
 
 <!-- readme:b33 -->
 
@@ -226,6 +226,8 @@ La configuration persistante et l’historique sont dans `%ProgramData%\OllamaSt
 
 Si la fin d’une requête ne peut être confirmée, `unknown` bloque les nouvelles tâches. Depuis 1.6.2, le watchdog SYSTEM vérifie chaque minute la disponibilité réelle. Une indisponibilité sans tâche active durant cinq minutes déclenche la récupération automatique (généralement sous 5–6 minutes) ; un échec entraîne une nouvelle tentative toutes les cinq minutes. Cela couvre les fins incertaines, les backends hors ligne, les passerelles injoignables, les services arrêtés et les blocages de planification. Les inférences, téléchargements et envois actifs sont protégés ; un arrêt explicite depuis la zone de notification et la maintenance suspendent la récupération. Celle-ci ferme l’admission, arrête et vérifie le backend, traite les enregistrements incertains, redémarre les services et vérifie leur disponibilité. Une tâche non confirmée peut être interrompue ; une passerelle injoignable ne permet pas de confirmer une inférence en cours. La récupération immédiate depuis la zone de notification reste possible. Ne supprimez pas la base de données tant qu’Ollama peut fonctionner. Les requêtes en attente ne sont pas rejouées après redémarrage. Journal : `%ProgramData%\OllamaStatusService\logs\watchdog.jsonl`.
 
+Dans 1.6.3, les processus de notification installés ne conservent plus le dossier extrait du programme d’installation. L’arrêt des services attend les états transitoires et réessaie les erreurs temporaires. Après expiration du délai, seul un arbre de processus vérifié comme appartenant à OSS est terminé. Les paramètres de démarrage sont conservés et les détails des erreurs Windows sont journalisés. Les fenêtres de confirmation, d’erreur, d’installation et de mise à jour partagent un même style ; la sélection de dossier utilise la boîte de dialogue Windows moderne.
+
 <!-- readme:b44 -->
 
 ## Développement et validation
@@ -257,9 +259,9 @@ Les composants tiers conservent leurs licences respectives ; voir [`licenses/THI
 [link1]: ../docs/DOWNLOAD-NETWORK.md
 [link2]: ../docs/OLLAMA-UPDATES.md
 [link3]: ../docs/MANAGE.md
-[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.2
-[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip
-[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip.sha256.txt
+[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.3
+[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.3/OllamaStatusService-Windows-x64-v1.6.3.zip
+[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.3/OllamaStatusService-Windows-x64-v1.6.3.zip.sha256.txt
 [link7]: ../CHANGELOG.md
 [link8]: ../docs/BUILD.md
 [link9]: ../docs/LANGUAGES.md

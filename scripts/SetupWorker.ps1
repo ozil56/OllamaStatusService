@@ -45,7 +45,12 @@ try {
     else { throw '未知操作。' }
 } catch {
     $message=$_.Exception.Message
-    Write-SetupPhase ($message + "`r`n" + $_.ScriptStackTrace)
+    $inner=$_.Exception.InnerException
+    while ($inner) {
+        if (-not $message.Contains($inner.Message)) { $message += "`r`n"+$inner.Message }
+        $inner=$inner.InnerException
+    }
+    Write-SetupPhase ($_.Exception.ToString() + "`r`nErrorId=" + $_.FullyQualifiedErrorId + "`r`n" + $_.ScriptStackTrace)
     Complete-Setup $false $message
     exit 1
 }

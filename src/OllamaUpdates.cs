@@ -64,6 +64,7 @@ namespace OllamaStatusTray
                 FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), @"WindowsPowerShell\v1.0\powershell.exe"),
                 Arguments = "-NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File " + OllamaUpdates.Quote(script) + arguments,
                 UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
                 RedirectStandardOutput = true, RedirectStandardError = true
             };
         }
@@ -79,10 +80,10 @@ namespace OllamaStatusTray
                     var error = process.StandardError.ReadToEndAsync();
                     process.WaitForExit(); Task.WaitAll(output, error);
                     if (process.ExitCode != 0 && !String.IsNullOrWhiteSpace(error.Result))
-                        MessageBox.Show(error.Result, L.T("Ollama 状态服务"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        OssDialog.Message(error.Result, L.T("Ollama 状态服务"));
                     return process.ExitCode;
                 }
-            } catch (Exception ex) { MessageBox.Show(ex.Message, L.T("Ollama 状态服务")); return 1; }
+            } catch (Exception ex) { OssDialog.Message(ex.Message, L.T("Ollama 状态服务")); return 1; }
         }
     }
 
@@ -149,7 +150,7 @@ namespace OllamaStatusTray
             string json;
             using (var client = new HttpClient()) {
                 client.Timeout = TimeSpan.FromSeconds(30);
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("OllamaStatusService-Updater/1.6.2");
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("OllamaStatusService-Updater/1.6.3");
                 json = await client.GetStringAsync("https://api.github.com/repos/ollama/ollama/releases/latest");
             }
             // Read the installed version AFTER the potentially slow Internet request.
@@ -230,6 +231,7 @@ namespace OllamaStatusTray
             Controls.Add(layout);
             var picker = LanguageUI.Attach(this, 0, 0, 245);
             Controls.Remove(picker); picker.Anchor = AnchorStyles.Left; layout.Controls.Add(picker);
+            OssDialog.Apply(this); OssDialog.Primary(upgrade);
             timer.Interval = 700; timer.Tick += delegate { Poll(); }; timer.Start();
             Shown += async delegate {
                 if (preview) return;

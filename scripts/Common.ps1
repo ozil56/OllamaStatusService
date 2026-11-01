@@ -11,6 +11,7 @@ $script:TaskName = 'OllamaStatusServiceWatchdog'
 $script:RegistrationPath = Join-Path $script:StateRoot 'installation.json'
 . (Join-Path $PSScriptRoot 'ModelPermissions.ps1')
 . (Join-Path $PSScriptRoot 'Localization.ps1')
+. (Join-Path $PSScriptRoot 'ServiceLifecycle.ps1')
 
 function Test-Administrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -109,13 +110,11 @@ function Wait-ServiceState([string]$Name, [string]$Desired, [int]$Seconds = 100)
 
 function Stop-ManagedServices {
     foreach ($name in @($script:GatewayName, $script:BackendName)) {
-        $svc = Get-Service -Name $name -ErrorAction SilentlyContinue
-        try {
-            if ($svc -and $svc.Status -ne 'Stopped') {
-                Stop-Service -Name $name -Force
-                Wait-ServiceState $name 'Stopped'
-            }
-        } finally { if ($svc) { $svc.Dispose() } }
+        try { Stop-ManagedService $name }
+        catch {
+            Write-ServiceControlLog 'stop_failed' $name @{error=$_.Exception.ToString();error_id=$_.FullyQualifiedErrorId}
+            throw
+        }
     }
 }
 
@@ -133,8 +132,10 @@ function Assert-BackendStopped {
 }
 
 function Start-ManagedServices {
+    Restore-ManagedServiceStartMode $script:BackendName
     Start-Service -Name $script:BackendName
     Wait-ServiceState $script:BackendName 'Running'
+    Restore-ManagedServiceStartMode $script:GatewayName
     Start-Service -Name $script:GatewayName
     Wait-ServiceState $script:GatewayName 'Running'
 }
@@ -166,6 +167,7 @@ function Remove-Registrations {
             $wrapper = Join-Path $script:InstallRoot ($name + '.exe')
             if (Test-Path -LiteralPath $wrapper) { Invoke-Native $wrapper @('uninstall') }
             else { Invoke-Native "$env:SystemRoot\System32\sc.exe" @('delete', $name) }
+            Remove-ManagedStopRecord $name
         }
     }
     foreach ($ruleName in @($script:FirewallName, 'OllamaStatusService-11435')) { Get-NetFirewallRule -Name $ruleName -ErrorAction SilentlyContinue | Remove-NetFirewallRule }
@@ -212,7 +214,6 @@ function Restore-OriginalSettings($Registration) {
 }
 
 function Show-Message([string]$Text, [string]$Title = 'Ollama 状态服务') {
-    $Text=Get-UiText $Text; $Title=Get-UiText $Title
-    Add-Type -AssemblyName System.Windows.Forms
-    [Windows.Forms.MessageBox]::Show($Text, $Title, 'OK', 'Information') | Out-Null
+    Initialize-UiDialogs
+    [OssDialog]::Show((Get-UiText $Text),(Get-UiText $Title),(Get-UiText '关闭'),(Get-UiText '取消'),$false) | Out-Null
 }

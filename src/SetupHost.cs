@@ -11,8 +11,8 @@ using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-[assembly: System.Reflection.AssemblyFileVersion("1.6.2")]
-[assembly: System.Reflection.AssemblyInformationalVersion("1.6.2")]
+[assembly: System.Reflection.AssemblyFileVersion("1.6.3")]
+[assembly: System.Reflection.AssemblyInformationalVersion("1.6.3")]
 
 // A Windows-subsystem executable owns the only UI. The elevated copy has no UI;
 // it starts the existing PowerShell installation engine with CREATE_NO_WINDOW.
@@ -42,13 +42,17 @@ internal static class SetupHost
     {
         File.WriteAllText(path, Json.Serialize(value), new UTF8Encoding(true));
     }
+    internal static ProcessStartInfo TrayStartInfo(string path)
+    {
+        return new ProcessStartInfo(path) { UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(path) };
+    }
 
     [STAThread]
     static int Main(string[] args)
     {
+        OssDialog.Initialize(); Application.SetCompatibleTextRenderingDefault(false);
         args = L.Arguments(args);
         if (args.Length == 2 && args[0] == "--worker") return Worker(args[1]);
-        Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
         try {
             bool uninstall = String.Equals(Path.GetFileNameWithoutExtension(Application.ExecutablePath), "Uninstall", StringComparison.OrdinalIgnoreCase);
             if (args.Length == 2 && args[0] == "--render-preview") {
@@ -64,7 +68,7 @@ internal static class SetupHost
                 Application.Run(form); return form.ExitCode;
             }
         } catch (Exception ex) {
-            MessageBox.Show(L.T("无法启动安装窗口：\r\n") + ex.Message, L.T("Ollama 状态服务"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            OssDialog.Message(L.T("无法启动安装窗口：\r\n") + ex.Message, L.T("Ollama 状态服务"));
             return 1;
         }
     }
@@ -111,6 +115,79 @@ internal static class SetupHost
     }
 }
 
+// Windows Common Item Dialog supplies the Explorer-style folder picker even on
+// .NET Framework 4.8, whose FolderBrowserDialog still uses the old tree dialog.
+internal static class ModelFolderPicker
+{
+    [ComImport, Guid("43826D1E-E718-42EE-BC55-A1E261C37BFE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    internal interface IShellItem
+    {
+        void BindToHandler(IntPtr context, ref Guid handler, ref Guid iid, out IntPtr result);
+        void GetParent(out IShellItem parent);
+        void GetDisplayName(uint kind, out IntPtr name);
+        void GetAttributes(uint mask, out uint attributes);
+        void Compare(IShellItem other, uint hint, out int order);
+    }
+    [ComImport, Guid("42F85136-DB7E-439C-85F1-E4075D135FC8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    internal interface IFileDialog
+    {
+        [PreserveSig] int Show(IntPtr owner);
+        void SetFileTypes(uint count, IntPtr types);
+        void SetFileTypeIndex(uint index);
+        void GetFileTypeIndex(out uint index);
+        void Advise(IntPtr events, out uint cookie);
+        void Unadvise(uint cookie);
+        void SetOptions(uint options);
+        void GetOptions(out uint options);
+        void SetDefaultFolder(IShellItem folder);
+        void SetFolder(IShellItem folder);
+        void GetFolder(out IShellItem folder);
+        void GetCurrentSelection(out IShellItem item);
+        void SetFileName([MarshalAs(UnmanagedType.LPWStr)] string name);
+        void GetFileName([MarshalAs(UnmanagedType.LPWStr)] out string name);
+        void SetTitle([MarshalAs(UnmanagedType.LPWStr)] string title);
+        void SetOkButtonLabel([MarshalAs(UnmanagedType.LPWStr)] string label);
+        void SetFileNameLabel([MarshalAs(UnmanagedType.LPWStr)] string label);
+        void GetResult(out IShellItem item);
+    }
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+    static extern void SHCreateItemFromParsingName(string path, IntPtr context, ref Guid iid, out IShellItem item);
+    internal static IFileDialog Create(string initial, string title)
+    {
+        var dialog = (IFileDialog)Activator.CreateInstance(Type.GetTypeFromCLSID(new Guid("DC1C5A9C-E88A-4DDE-A5A1-60F82A20AEF7")));
+        try {
+            uint options; dialog.GetOptions(out options);
+            dialog.SetOptions(options | 0x20 | 0x40 | 0x800 | 0x02000000); // folders, filesystem, existing path, no recent entry
+            dialog.SetTitle(title);
+            if (Directory.Exists(initial)) {
+                IShellItem item = null; Guid iid = typeof(IShellItem).GUID;
+                try { SHCreateItemFromParsingName(Path.GetFullPath(initial), IntPtr.Zero, ref iid, out item); dialog.SetFolder(item); }
+                finally { if (item != null) Marshal.ReleaseComObject(item); }
+            }
+            return dialog;
+        } catch { Marshal.ReleaseComObject(dialog); throw; }
+    }
+    internal static string PathOf(IShellItem item)
+    {
+        IntPtr text = IntPtr.Zero;
+        try { item.GetDisplayName(0x80058000, out text); return Marshal.PtrToStringUni(text); }
+        finally { if (text != IntPtr.Zero) Marshal.FreeCoTaskMem(text); }
+    }
+    internal static string Show(IWin32Window owner, string initial, string title)
+    {
+        IFileDialog dialog = Create(initial, title); IShellItem result = null;
+        try {
+            int hr = dialog.Show(owner == null ? IntPtr.Zero : owner.Handle);
+            if (hr == unchecked((int)0x800704C7)) return null;
+            Marshal.ThrowExceptionForHR(hr);
+            dialog.GetResult(out result); return PathOf(result);
+        } finally {
+            if (result != null) Marshal.ReleaseComObject(result);
+            Marshal.ReleaseComObject(dialog);
+        }
+    }
+}
+
 internal sealed class SetupForm : Form
 {
     readonly bool uninstall, verify, test;
@@ -139,17 +216,22 @@ internal sealed class SetupForm : Form
         FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         Icon = SystemIcons.Application;
-        AddLabel(L.T("Ollama 状态服务 · 1.6.2"), 22, 18, 690, 30).Font = new Font(Font.FontFamily, 16F, FontStyle.Bold);
+        AddLabel(L.T("Ollama 状态服务 · 1.6.3"), 22, 18, 690, 30).Font = new Font(Font.FontFamily, 16F, FontStyle.Bold);
         AddLabel(L.T("直连 11434 · 代理入口 11436 · 共享队列与本机优先"), 22, 58, 690, 28);
         AddLabel(L.T("Ollama 主程序"), 22, 99, 680, 24);
         exeBox.SetBounds(22, 126, 589, 28); Controls.Add(exeBox);
         browseExe.Text = L.T("浏览…"); browseExe.SetBounds(621, 125, 95, 30); Controls.Add(browseExe);
-        browseExe.Click += delegate { using (var dlg = new OpenFileDialog { Filter = L.T("Ollama 主程序") + "|ollama.exe" }) { if (dlg.ShowDialog(this) == DialogResult.OK) exeBox.Text = dlg.FileName; } };
+        browseExe.Click += delegate { using (var dlg = new OpenFileDialog { AutoUpgradeEnabled = true, RestoreDirectory = true, Filter = L.T("Ollama 主程序") + "|ollama.exe" }) { if (dlg.ShowDialog(this) == DialogResult.OK) exeBox.Text = dlg.FileName; } };
         modelSource.Text = L.T("模型目录（包含 blobs 和 manifests）");
         modelSource.SetBounds(22, 168, 690, 24); Controls.Add(modelSource);
         modelBox.SetBounds(22, 195, 589, 28); Controls.Add(modelBox);
         browseModel.Text = L.T("浏览…"); browseModel.SetBounds(621, 194, 95, 30); Controls.Add(browseModel);
-        browseModel.Click += delegate { using (var dlg = new FolderBrowserDialog()) { if (dlg.ShowDialog(this) == DialogResult.OK) { modelBox.Text = dlg.SelectedPath; modelSource.Text = L.T("模型目录（手动选择）"); } } };
+        browseModel.Click += delegate {
+            try {
+                string selected = ModelFolderPicker.Show(this, modelBox.Text, L.T("模型目录（包含 blobs 和 manifests）"));
+                if (selected != null) { modelBox.Text = selected; modelSource.Text = L.T("模型目录（手动选择）"); }
+            } catch (Exception ex) { OssDialog.Message(this, ex.Message, Text); }
+        };
         var note = AddLabel(verify ? L.T("只校验安装包完整性，不修改系统或现有服务。") : uninstall
             ? L.T("卸载将停止当前推理，移除服务和防火墙规则，并恢复原启动项。原 Ollama、模型、任务记录及日志保留。")
             : L.T("安装会停止现有 Ollama 及正在执行的任务，并备份原启动项。\r\n请先结束当前任务；点击“开始安装”后确认 Windows 管理员权限提示。"), 22, 238, 693, 48);
@@ -184,20 +266,20 @@ internal sealed class SetupForm : Form
         }
         EnableInputs(!uninstall && !verify);
         if (!uninstall && !verify && hasInstall) {
-            upgrade = true; primary.Text = L.T("升级到 1.6.2"); state.Text = L.T("检测到已有服务，可直接升级");
+            upgrade = true; primary.Text = L.T("升级到 1.6.3"); state.Text = L.T("检测到已有服务，可直接升级");
             Text = L.T("升级 Ollama 状态服务"); EnableInputs(false);
             note.Text = L.T("升级将自动卸载旧版，再安装新版，期间 Ollama 会短暂停服。\r\n请先暂停本机和远端提交，等待当前任务完成，再点击升级。");
-            details.Text = L.T("无需手动卸载。保留原 Ollama、模型和服务配置。1.6.2 自动识别代理并支持 TUN 模型下载，保留 HTTPS 校验；修复升级后托盘提示与命令窗口闪烁。有任务时不停止服务。保留 /manage 网页管理与现有反代认证。安装 OSS 本身请安排在空闲时段。");
+            details.Text = L.T("无需手动卸载，保留原 Ollama、模型和服务配置。1.6.3 修复安装目录占用与停止服务失败，统一桌面窗口样式，并保留无人值守自动恢复。请等待任务完成后升级。");
             try {
                 var installed = SetupHost.Read(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OllamaStatusService\installation.json"));
                 exeBox.Text = (string)installed["source_exe"];
-                state.Text = L.T("当前版本 ") + installed["version"] + " → 1.6.2";
+                state.Text = L.T("当前版本 ") + installed["version"] + " → 1.6.3";
                 if (!models.Found) { primary.Enabled = false; details.Text = models.Warning; }
             } catch (Exception ex) { primary.Enabled = false; details.Text = L.T("无法读取旧安装记录，未修改系统：") + ex.Message; }
         }
         FormClosing += delegate(object sender, FormClosingEventArgs e) { if (busy) { e.Cancel = true; state.Text = L.T("操作正在进行，请等待完成后关闭。"); } };
         Shown += delegate {
-            initialHandle = Handle.ToInt64(); Activate();
+            initialHandle = Handle.ToInt64(); Activate(); ActiveControl = primary.Enabled ? primary : close;
             if (test) {
                 if (verify) Begin();
                 else { completed = true; testCloseAt = DateTime.UtcNow.AddMilliseconds(900); }
@@ -209,8 +291,10 @@ internal sealed class SetupForm : Form
         }
         note.Height = 105; details.Height = 105;
         primary.Left = 515; primary.Width = 180; close.Left = 705;
+        browseExe.Width = browseModel.Width = 179;
         history = new LocalizedHistory(details, false);
         LanguageUI.Attach(this, 22, 580, 245);
+        OssDialog.Apply(this); OssDialog.Primary(primary);
         timer.Interval = 100; timer.Tick += delegate { Poll(); }; timer.Start();
     }
     static bool Installed()
@@ -293,7 +377,7 @@ internal sealed class SetupForm : Form
         state.Text = success ? (verify ? L.T("安装包校验通过") : uninstall ? L.T("卸载完成") : upgrade ? L.T("升级完成") : L.T("安装完成")) : L.T("操作未完成，请查看下方原因");
         Append(message); close.Enabled = true; primary.Enabled = false;
         if (success && !uninstall && !verify) {
-            try { Process.Start(new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"OllamaStatusService\OllamaTray.exe")) { UseShellExecute = true }); }
+            try { Process.Start(SetupHost.TrayStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"OllamaStatusService\OllamaTray.exe"))); }
             catch (Exception ex) { Append(UiText.Stored("托盘未自动打开，可从开始菜单启动：" + ex.Message, "zh-CN")); }
         }
         testCloseAt = DateTime.UtcNow.AddMilliseconds(900);

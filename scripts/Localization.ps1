@@ -43,25 +43,17 @@ function Get-UiText([string]$Text) {
     return $Text
 }
 
-function Show-UiConfirmation([string]$Text,[string]$Title) {
+function Initialize-UiDialogs {
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
-    $form=New-Object Windows.Forms.Form
-    try {
-        $form.Text=Get-UiText $Title
-        $form.Font=New-Object Drawing.Font('Segoe UI',10)
-        $form.ClientSize=New-Object Drawing.Size(560,230)
-        $form.StartPosition='CenterScreen'; $form.FormBorderStyle='FixedDialog'
-        $form.MaximizeBox=$false; $form.MinimizeBox=$false
-        $label=New-Object Windows.Forms.Label
-        $label.Text=Get-UiText $Text; $label.SetBounds(22,22,516,130)
-        $form.Controls.Add($label)
-        $cancel=New-Object Windows.Forms.Button
-        $cancel.Text=Get-UiText '取消'; $cancel.SetBounds(365,178,170,34); $cancel.DialogResult='Cancel'
-        $confirm=New-Object Windows.Forms.Button
-        $confirm.Text=Get-UiText '继续'; $confirm.SetBounds(184,178,170,34); $confirm.DialogResult='OK'
-        $form.Controls.Add($confirm); $form.Controls.Add($cancel)
-        $form.AcceptButton=$cancel; $form.CancelButton=$cancel
-        return $form.ShowDialog() -eq [Windows.Forms.DialogResult]::OK
-    } finally { $form.Dispose() }
+    if (-not ('OssDialog' -as [type])) {
+        $assembly=Join-Path (Split-Path -Parent $PSScriptRoot) 'OllamaTray.exe'
+        [Reflection.Assembly]::LoadFrom($assembly) | Out-Null
+    }
+    [OssDialog]::Initialize()
+}
+
+function Show-UiConfirmation([string]$Text,[string]$Title) {
+    Initialize-UiDialogs
+    return [OssDialog]::Show((Get-UiText $Text),(Get-UiText $Title),(Get-UiText '继续'),(Get-UiText '取消'),$true)
 }

@@ -26,7 +26,7 @@ from download_network import DownloadNetwork
 from localization import render_asset, request_language, text as localized_text, headers as language_headers, display as localized_display, metadata as localized_metadata
 
 LOG = logging.getLogger("ollama_status")
-VERSION = "1.6.2"
+VERSION = "1.6.3"
 INFERENCE = {"/api/chat", "/api/generate", "/api/embed", "/api/embeddings",
              "/v1/chat/completions", "/v1/completions", "/v1/embeddings",
              "/v1/responses", "/v1/messages"}

@@ -14,11 +14,11 @@ Una pasarela de Windows, servicios en segundo plano y una aplicación de bandeja
 
 <!-- readme:b03 -->
 
-**Versión actual: 1.6.2 · Windows x64 · Instalador sin conexión**
+**Versión actual: 1.6.3 · Windows x64 · Instalador sin conexión**
 
 <!-- readme:b04 -->
 
-La versión 1.6.2 corrige la mezcla de idiomas en los resúmenes de versión, el historial de actualizaciones y los mensajes de instalación finalizada. Incluye ocho idiomas de interfaz con detección automática y selección guardada, detección automática de proxies y un relé local de descarga integrado para redes TUN/Fake-IP. Corrige avisos obsoletos de actualización de Ollama y ventanas de consola que aparecían brevemente al usar la bandeja. Consulte [la red de descarga][link1]. La bandeja también comprueba e instala actualizaciones oficiales de Ollama: busca versiones estables cada seis horas, verifica el hash y la firma del editor del instalador, rechaza interrumpir trabajos activos o inciertos y devuelve el control a OSS después de validar los modelos y la configuración originales. Consulte [las actualizaciones de Ollama][link2]. El paquete de Windows está enlazado abajo.
+La versión 1.6.3 corrige la mezcla de idiomas en los resúmenes de versión, el historial de actualizaciones y los mensajes de instalación finalizada. Incluye ocho idiomas de interfaz con detección automática y selección guardada, detección automática de proxies y un relé local de descarga integrado para redes TUN/Fake-IP. Corrige avisos obsoletos de actualización de Ollama y ventanas de consola que aparecían brevemente al usar la bandeja. Consulte [la red de descarga][link1]. La bandeja también comprueba e instala actualizaciones oficiales de Ollama: busca versiones estables cada seis horas, verifica el hash y la firma del editor del instalador, rechaza interrumpir trabajos activos o inciertos y devuelve el control a OSS después de validar los modelos y la configuración originales. Consulte [las actualizaciones de Ollama][link2]. El paquete de Windows está enlazado abajo.
 
 <!-- readme:b05 -->
 
@@ -30,11 +30,11 @@ La versión 1.2.5 corrige listas vacías de modelos debidas a permisos insuficie
 
 <!-- readme:b07 -->
 
-[Versión 1.6.2][link4] · [ZIP de Windows][link5] · [SHA256][link6] · [Cambios][link7] · [Compilar desde el código][link8]
+[Versión 1.6.3][link4] · [ZIP de Windows][link5] · [SHA256][link6] · [Cambios][link7] · [Compilar desde el código][link8]
 
 <!-- readme:b08 -->
 
-> Descargue `OllamaStatusService-Windows-x64-v1.6.2.zip` y su suma de comprobación desde la publicación anterior, o compílelo desde el código fuente. Los archivos «Source code» generados automáticamente por GitHub no son instaladores. El instalador, la bandeja, /manage y /dashboard admiten chino simplificado y tradicional, inglés, japonés, coreano, alemán, francés y español. Puede detectar el idioma automáticamente o guardar una selección manual; /status y /help traducen el texto visible y mantienen las claves del protocolo. Consulte [los idiomas][link9].
+> Descargue `OllamaStatusService-Windows-x64-v1.6.3.zip` y su suma de comprobación desde la publicación anterior, o compílelo desde el código fuente. Los archivos «Source code» generados automáticamente por GitHub no son instaladores. El instalador, la bandeja, /manage y /dashboard admiten chino simplificado y tradicional, inglés, japonés, coreano, alemán, francés y español. Puede detectar el idioma automáticamente o guardar una selección manual; /status y /help traducen el texto visible y mantienen las claves del protocolo. Consulte [los idiomas][link9].
 
 <!-- readme:b09 -->
 
@@ -167,7 +167,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11436/help
 
 <!-- readme:b32 -->
 
-Compruebe `version=1.6.2` y respectivamente `request_origin=local` / `remote`, después consulte `/help` a través de la URL pública del proxy existente. Durante la inferencia, revise `/status.active_origin` y `requests[].origin`. Si el proxy sigue apuntando a `11434`, el reenvío por bucle local aún puede confundirse con trabajo local.
+Compruebe `version=1.6.3` y respectivamente `request_origin=local` / `remote`, después consulte `/help` a través de la URL pública del proxy existente. Durante la inferencia, revise `/status.active_origin` y `requests[].origin`. Si el proxy sigue apuntando a `11434`, el reenvío por bucle local aún puede confundirse con trabajo local.
 
 <!-- readme:b33 -->
 
@@ -226,6 +226,8 @@ La configuración persistente y el historial están en `%ProgramData%\OllamaStat
 
 Si no se puede confirmar la finalización de una solicitud, `unknown` bloquea nuevas tareas. Desde 1.6.2, el supervisor SYSTEM comprueba cada minuto la disponibilidad real. Si el servicio permanece indisponible sin trabajo activo durante cinco minutos, inicia la recuperación automática (normalmente en 5–6 minutos); si falla, reintenta cada cinco minutos. Cubre finalizaciones inciertas, backends desconectados, gateways sin respuesta, servicios detenidos y planificación bloqueada. Protege inferencias, descargas y cargas activas; la detención explícita desde la bandeja y el mantenimiento suspenden la recuperación. Primero bloquea nuevas solicitudes, detiene y verifica el backend, limpia registros inciertos, reinicia los servicios y verifica su disponibilidad. Puede interrumpir trabajo no confirmado; un gateway sin respuesta impide confirmar si sigue ejecutándose una inferencia. La recuperación inmediata desde la bandeja sigue disponible. No elimine la base de datos mientras Ollama pueda estar funcionando. Las solicitudes en cola no se repiten tras reiniciar. Registro de diagnóstico: `%ProgramData%\OllamaStatusService\logs\watchdog.jsonl`.
 
+En 1.6.3, los procesos de bandeja instalados dejan de mantener abierto el directorio extraído del instalador. La detención espera los estados transitorios y reintenta errores temporales. Al agotarse el plazo, solo termina un árbol de procesos verificado como propio de OSS. Conserva la configuración de inicio y registra los detalles de los errores de Windows. Las ventanas de confirmación, error, instalación y actualización comparten un estilo uniforme; la selección de carpetas usa el diálogo moderno de Windows.
+
 <!-- readme:b44 -->
 
 ## Desarrollo y validación
@@ -257,9 +259,9 @@ Los componentes de terceros conservan sus propias licencias; consulte [`licenses
 [link1]: ../docs/DOWNLOAD-NETWORK.md
 [link2]: ../docs/OLLAMA-UPDATES.md
 [link3]: ../docs/MANAGE.md
-[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.2
-[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip
-[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip.sha256.txt
+[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.3
+[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.3/OllamaStatusService-Windows-x64-v1.6.3.zip
+[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.3/OllamaStatusService-Windows-x64-v1.6.3.zip.sha256.txt
 [link7]: ../CHANGELOG.md
 [link8]: ../docs/BUILD.md
 [link9]: ../docs/LANGUAGES.md

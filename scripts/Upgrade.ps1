@@ -136,7 +136,7 @@ try {
     if (-not $removed) { throw 'Windows 尚未释放旧服务，请关闭 services.msc 等服务管理窗口后重试。' }
     Set-Progress '第 2/2 步：安装新版服务，沿用原配置并启用共享队列的代理专用入口…'
     . (Join-Path $PSScriptRoot 'Setup.ps1') -AsUpgrade
-    Complete-Setup $true "已升级到 1.6.2：右键托盘可检查更新／升级 Ollama，有新版时自动提示；有任务时不停止服务。`r`n原配置和模型路径已保留，/manage 网页管理与现有认证继续使用。`r`n设置备份：$upgradeBackup"
+    Complete-Setup $true "已升级到 1.6.3：右键托盘可检查更新／升级 Ollama，有新版时自动提示；有任务时不停止服务。`r`n原配置和模型路径已保留，/manage 网页管理与现有认证继续使用。`r`n设置备份：$upgradeBackup"
 } catch {
     Write-SetupPhase $_.ScriptStackTrace
     if (-not $upgradeStarted) { throw ("升级未开始，当前服务与任务保持原状："+$_.Exception.Message) }

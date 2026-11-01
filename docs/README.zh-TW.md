@@ -14,11 +14,11 @@
 
 <!-- readme:b03 -->
 
-**當前版本：1.6.2 · Windows x64 · 離線安裝套件**
+**當前版本：1.6.3 · Windows x64 · 離線安裝套件**
 
 <!-- readme:b04 -->
 
-1.6.2 修復版本摘要、已儲存的更新記錄和安裝完成提示中的語言混用。介面支援八種語言，自動匹配並儲存手動選擇；自動發現代理，內建適用於 TUN/Fake-IP 網路的本機下載轉發入口；修復過時的 Ollama 升級提示和系統匣操作時命令視窗閃現。詳見[下載網路說明][link1]。系統匣還提供官方 Ollama 更新檢查與升級：每六小時檢查穩定版，驗證安裝套件雜湊和發行者簽章，拒絕中斷活動任務或狀態不確定的任務，並在驗證原模型和設定後恢復 OSS 接管。詳見[Ollama 更新說明][link2]。Windows 安裝套件見下方連結。
+1.6.3 修復版本摘要、已儲存的更新記錄和安裝完成提示中的語言混用。介面支援八種語言，自動匹配並儲存手動選擇；自動發現代理，內建適用於 TUN/Fake-IP 網路的本機下載轉發入口；修復過時的 Ollama 升級提示和系統匣操作時命令視窗閃現。詳見[下載網路說明][link1]。系統匣還提供官方 Ollama 更新檢查與升級：每六小時檢查穩定版，驗證安裝套件雜湊和發行者簽章，拒絕中斷活動任務或狀態不確定的任務，並在驗證原模型和設定後恢復 OSS 接管。詳見[Ollama 更新說明][link2]。Windows 安裝套件見下方連結。
 
 <!-- readme:b05 -->
 
@@ -30,11 +30,11 @@
 
 <!-- readme:b07 -->
 
-[1.6.2 釋出頁][link4] · [Windows ZIP][link5] · [SHA256][link6] · [更新記錄][link7] · [原始碼構建][link8]
+[1.6.3 釋出頁][link4] · [Windows ZIP][link5] · [SHA256][link6] · [更新記錄][link7] · [原始碼構建][link8]
 
 <!-- readme:b08 -->
 
-> 從上方釋出頁下載 `OllamaStatusService-Windows-x64-v1.6.2.zip` 和校驗檔案，或從原始碼構建。GitHub 自動生成的“Source code”歸檔不是可安裝的套件。安裝器、系統匣、/manage 和 /dashboard 支援簡體中文、繁體中文、英文、日文、韓文、德文、法文和西班牙文，可自動匹配語言或儲存手動選擇；/status 和 /help 翻譯顯示文字，同時保留協議欄位。詳見[語言設定][link9]。
+> 從上方釋出頁下載 `OllamaStatusService-Windows-x64-v1.6.3.zip` 和校驗檔案，或從原始碼構建。GitHub 自動生成的“Source code”歸檔不是可安裝的套件。安裝器、系統匣、/manage 和 /dashboard 支援簡體中文、繁體中文、英文、日文、韓文、德文、法文和西班牙文，可自動匹配語言或儲存手動選擇；/status 和 /help 翻譯顯示文字，同時保留協議欄位。詳見[語言設定][link9]。
 
 <!-- readme:b09 -->
 
@@ -167,7 +167,7 @@ curl.exe --noproxy "*" http://127.0.0.1:11436/help
 
 <!-- readme:b32 -->
 
-檢查 `version=1.6.2`，確認兩個入口的來源分別為 `request_origin=local` / `remote`，再透過現有公網代理 URL 檢查 `/help`。推理期間檢視 `/status.active_origin` 和 `requests[].origin`。代理若仍回源到 `11434`，迴環轉發仍可能被誤判為本機任務。
+檢查 `version=1.6.3`，確認兩個入口的來源分別為 `request_origin=local` / `remote`，再透過現有公網代理 URL 檢查 `/help`。推理期間檢視 `/status.active_origin` 和 `requests[].origin`。代理若仍回源到 `11434`，迴環轉發仍可能被誤判為本機任務。
 
 <!-- readme:b33 -->
 
@@ -226,6 +226,8 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/generate' `
 
 請求是否完成無法確認時，`unknown` 會阻止新任務。1.6.2 起，SYSTEM 看門狗每分鐘檢查實際接單能力。沒有正在執行的任務且異常持續五分鐘時自動恢復（通常在 5–6 分鐘內），失敗後每五分鐘重試。涵蓋未確認完成、後端離線、閘道無回應、服務意外停止和排程停滯。正常推理、下載、上傳受到保護；系統匣明確停止和升級維護期間暫停恢復。恢復先關閉入口，停止並確認後端退出，再清理不確定記錄、啟動並驗證就緒。未確認任務可能被中止；閘道無回應時無法確認後端是否仍在執行。仍可從系統匣立即恢復。不要在 Ollama 可能執行時刪除資料庫，佇列內容不會跨重啟重播。診斷記錄位於 `%ProgramData%\OllamaStatusService\logs\watchdog.jsonl`。
 
+1.6.3 同時修復已安裝系統匣程式占用解壓目錄的問題。停服會等待過渡狀態、重試暫時錯誤，逾時後僅強制結束經核實屬於 OSS 的處理程序樹；保留啟動設定並記錄 Windows 詳細錯誤。 桌面確認、錯誤、安裝與更新視窗已統一視覺風格；目錄選擇使用現代 Windows 對話方塊。
+
 <!-- readme:b44 -->
 
 ## 開發與驗證
@@ -257,9 +259,9 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/generate' `
 [link1]: ../docs/DOWNLOAD-NETWORK.md
 [link2]: ../docs/OLLAMA-UPDATES.md
 [link3]: ../docs/MANAGE.md
-[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.2
-[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip
-[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.2/OllamaStatusService-Windows-x64-v1.6.2.zip.sha256.txt
+[link4]: https://github.com/ozil56/OllamaStatusService/releases/tag/v1.6.3
+[link5]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.3/OllamaStatusService-Windows-x64-v1.6.3.zip
+[link6]: https://github.com/ozil56/OllamaStatusService/releases/download/v1.6.3/OllamaStatusService-Windows-x64-v1.6.3.zip.sha256.txt
 [link7]: ../CHANGELOG.md
 [link8]: ../docs/BUILD.md
 [link9]: ../docs/LANGUAGES.md

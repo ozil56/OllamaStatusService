@@ -12,8 +12,8 @@ using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-[assembly: System.Reflection.AssemblyFileVersion("1.6.2.0")]
-[assembly: System.Reflection.AssemblyInformationalVersion("1.6.2")]
+[assembly: System.Reflection.AssemblyFileVersion("1.6.3.0")]
+[assembly: System.Reflection.AssemblyInformationalVersion("1.6.3")]
 
 namespace OllamaStatusTray
 {
@@ -22,18 +22,20 @@ namespace OllamaStatusTray
         [STAThread]
         static int Main(string[] args)
         {
+            // A tray started by an installer/shortcut must not retain the
+            // extracted package as its current-directory handle.
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+            OssDialog.Initialize(); Application.SetCompatibleTextRenderingDefault(false);
             args = L.Arguments(args);
             if (args.Length == 2 && (args[0] == "--manage-worker" || args[0] == "--update-worker"))
                 return TrayWorker.Run(args[0], args[1]);
             if (args.Length == 2 && args[0] == "--render-update-preview")
             {
-                Application.EnableVisualStyles();
                 using (var form = new OllamaUpdateForm()) form.RenderPreview(args[1]);
                 return 0;
             }
             if (args.Length == 1 && args[0] == "--updates")
             {
-                Application.EnableVisualStyles();
                 Application.Run(new OllamaUpdateForm());
                 return 0;
             }
@@ -48,8 +50,6 @@ namespace OllamaStatusTray
             using (Mutex mutex = new Mutex(true, @"Local\OllamaStatusServiceTray", out created))
             {
                 if (!created) return 0;
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new TrayContext());
                 mutex.ReleaseMutex();
             }
@@ -96,7 +96,7 @@ namespace OllamaStatusTray
             }
             OllamaUpdates.ReleaseChecked += ApplyRelease;
             OllamaUpdates.InstallationChanged += InstallationChanged;
-            ContextMenuStrip menu = new ContextMenuStrip();
+            ContextMenuStrip menu = new ContextMenuStrip { Font = new Font("Segoe UI", 10F), BackColor = Color.White, ForeColor = OssDialog.Ink, RenderMode = ToolStripRenderMode.Professional };
             menu.Opening += async delegate { ObserveUpdateCompletion(); await RefreshInstalledVersion(true); };
             headline.Enabled = false; menu.Items.Add(headline); menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(L.T("打开状态面板"), null, delegate { Open("http://127.0.0.1:11434/dashboard"); });
@@ -277,13 +277,13 @@ namespace OllamaStatusTray
         void Open(string target)
         {
             try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true }); }
-            catch (Exception e) { MessageBox.Show(e.Message, L.T("Ollama 状态服务")); }
+            catch (Exception e) { OssDialog.Message(e.Message, L.T("Ollama 状态服务")); }
         }
 
         void Manage(string action)
         {
             try { TrayWorker.Start("--manage-worker", action); }
-            catch (System.ComponentModel.Win32Exception e) { if (e.NativeErrorCode != 1223) MessageBox.Show(e.Message, L.T("Ollama 状态服务")); }
+            catch (System.ComponentModel.Win32Exception e) { if (e.NativeErrorCode != 1223) OssDialog.Message(e.Message, L.T("Ollama 状态服务")); }
         }
 
         protected override void ExitThreadCore()
